@@ -472,7 +472,7 @@ const Admin = () => {
     total_votes_count: number;
   }>>({});
   const [dailyStats, setDailyStats] = useState<Array<{ day_name: string; vote_count: number; like_count: number }>>([]);
-  const [dailyApplicationStats, setDailyApplicationStats] = useState<Array<{ day_name: string; day_date?: string; total_applications: number; approved_applications: number; status_changed_count?: number; day_of_week?: number; sort_order?: number }>>([]);
+  const [dailyApplicationStats, setDailyApplicationStats] = useState<Array<{ day_name: string; day_date?: string; total_applications: number; approved_applications: number; status_changed_count?: number; rejected_count?: number; day_of_week?: number; sort_order?: number }>>([]);
   const [dailyRegistrationStats, setDailyRegistrationStats] = useState<Array<{ day_name: string; registration_count: number; suspicious_count: number; day_of_week: number; sort_order: number }>>([]);
   const [registrationStatsByType, setRegistrationStatsByType] = useState<Array<{ 
     stat_type: string; 
@@ -487,7 +487,7 @@ const Admin = () => {
   const [nextWeekDailyStats, setNextWeekDailyStats] = useState<Array<{ day_name: string; like_count: number; dislike_count: number; total_votes: number }>>([]);
   const [nextWeekVotesStats, setNextWeekVotesStats] = useState<Record<string, { like_count: number; dislike_count: number }>>({});
   const [selectedDay, setSelectedDay] = useState<{ day: number; type: 'new' | 'approved' } | null>(null);
-  const [selectedNewAppDay, setSelectedNewAppDay] = useState<string | null>(null);
+  const [selectedNewAppDay, setSelectedNewAppDay] = useState<{ date: string; filter: 'all' | 'approved' | 'rejected' } | null>(null);
   const [selectedRegistrationDay, setSelectedRegistrationDay] = useState<{ dayName: string; showSuspicious: boolean } | null>(null);
   const [selectedRegistrationFilter, setSelectedRegistrationFilter] = useState<{ 
     type: 'all' | 'email_verified' | 'unverified' | 'gmail' | 'facebook' | 'suspicious' | 'maybe_suspicious'; 
@@ -1546,10 +1546,10 @@ const Admin = () => {
         return;
       }
 
-      // Get status change counts for each day
+      // Get status change and rejection counts for each day
       const statsWithChanges = await Promise.all((data || []).map(async (stat: any) => {
-        // Count applications that changed status from pending to something else on this day
-        const { count } = await supabase
+        // Count applications that changed status from pending to approved statuses on this day (based on submitted_at, not status change)
+        const { count: approvedCount } = await supabase
           .from('weekly_contest_participants')
           .select('*', { count: 'exact', head: true })
           .eq('is_active', true)
@@ -1558,9 +1558,20 @@ const Admin = () => {
           .gte('submitted_at', stat.day_date)
           .lt('submitted_at', new Date(new Date(stat.day_date).getTime() + 24 * 60 * 60 * 1000).toISOString());
         
+        // Count rejected applications on this day
+        const { count: rejectedCount } = await supabase
+          .from('weekly_contest_participants')
+          .select('*', { count: 'exact', head: true })
+          .eq('is_active', true)
+          .is('deleted_at', null)
+          .eq('admin_status', 'rejected')
+          .gte('submitted_at', stat.day_date)
+          .lt('submitted_at', new Date(new Date(stat.day_date).getTime() + 24 * 60 * 60 * 1000).toISOString());
+        
         return {
           ...stat,
-          status_changed_count: count || 0
+          status_changed_count: approvedCount || 0,
+          rejected_count: rejectedCount || 0
         };
       }));
 
@@ -3359,25 +3370,56 @@ const Admin = () => {
                         new Date(stat.day_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' }) 
                         : '';
                       
-                      const isSelected = selectedNewAppDay === stat.day_date;
+                      const isSelectedAll = selectedNewAppDay?.date === stat.day_date && selectedNewAppDay?.filter === 'all';
+                      const isSelectedApproved = selectedNewAppDay?.date === stat.day_date && selectedNewAppDay?.filter === 'approved';
+                      const isSelectedRejected = selectedNewAppDay?.date === stat.day_date && selectedNewAppDay?.filter === 'rejected';
                       
                       return (
                         <div 
                           key={index} 
-                          className={`text-center p-1 rounded cursor-pointer transition-colors ${
-                            isSelected ? 'bg-primary text-primary-foreground' : 'bg-background hover:bg-muted'
-                          }`}
-                          onClick={() => setSelectedNewAppDay(isSelected ? null : stat.day_date || null)}
-                          title="Click to filter applications by this day"
+                          className="text-center p-1 rounded bg-background"
                         >
                           <div className="font-medium text-xs">{stat.day_name}</div>
                           <div className="text-[10px] text-muted-foreground mb-0.5">{dateStr}</div>
-                          <div className="text-xs">
+                          <div 
+                            className={`text-xs cursor-pointer px-1 rounded ${
+                              isSelectedAll ? 'bg-gray-600 text-white' : 'hover:bg-gray-100'
+                            }`}
+                            onClick={() => setSelectedNewAppDay(
+                              isSelectedAll ? null : { date: stat.day_date || '', filter: 'all' }
+                            )}
+                            title="All applications for this day"
+                          >
                             {stat.total_applications}
                           </div>
                           {stat.status_changed_count !== undefined && stat.status_changed_count > 0 && (
-                            <div className="text-[10px] text-green-600 dark:text-green-400 font-semibold">
+                            <div 
+                              className={`text-[10px] font-semibold cursor-pointer px-1 rounded ${
+                                isSelectedApproved 
+                                  ? 'bg-blue-600 text-white' 
+                                  : 'text-blue-600 dark:text-blue-400 hover:bg-blue-100'
+                              }`}
+                              onClick={() => setSelectedNewAppDay(
+                                isSelectedApproved ? null : { date: stat.day_date || '', filter: 'approved' }
+                              )}
+                              title="Applications moved to Pre/Next/This Week"
+                            >
                               {stat.status_changed_count}
+                            </div>
+                          )}
+                          {stat.rejected_count !== undefined && stat.rejected_count > 0 && (
+                            <div 
+                              className={`text-[10px] font-semibold cursor-pointer px-1 rounded ${
+                                isSelectedRejected 
+                                  ? 'bg-red-600 text-white' 
+                                  : 'text-red-600 dark:text-red-400 hover:bg-red-100'
+                              }`}
+                              onClick={() => setSelectedNewAppDay(
+                                isSelectedRejected ? null : { date: stat.day_date || '', filter: 'rejected' }
+                              )}
+                              title="Rejected applications"
+                            >
+                              {stat.rejected_count}
                             </div>
                           )}
                         </div>
@@ -3392,8 +3434,16 @@ const Admin = () => {
                 applications={selectedNewAppDay ? contestApplications.filter(app => {
                   if (!app.submitted_at) return false;
                   const appDate = new Date(app.submitted_at).toISOString().split('T')[0];
-                  const filterDate = new Date(selectedNewAppDay).toISOString().split('T')[0];
-                  return appDate === filterDate;
+                  const filterDate = new Date(selectedNewAppDay.date).toISOString().split('T')[0];
+                  if (appDate !== filterDate) return false;
+                  
+                  // Apply additional filter based on status
+                  if (selectedNewAppDay.filter === 'approved') {
+                    return ['pre next week', 'next week', 'next week on site', 'this week', 'past'].includes(app.admin_status || '');
+                  } else if (selectedNewAppDay.filter === 'rejected') {
+                    return app.admin_status === 'rejected';
+                  }
+                  return true; // 'all' filter
                 }) : contestApplications}
                 deletedApplications={deletedApplications}
                 showDeleted={showDeletedApplications}
