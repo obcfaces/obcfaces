@@ -48,6 +48,7 @@ import { AdminPastWeekTab } from '@/components/admin/tabs/AdminPastWeekTab';
 import { AdminAllParticipantsTab } from '@/components/admin/tabs/AdminAllParticipantsTab';
 import { AdminRegistrationsTab } from '@/components/admin/tabs/AdminRegistrationsTab';
 import { AdminStatisticsTab } from '@/components/admin/tabs/AdminStatisticsTab';
+import { BackupTrigger } from '@/components/admin/BackupTrigger';
 
 // Unified status type for participants - only real statuses from DB
 type ParticipantStatus = 'pending' | 'rejected' | 'pre next week' | 'this week' | 'next week' | 'next week on site' | 'past';
@@ -3191,6 +3192,10 @@ const Admin = () => {
         <div className="max-w-7xl md:mx-auto px-2 md:px-6">
           <div className="mb-8">
             <h1 className="text-3xl font-bold mb-2">Admin Panel</h1>
+          </div>
+
+          <div className="mb-6">
+            <BackupTrigger />
           </div>
 
           <Tabs value={activeTab} onValueChange={(tab) => {
