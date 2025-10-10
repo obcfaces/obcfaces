@@ -6,8 +6,8 @@ interface LoadingSpinnerProps {
 }
 
 export function LoadingSpinner({ 
-  message = "Загрузка данных...", 
-  submessage = "Пожалуйста, подождите" 
+  message = "Loading data...", 
+  submessage = "Please wait" 
 }: LoadingSpinnerProps) {
   return (
     <div className="flex flex-col items-center justify-center py-20 space-y-4">
