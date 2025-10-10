@@ -3,10 +3,13 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { ProfileData } from '@/types/admin';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { ChevronDown, Star, Heart } from 'lucide-react';
+import { ChevronDown, Star, Heart, Copy, Facebook, Loader2 } from 'lucide-react';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { UAParser } from 'ua-parser-js';
+import { useToast } from '@/hooks/use-toast';
 
 interface AdminRegistrationsTabProps {
   profiles: ProfileData[];
@@ -385,7 +388,8 @@ export function AdminRegistrationsTab({
             `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 
             'Unknown';
           
-          const manilaTime = new Date(profile.created_at).toLocaleString('en-GB', {
+          const activityDate = new Date(profile.created_at);
+          const manilaTime = activityDate.toLocaleString('en-GB', {
             timeZone: 'Asia/Manila',
             day: '2-digit',
             month: 'short',
@@ -394,29 +398,14 @@ export function AdminRegistrationsTab({
           });
           
           const email = (profile as any).email || '';
-          const initials = fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-          
           const userRole = userRoleMap[profile.id] || 'usual';
           const votingStats = userVotingStats[profile.id];
           
-          // Get country flag emoji
-          const getCountryFlag = (ipAddress: string) => {
-            if (!ipAddress) return '';
-            // Simple country detection based on IP prefix (can be enhanced)
-            if (ipAddress.startsWith('103.189') || ipAddress.startsWith('49.145')) return '🇵🇭 Philippines';
-            return '';
-          };
-          
-          // Get device info from device_info or construct from user agent
-          const deviceInfo = profile.device_info || (() => {
-            const ua = (profile as any).user_agent || '';
-            if (ua.includes('Mac')) return 'Desktop | macOS';
-            if (ua.includes('Windows')) return 'Desktop | Windows';
-            if (ua.includes('Linux')) return 'Desktop | Linux';
-            if (ua.includes('Android')) return 'Mobile | Android';
-            if (ua.includes('iPhone') || ua.includes('iPad')) return 'Mobile | iOS';
-            return 'Unknown';
-          })();
+          // Get device info from user_agent
+          const deviceInfo = profile.user_agent ? (() => {
+            const { browser, device, os } = UAParser(profile.user_agent);
+            return `${device.type || 'Desktop'} | ${os.name || 'Unknown OS'} ${os.version || ''}`;
+          })() : 'Unknown';
           
           const ipCount = profile.ip_address ? profiles.filter(p => p.ip_address === profile.ip_address).length : 0;
           const fingerprintCount = profile.fingerprint_id ? (fingerprintCounts.get(profile.fingerprint_id) || 0) : 0;
@@ -427,128 +416,314 @@ export function AdminRegistrationsTab({
           
           const isExpanded = expandedFingerprint === `${profile.fingerprint_id}-${profile.id}`;
           
+          // IP color based on count
+          let ipColor = 'text-muted-foreground';
+          if (ipCount >= 10) {
+            ipColor = 'text-red-500 font-medium';
+          } else if (ipCount >= 2 && ipCount <= 5) {
+            ipColor = 'text-blue-500 font-medium';
+          }
+          
+          // Fingerprint styling
+          const duplicateCount = profilesWithSameFingerprint.length;
+          const isBlue = duplicateCount >= 2;
+          const showCount = duplicateCount >= 2;
+          const isClickable = duplicateCount >= 1;
+          
+          // Check for suspicious indicators
+          const hasSuspiciousRole = userRoles.some(r => r.user_id === profile.id && r.role === 'suspicious');
+          const hasClearedRole = userRoles.some(r => r.user_id === profile.id && r.role === 'cleared');
+          const isOAuth = profile.auth_provider === 'google' || profile.auth_provider === 'facebook';
+          const wasAutoConfirmed = profile.created_at && profile.email_confirmed_at && 
+            Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 1000;
+          const formFillTime = profile.raw_user_meta_data?.form_fill_time_seconds;
+          const fastFormFill = formFillTime !== undefined && formFillTime !== null && formFillTime < 5;
+          const hasDuplicateFingerprint = duplicateCount >= 4;
+          const hasRegularRole = userRoles.some(r => r.user_id === profile.id && r.role === 'regular');
+          
+          const isMaybeSuspicious = !isOAuth && !hasClearedRole && !hasSuspiciousRole && (wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint);
+          
+          const reasonCodes = [];
+          if (wasAutoConfirmed) reasonCodes.push("<1");
+          if (fastFormFill) reasonCodes.push("<3");
+          if (hasDuplicateFingerprint) reasonCodes.push(`FP ${duplicateCount + 1}`);
+          
           return (
             <div key={profile.id} className="space-y-2">
               <Card className="p-4 relative hover:shadow-md transition-shadow">
-                {/* Date/time in top-left */}
-                <div className="absolute top-4 left-4 text-sm text-muted-foreground">
-                  {manilaTime}
-                </div>
+                {/* Date/time badge in top-left */}
+                <Badge 
+                  variant="outline"
+                  className="absolute top-0 left-0 text-xs rounded-none rounded-tr-md font-normal"
+                >
+                  {activityDate.toLocaleDateString('en-GB', { 
+                    day: 'numeric', 
+                    month: 'short' 
+                  })}
+                </Badge>
                 
-                {/* Three-dot menu in top-right */}
-                <div className="absolute top-4 right-4">
+                {/* Role and status badges in top-right */}
+                <div className="absolute top-0 right-0 flex items-center gap-1">
+                  {/* Role badge */}
+                  {hasSuspiciousRole && (
+                    <Badge variant="destructive" className="text-xs rounded-none bg-red-500 text-white hover:bg-red-600">
+                      Suspicious
+                    </Badge>
+                  )}
+                  {userRole === 'admin' && (
+                    <>
+                      <Badge className="text-xs rounded-none bg-blue-500 text-white hover:bg-blue-600">
+                        Admin
+                      </Badge>
+                      {hasRegularRole && (
+                        <Badge className="text-xs rounded-none bg-green-500 text-white hover:bg-green-600 ml-1">
+                          Regular ({votingStats?.unique_weeks_count || 0}w)
+                        </Badge>
+                      )}
+                    </>
+                  )}
+                  {userRole === 'moderator' && (
+                    <>
+                      <Badge className="text-xs rounded-none bg-yellow-500 text-white hover:bg-yellow-600">
+                        Moderator
+                      </Badge>
+                      {hasRegularRole && (
+                        <Badge className="text-xs rounded-none bg-green-500 text-white hover:bg-green-600 ml-1">
+                          Regular ({votingStats?.unique_weeks_count || 0}w)
+                        </Badge>
+                      )}
+                    </>
+                  )}
+                  {userRole === 'usual' && hasRegularRole && (
+                    <Badge className="text-xs rounded-none bg-green-500 text-white hover:bg-green-600">
+                      Regular ({votingStats?.unique_weeks_count || 0}w)
+                    </Badge>
+                  )}
+                  {isMaybeSuspicious && (
+                    <>
+                      <Badge 
+                        variant="outline" 
+                        className="text-xs rounded-none bg-orange-100 text-orange-700 border-orange-300 flex items-center gap-1 cursor-pointer hover:bg-orange-200"
+                        onClick={() => {
+                          if (hasDuplicateFingerprint && profile.fingerprint_id) {
+                            toggleFingerprintExpand(profile.fingerprint_id, profile.id);
+                          }
+                        }}
+                      >
+                        {reasonCodes.length > 0 && (
+                          <span className="text-[10px] font-semibold">
+                            {reasonCodes.join(" ")}
+                          </span>
+                        )}
+                        Maybe
+                      </Badge>
+                      {hasRegularRole && (
+                        <Badge className="text-xs rounded-none bg-green-500 text-white hover:bg-green-600 ml-1">
+                          Regular ({votingStats?.unique_weeks_count || 0}w)
+                        </Badge>
+                      )}
+                    </>
+                  )}
+                  
+                  {/* Verify button if not verified */}
+                  {!profile.email_confirmed_at && (
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => {
+                        if (confirm(`Are you sure you want to verify email for ${fullName}?`)) {
+                          handleEmailVerification(profile.id);
+                        }
+                      }}
+                      disabled={verifyingUsers.has(profile.id)}
+                      className="h-6 px-2 text-xs rounded-none rounded-bl-md bg-red-100 text-red-700 hover:bg-red-200"
+                    >
+                      {verifyingUsers.has(profile.id) ? 'Verifying...' : 'Verify'}
+                    </Button>
+                  )}
+                  
+                  {/* Three dots menu */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                        <span className="text-lg">⋮</span>
+                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0 rounded-none rounded-bl-md">
+                        <span className="text-lg leading-none">⋮</span>
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-[160px] bg-background z-50">
-                      <DropdownMenuItem onClick={() => {
-                        alert(`IP: ${profile.ip_address || 'N/A'} (${ipCount} users)\nFingerprint: ${profile.fingerprint_id?.substring(0, 8) || 'N/A'} (${fingerprintCount} users)\nDevice Info: ${deviceInfo}`);
-                      }}>
-                        View Details
+                    <DropdownMenuContent align="end" className="z-[9999] bg-popover border shadow-lg">
+                      <DropdownMenuItem
+                        onClick={() => handleRoleChange(profile.id, fullName, hasSuspiciousRole ? 'usual' : 'suspicious')}
+                        className="cursor-pointer"
+                      >
+                        {hasSuspiciousRole ? '✓ ' : ''}Mark as Suspicious
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => {
-                        handleRoleChange(profile.id, fullName, userRole === 'suspicious' ? 'usual' : 'suspicious');
-                      }}>
-                        {userRole === 'suspicious' ? 'Mark as Usual' : 'Mark Suspicious'}
+                      <DropdownMenuItem
+                        onClick={() => handleRoleChange(profile.id, fullName, 'usual')}
+                        className="cursor-pointer"
+                      >
+                        {userRole === 'usual' ? '✓ ' : ''}Mark as Usual
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleRoleChange(profile.id, fullName, hasClearedRole ? 'usual' : 'cleared')}
+                        className="cursor-pointer"
+                      >
+                        {hasClearedRole ? '✓ ' : ''}Clear "Maybe Suspicious"
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleRoleChange(profile.id, fullName, 'regular')}
+                        className="cursor-pointer"
+                      >
+                        {hasRegularRole ? '✓ ' : ''}Mark as Regular
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleRoleChange(profile.id, fullName, 'moderator')}
+                        className="cursor-pointer"
+                      >
+                        {userRole === 'moderator' ? '✓ ' : ''}Make Moderator
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleRoleChange(profile.id, fullName, userRole === 'admin' ? 'usual' : 'admin')}
+                        className="cursor-pointer"
+                      >
+                        {userRole === 'admin' ? '✓ ' : ''}Make Admin
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
                 
                 {/* Main content */}
-                <div className="mt-8">
-                  <div className="flex items-start gap-3">
-                    {/* Avatar */}
-                    <div className="flex-shrink-0">
-                      <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-base font-medium">
-                        {initials.toLowerCase()}
-                      </div>
-                    </div>
-                    
-                    {/* User info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-base mb-0.5">
-                        {fullName.toLowerCase()}
-                      </div>
-                      
-                      <div className="flex items-center gap-1.5 mb-1 text-sm">
-                        <span className="text-foreground">{email}</span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-5 w-5 p-0"
-                          onClick={() => {
-                            navigator.clipboard.writeText(email);
-                          }}
-                        >
-                          <span className="text-xs">📋</span>
-                        </Button>
-                      </div>
-                      
-                      {/* IP and Country */}
-                      {profile.ip_address && (
-                        <div className="text-sm text-blue-600 mb-1">
-                          <span className="font-medium">IP:</span> {profile.ip_address} ({ipCount}) {getCountryFlag(profile.ip_address)}
-                        </div>
-                      )}
-                      
-                      {/* Device Info */}
-                      <div className="text-sm text-muted-foreground">
-                        {deviceInfo}
-                        {profile.fingerprint_id && (
-                          <>
-                            {' | '}
-                            <Button
-                              variant="link"
-                              size="sm"
-                              className="h-auto p-0 text-sm text-blue-600 underline"
-                              onClick={() => toggleFingerprintExpand(profile.fingerprint_id!, profile.id)}
-                            >
-                              fp {fingerprintShort} ({fingerprintCount})
-                            </Button>
-                          </>
-                        )}
-                      </div>
-                      
-                      {/* Warning if no fingerprint/IP data */}
-                      {(!profile.fingerprint_id || !profile.ip_address) && (
-                        <div className="flex items-center gap-2 text-sm text-orange-500 mt-1">
-                          <span>⚠️</span>
-                          <span>IP/данные устройства будут записаны при следующем логине</span>
-                        </div>
-                      )}
-                    </div>
+                <div className="mt-6">
+                  <div className="flex items-start gap-2 mb-1">
+                    <Avatar className="h-6 w-6 flex-shrink-0">
+                      <AvatarImage src={profile.avatar_url || ''} />
+                      <AvatarFallback className="text-xs">
+                        {profile.display_name?.charAt(0) || profile.first_name?.charAt(0) || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="font-medium">
+                      {fullName}
+                    </span>
                   </div>
                   
-                  {/* Ratings Section */}
-                  {votingStats && votingStats.total_ratings > 0 && (
-                    <div className="mt-4 border-t border-border pt-3">
-                      <div className="flex items-center gap-1 text-sm font-medium mb-2">
-                        <Star className="h-4 w-4 text-yellow-500" />
-                        <span>Ratings ({votingStats.total_ratings})</span>
-                      </div>
-                      
-                      {/* Sample ratings (you can expand this with actual rating data) */}
-                      <div className="space-y-2 text-sm">
-                        <div className="text-muted-foreground">
-                          User voted on {votingStats.total_ratings} participants
-                        </div>
-                      </div>
+                  {/* Email */}
+                  {email && (
+                    <div className="text-xs text-foreground/80 flex items-center gap-1 mb-1">
+                      <span>{email}</span>
+                      <Copy 
+                        className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                        onClick={() => {
+                          navigator.clipboard.writeText(email);
+                        }}
+                      />
+                      {/* Social profile links */}
+                      {profile.auth_provider === 'google' && (
+                        <a 
+                          href={`https://www.google.com/search?q=${encodeURIComponent(email)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="ml-1 text-blue-600 hover:text-blue-800 flex items-center gap-0.5"
+                          title="Search Google profile"
+                        >
+                          <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                          </svg>
+                          G
+                        </a>
+                      )}
+                      {profile.auth_provider === 'facebook' && profile.provider_data?.provider_id && (
+                        <a 
+                          href={`https://www.facebook.com/${profile.provider_data.provider_id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="ml-1 text-blue-600 hover:text-blue-800"
+                          title="View Facebook profile"
+                        >
+                          <Facebook className="h-3 w-3" />
+                        </a>
+                      )}
                     </div>
                   )}
                   
-                  {/* Stats footer */}
-                  <div className="flex items-center justify-end gap-3 mt-3 border-t border-border pt-2">
-                    <div className="flex items-center gap-1">
-                      <Star className="h-4 w-4 text-yellow-500" />
-                      <span className="text-sm font-medium">{votingStats?.given_stars || 0}</span>
+                  {/* No email warning */}
+                  {!email && (
+                    <div className="text-xs text-destructive font-medium mb-1">
+                      ⚠️ NO EMAIL - {profile.auth_provider === 'facebook' ? 'Facebook' : profile.auth_provider || 'Unknown'} - ID: {profile.id?.substring(0, 8)}
+                      {profile.auth_provider === 'facebook' && profile.provider_data?.provider_id && (
+                        <a 
+                          href={`https://www.facebook.com/${profile.provider_data.provider_id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="ml-2 text-blue-600 hover:text-blue-800 inline-flex items-center gap-1"
+                          title="View Facebook profile"
+                        >
+                          <Facebook className="h-3 w-3" />
+                          FB Profile
+                        </a>
+                      )}
                     </div>
-                    <div className="flex items-center gap-1">
+                  )}
+                  
+                  {/* IP Address */}
+                  {profile.ip_address ? (
+                    <div className={`text-xs ${ipColor}`}>
+                      IP: {profile.ip_address}
+                      {ipCount > 1 && ` (${ipCount})`}
+                      {(profile.country || profile.city) && (
+                        <span className="text-muted-foreground font-normal ml-1">
+                          📍 {profile.city ? `${profile.city}, ` : ''}{profile.country || 'Unknown Country'}
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-xs text-amber-600">
+                      ⚠️ IP/данные устройства будут записаны при следующем логине
+                    </div>
+                  )}
+                  
+                  {/* Device Info + Fingerprint */}
+                  {profile.user_agent && (
+                    <div className="text-xs text-muted-foreground">
+                      {deviceInfo}
+                      {profile.fingerprint_id && (
+                        <span className={`ml-2 ${isBlue ? 'text-blue-600 dark:text-blue-400 font-semibold' : ''}`}>
+                          | {isClickable ? (
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                toggleFingerprintExpand(profile.fingerprint_id!, profile.id);
+                              }}
+                              className="hover:underline cursor-pointer"
+                            >
+                              fp {fingerprintShort}
+                              {showCount && ` (${duplicateCount + 1})`}
+                            </button>
+                          ) : (
+                            <>fp {fingerprintShort}</>
+                          )}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* User Activity Icons (bottom right) */}
+                  <div className="absolute bottom-2 right-2 flex gap-2">
+                    {/* Ratings */}
+                    <div className="flex items-center gap-1 bg-background/90 px-2 py-1 rounded shadow-sm border">
+                      <Star className="h-4 w-4 text-yellow-500" />
+                      <span className="text-xs font-medium">
+                        {votingStats?.given_stars || 0}
+                      </span>
+                    </div>
+                    
+                    {/* Likes */}
+                    <div className="flex items-center gap-1 bg-background/90 px-2 py-1 rounded shadow-sm border">
                       <Heart className="h-4 w-4 text-red-500" />
-                      <span className="text-sm font-medium">{votingStats?.given_hearts || 0}</span>
+                      <span className="text-xs font-medium">
+                        {votingStats?.given_hearts || 0}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -556,80 +731,83 @@ export function AdminRegistrationsTab({
               
               {/* Expanded fingerprint section */}
               {isExpanded && profilesWithSameFingerprint.length > 0 && (
-                <Card className="p-4 bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
-                  <div className="text-sm font-semibold mb-3 text-blue-900 dark:text-blue-100">
-                    Пользователи с таким же Fingerprint ({profile.fingerprint_id?.substring(0, 20)}...):
-                  </div>
+                <Card className="p-4 bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800">
+                  <h4 className="text-sm font-medium mb-3 text-blue-900 dark:text-blue-100">
+                    Пользователи с таким же Fingerprint ({profile.fingerprint_id?.substring(0, 16)}...):
+                  </h4>
                   
-                  <div className="space-y-3">
-                    {profilesWithSameFingerprint.map(fp => {
-                      const fpFullName = fp.display_name || 
-                        `${fp.first_name || ''} ${fp.last_name || ''}`.trim() || 
+                  <div className="space-y-4">
+                    {profilesWithSameFingerprint.map(fpProfile => {
+                      const fpFullName = fpProfile.display_name || 
+                        `${fpProfile.first_name || ''} ${fpProfile.last_name || ''}`.trim() || 
                         'Unknown';
-                      const fpEmail = (fp as any).email || '';
-                      const fpInitials = fpFullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-                      const fpRegistered = new Date(fp.created_at).toLocaleString('en-GB', {
-                        timeZone: 'Asia/Manila',
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      });
-                      const fpDeviceInfo = fp.device_info || 'Unknown';
-                      const fpVotingStats = userVotingStats[fp.id];
+                      const fpEmail = (fpProfile as any).email || '';
+                      const fpVotingStats = userVotingStats[fpProfile.id];
+                      const fpActivityDate = new Date(fpProfile.created_at);
                       
                       return (
-                        <div key={fp.id} className="flex items-start gap-3 p-3 bg-background rounded-lg">
-                          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm font-medium flex-shrink-0">
-                            {fpInitials.toLowerCase()}
-                          </div>
-                          
-                          <div className="flex-1 min-w-0">
-                            <div className="font-semibold text-sm mb-0.5">
-                              {fpFullName.toLowerCase()}
-                            </div>
-                            <div className="text-xs text-muted-foreground mb-0.5">
-                              {fpEmail}
-                            </div>
-                            {fp.ip_address && (
-                              <div className="text-xs text-blue-600 mb-0.5">
-                                IP: {fp.ip_address}
-                              </div>
-                            )}
-                            <div className="text-xs text-muted-foreground mb-0.5">
-                              Зарегистрирован: {fpRegistered}
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              {fpDeviceInfo}
-                            </div>
+                        <div key={fpProfile.id} className="p-3 bg-background rounded border">
+                          <div className="flex items-start gap-3">
+                            <Avatar className="h-10 w-10">
+                              <AvatarImage src={fpProfile.avatar_url || ''} />
+                              <AvatarFallback className="text-xs">
+                                {fpProfile.display_name?.charAt(0) || fpProfile.first_name?.charAt(0) || 'U'}
+                              </AvatarFallback>
+                            </Avatar>
                             
-                            {/* Stats */}
-                            <div className="flex items-center gap-3 mt-2">
-                              <div className="flex items-center gap-1">
-                                <Star className="h-3 w-3 text-yellow-500" />
-                                <span className="text-xs">{fpVotingStats?.given_stars || 0}</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Heart className="h-3 w-3 text-red-500" />
-                                <span className="text-xs">{fpVotingStats?.given_hearts || 0}</span>
-                              </div>
-                            </div>
-                            
-                            {/* Ratings section if exists */}
-                            {fpVotingStats && fpVotingStats.total_ratings > 0 && (
-                              <div className="mt-2 pt-2 border-t border-border">
-                                <div className="flex items-center gap-1 text-xs font-medium mb-1">
-                                  <Star className="h-3 w-3 text-yellow-500" />
-                                  <span>Ratings ({fpVotingStats.total_ratings})</span>
-                                </div>
-                                {fpVotingStats.voting_week_intervals && (
-                                  <div className="text-xs text-blue-600">
-                                    Week: {fpVotingStats.voting_week_intervals[0]} ({fpVotingStats.total_ratings} votes)
-                                  </div>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-medium text-sm">{fpFullName}</span>
+                                {fpProfile.auth_provider === 'google' && (
+                                  <Badge variant="outline" className="text-xs">G</Badge>
+                                )}
+                                {fpProfile.auth_provider === 'facebook' && (
+                                  <Badge variant="outline" className="text-xs">F</Badge>
                                 )}
                               </div>
-                            )}
+                              
+                              {fpEmail && (
+                                <div className="text-xs text-muted-foreground mb-0.5">{fpEmail}</div>
+                              )}
+                              
+                              {fpProfile.ip_address && (
+                                <div className="text-xs text-blue-600 mb-0.5">
+                                  IP: {fpProfile.ip_address}
+                                </div>
+                              )}
+                              
+                              <div className="text-xs text-muted-foreground mb-0.5">
+                                Зарегистрирован: {fpActivityDate.toLocaleString('en-GB', {
+                                  timeZone: 'Asia/Manila',
+                                  day: '2-digit',
+                                  month: '2-digit',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })}
+                              </div>
+                              
+                              {fpProfile.user_agent && (() => {
+                                const { browser, device, os } = UAParser(fpProfile.user_agent);
+                                return (
+                                  <div className="text-xs text-muted-foreground">
+                                    {device.type || 'Desktop'} | {os.name || 'Unknown OS'}
+                                  </div>
+                                );
+                              })()}
+                              
+                              {/* Stats */}
+                              <div className="flex items-center gap-3 mt-2">
+                                <div className="flex items-center gap-1">
+                                  <Star className="h-3 w-3 text-yellow-500" />
+                                  <span className="text-xs">{fpVotingStats?.given_stars || 0}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Heart className="h-3 w-3 text-red-500" />
+                                  <span className="text-xs">{fpVotingStats?.given_hearts || 0}</span>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       );
