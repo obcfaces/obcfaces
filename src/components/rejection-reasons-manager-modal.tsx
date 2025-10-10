@@ -91,6 +91,8 @@ export const RejectionReasonsManagerModal = ({
   const handleAddNewReason = () => {
     if (!newReason.text.trim()) return;
 
+    console.log('➕ Adding new reason:', newReason.text);
+    
     // If no order specified, use last position + 1
     const orderNum = newReason.sortOrder && newReason.sortOrder.trim() 
       ? parseInt(newReason.sortOrder) 
@@ -104,6 +106,8 @@ export const RejectionReasonsManagerModal = ({
       sortOrder: orderNum,
     };
 
+    console.log('➕ New reason object:', newReasonObj);
+
     const updated = [...reasons];
     
     // Shift existing reasons if needed
@@ -116,6 +120,7 @@ export const RejectionReasonsManagerModal = ({
     updated.push(newReasonObj);
     updated.sort((a, b) => a.sortOrder - b.sortOrder);
     
+    console.log('➕ Updated reasons list:', updated);
     setReasons(updated);
     setNewReason({ text: "", sortOrder: "" });
   };
