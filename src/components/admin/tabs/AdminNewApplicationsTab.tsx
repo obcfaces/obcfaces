@@ -95,8 +95,9 @@ export function AdminNewApplicationsTab({
         const appData = participant.application_data || {};
         const firstName = appData.first_name || appData.firstName || '';
         const lastName = appData.last_name || appData.lastName || '';
-        const photo1 = appData.photo_1_url || appData.photo1_url || '';
-        const photo2 = appData.photo_2_url || appData.photo2_url || '';
+        // Try multiple possible keys for photo URLs to handle different data formats
+        const photo1 = appData.photo_1_url || appData.photo1_url || appData.photo1Url || appData.photoUrl1 || '';
+        const photo2 = appData.photo_2_url || appData.photo2_url || appData.photo2Url || appData.photoUrl2 || '';
         const submittedDate = participant.submitted_at ? new Date(participant.submitted_at) : null;
 
         return (
@@ -181,10 +182,10 @@ const ApplicationCardWithHistory = ({
             </Badge>
           )}
 
-          {/* History badge - top right corner of info area */}
+          {/* History badge - top right corner of second photo */}
           {historyCount > 0 && (
             <div
-              className="absolute top-0 right-0 z-20 bg-primary text-primary-foreground rounded-full w-10 h-10 flex items-center justify-center text-sm font-bold cursor-pointer hover:bg-primary/90 shadow-lg transition-all border-2 border-background"
+              className="absolute top-0 left-[calc(25ch/2)] z-20 bg-primary text-primary-foreground rounded-full w-10 h-10 flex items-center justify-center text-sm font-bold cursor-pointer hover:bg-primary/90 shadow-lg transition-all border-2 border-background"
               onClick={() => setIsHistoryExpanded(!isHistoryExpanded)}
               title={`${historyCount} edit${historyCount > 1 ? 's' : ''} - click to ${isHistoryExpanded ? 'hide' : 'show'}`}
             >
@@ -248,13 +249,21 @@ const ApplicationCardWithHistory = ({
                   </div>
                 )}
                 {photo2 && (
-                  <div className="w-full">
+                  <div className="w-full relative">
                     <img 
                       src={photo2} 
                       alt="Full length"
                       className="w-full h-[149px] object-cover cursor-pointer hover:opacity-90 transition-opacity"
                       onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 1, `${firstName} ${lastName}`)}
                     />
+                  </div>
+                )}
+                {!photo2 && (
+                  <div className="w-full h-[149px] bg-muted flex items-center justify-center border border-border">
+                    <div className="text-center text-muted-foreground">
+                      <p className="text-sm font-medium">No Photo 2</p>
+                      <p className="text-xs mt-1">Check application_data</p>
+                    </div>
                   </div>
                 )}
               </div>
