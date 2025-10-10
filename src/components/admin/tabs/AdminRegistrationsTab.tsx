@@ -385,9 +385,9 @@ export function AdminRegistrationsTab({
             `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 
             'Unknown';
           
-          const manilaTime = new Date(profile.created_at).toLocaleString('ru-RU', {
+          const manilaTime = new Date(profile.created_at).toLocaleString('en-GB', {
             timeZone: 'Asia/Manila',
-            day: 'numeric',
+            day: '2-digit',
             month: 'short',
             hour: '2-digit',
             minute: '2-digit',
@@ -399,102 +399,245 @@ export function AdminRegistrationsTab({
           const userRole = userRoleMap[profile.id] || 'usual';
           const votingStats = userVotingStats[profile.id];
           
+          // Get country flag emoji
+          const getCountryFlag = (ipAddress: string) => {
+            if (!ipAddress) return '';
+            // Simple country detection based on IP prefix (can be enhanced)
+            if (ipAddress.startsWith('103.189') || ipAddress.startsWith('49.145')) return '🇵🇭 Philippines';
+            return '';
+          };
+          
+          // Get device info from device_info or construct from user agent
+          const deviceInfo = profile.device_info || (() => {
+            const ua = (profile as any).user_agent || '';
+            if (ua.includes('Mac')) return 'Desktop | macOS';
+            if (ua.includes('Windows')) return 'Desktop | Windows';
+            if (ua.includes('Linux')) return 'Desktop | Linux';
+            if (ua.includes('Android')) return 'Mobile | Android';
+            if (ua.includes('iPhone') || ua.includes('iPad')) return 'Mobile | iOS';
+            return 'Unknown';
+          })();
+          
+          const ipCount = profile.ip_address ? profiles.filter(p => p.ip_address === profile.ip_address).length : 0;
+          const fingerprintCount = profile.fingerprint_id ? (fingerprintCounts.get(profile.fingerprint_id) || 0) : 0;
+          const fingerprintShort = profile.fingerprint_id ? profile.fingerprint_id.substring(0, 5) : 'N/A';
+          
+          const profilesWithSameFingerprint = profile.fingerprint_id ? 
+            getProfilesWithFingerprint(profile.fingerprint_id).filter(p => p.id !== profile.id) : [];
+          
+          const isExpanded = expandedFingerprint === `${profile.fingerprint_id}-${profile.id}`;
+          
           return (
-            <Card key={profile.id} className="p-4 relative hover:shadow-md transition-shadow">
-              {/* Date/time in top-left */}
-              <div className="absolute top-4 left-4 text-sm text-muted-foreground">
-                {manilaTime}
-              </div>
-              
-              {/* Three-dot menu in top-right */}
-              <div className="absolute top-4 right-4">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <span className="text-lg">⋮</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-[160px] bg-background z-50">
-                    <DropdownMenuItem onClick={() => {
-                      const ipCount = profiles.filter(p => p.ip_address === profile.ip_address).length;
-                      const fingerprintCount = profile.fingerprint_id ? 
-                        fingerprintCounts.get(profile.fingerprint_id) || 0 : 0;
-                      
-                      alert(`IP: ${profile.ip_address || 'N/A'} (${ipCount} users)\nFingerprint: ${profile.fingerprint_id?.substring(0, 8) || 'N/A'} (${fingerprintCount} users)\nDevice Info: ${profile.device_info || 'N/A'}`);
-                    }}>
-                      View Details
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => {
-                      handleRoleChange(profile.id, fullName, userRole === 'suspicious' ? 'usual' : 'suspicious');
-                    }}>
-                      {userRole === 'suspicious' ? 'Mark as Usual' : 'Mark Suspicious'}
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-              
-              {/* Main content */}
-              <div className="flex items-start gap-4 mt-8">
-                {/* Avatar */}
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center text-lg font-medium">
-                    {initials}
-                  </div>
+            <div key={profile.id} className="space-y-2">
+              <Card className="p-4 relative hover:shadow-md transition-shadow">
+                {/* Date/time in top-left */}
+                <div className="absolute top-4 left-4 text-sm text-muted-foreground">
+                  {manilaTime}
                 </div>
                 
-                {/* User info */}
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-base mb-1">
-                    {fullName.toUpperCase()}
-                  </div>
-                  
-                  <div className="flex items-center gap-2 flex-wrap mb-2">
-                    <span className="text-sm text-foreground">{email}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 w-6 p-0"
-                      onClick={() => {
-                        navigator.clipboard.writeText(email);
-                      }}
-                    >
-                      <span className="text-muted-foreground">📋</span>
-                    </Button>
+                {/* Three-dot menu in top-right */}
+                <div className="absolute top-4 right-4">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <span className="text-lg">⋮</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-[160px] bg-background z-50">
+                      <DropdownMenuItem onClick={() => {
+                        alert(`IP: ${profile.ip_address || 'N/A'} (${ipCount} users)\nFingerprint: ${profile.fingerprint_id?.substring(0, 8) || 'N/A'} (${fingerprintCount} users)\nDevice Info: ${deviceInfo}`);
+                      }}>
+                        View Details
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => {
+                        handleRoleChange(profile.id, fullName, userRole === 'suspicious' ? 'usual' : 'suspicious');
+                      }}>
+                        {userRole === 'suspicious' ? 'Mark as Usual' : 'Mark Suspicious'}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                
+                {/* Main content */}
+                <div className="mt-8">
+                  <div className="flex items-start gap-3">
+                    {/* Avatar */}
+                    <div className="flex-shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-base font-medium">
+                        {initials.toLowerCase()}
+                      </div>
+                    </div>
                     
-                    {/* Provider badges */}
-                    {profile.auth_provider === 'google' && (
-                      <>
-                        <Badge variant="outline" className="text-xs px-1.5 py-0">G</Badge>
-                        <Badge variant="outline" className="text-xs px-1.5 py-0">G</Badge>
-                      </>
-                    )}
-                    {profile.auth_provider === 'facebook' && (
-                      <Badge variant="outline" className="text-xs px-1.5 py-0">F</Badge>
-                    )}
+                    {/* User info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold text-base mb-0.5">
+                        {fullName.toLowerCase()}
+                      </div>
+                      
+                      <div className="flex items-center gap-1.5 mb-1 text-sm">
+                        <span className="text-foreground">{email}</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-5 w-5 p-0"
+                          onClick={() => {
+                            navigator.clipboard.writeText(email);
+                          }}
+                        >
+                          <span className="text-xs">📋</span>
+                        </Button>
+                      </div>
+                      
+                      {/* IP and Country */}
+                      {profile.ip_address && (
+                        <div className="text-sm text-blue-600 mb-1">
+                          <span className="font-medium">IP:</span> {profile.ip_address} ({ipCount}) {getCountryFlag(profile.ip_address)}
+                        </div>
+                      )}
+                      
+                      {/* Device Info */}
+                      <div className="text-sm text-muted-foreground">
+                        {deviceInfo}
+                        {profile.fingerprint_id && (
+                          <>
+                            {' | '}
+                            <Button
+                              variant="link"
+                              size="sm"
+                              className="h-auto p-0 text-sm text-blue-600 underline"
+                              onClick={() => toggleFingerprintExpand(profile.fingerprint_id!, profile.id)}
+                            >
+                              fp {fingerprintShort} ({fingerprintCount})
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                      
+                      {/* Warning if no fingerprint/IP data */}
+                      {(!profile.fingerprint_id || !profile.ip_address) && (
+                        <div className="flex items-center gap-2 text-sm text-orange-500 mt-1">
+                          <span>⚠️</span>
+                          <span>IP/данные устройства будут записаны при следующем логине</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                   
-                  {/* Warning if no fingerprint/IP data */}
-                  {(!profile.fingerprint_id || !profile.ip_address) && (
-                    <div className="flex items-center gap-2 text-sm text-orange-500 mb-1">
-                      <span>⚠️</span>
-                      <span>IP/данные устройства будут записаны при следующем логине</span>
+                  {/* Ratings Section */}
+                  {votingStats && votingStats.total_ratings > 0 && (
+                    <div className="mt-4 border-t border-border pt-3">
+                      <div className="flex items-center gap-1 text-sm font-medium mb-2">
+                        <Star className="h-4 w-4 text-yellow-500" />
+                        <span>Ratings ({votingStats.total_ratings})</span>
+                      </div>
+                      
+                      {/* Sample ratings (you can expand this with actual rating data) */}
+                      <div className="space-y-2 text-sm">
+                        <div className="text-muted-foreground">
+                          User voted on {votingStats.total_ratings} participants
+                        </div>
+                      </div>
                     </div>
                   )}
-                </div>
-                
-                {/* Stats on the right */}
-                <div className="flex items-center gap-3 flex-shrink-0">
-                  <div className="flex items-center gap-1 text-muted-foreground">
-                    <Star className="h-4 w-4" />
-                    <span className="text-sm">{votingStats?.given_stars || 0}</span>
+                  
+                  {/* Stats footer */}
+                  <div className="flex items-center justify-end gap-3 mt-3 border-t border-border pt-2">
+                    <div className="flex items-center gap-1">
+                      <Star className="h-4 w-4 text-yellow-500" />
+                      <span className="text-sm font-medium">{votingStats?.given_stars || 0}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Heart className="h-4 w-4 text-red-500" />
+                      <span className="text-sm font-medium">{votingStats?.given_hearts || 0}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1 text-muted-foreground">
-                    <Heart className="h-4 w-4" />
-                    <span className="text-sm">{votingStats?.given_hearts || 0}</span>
-                  </div>
                 </div>
-              </div>
-            </Card>
+              </Card>
+              
+              {/* Expanded fingerprint section */}
+              {isExpanded && profilesWithSameFingerprint.length > 0 && (
+                <Card className="p-4 bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
+                  <div className="text-sm font-semibold mb-3 text-blue-900 dark:text-blue-100">
+                    Пользователи с таким же Fingerprint ({profile.fingerprint_id?.substring(0, 20)}...):
+                  </div>
+                  
+                  <div className="space-y-3">
+                    {profilesWithSameFingerprint.map(fp => {
+                      const fpFullName = fp.display_name || 
+                        `${fp.first_name || ''} ${fp.last_name || ''}`.trim() || 
+                        'Unknown';
+                      const fpEmail = (fp as any).email || '';
+                      const fpInitials = fpFullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                      const fpRegistered = new Date(fp.created_at).toLocaleString('en-GB', {
+                        timeZone: 'Asia/Manila',
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      });
+                      const fpDeviceInfo = fp.device_info || 'Unknown';
+                      const fpVotingStats = userVotingStats[fp.id];
+                      
+                      return (
+                        <div key={fp.id} className="flex items-start gap-3 p-3 bg-background rounded-lg">
+                          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm font-medium flex-shrink-0">
+                            {fpInitials.toLowerCase()}
+                          </div>
+                          
+                          <div className="flex-1 min-w-0">
+                            <div className="font-semibold text-sm mb-0.5">
+                              {fpFullName.toLowerCase()}
+                            </div>
+                            <div className="text-xs text-muted-foreground mb-0.5">
+                              {fpEmail}
+                            </div>
+                            {fp.ip_address && (
+                              <div className="text-xs text-blue-600 mb-0.5">
+                                IP: {fp.ip_address}
+                              </div>
+                            )}
+                            <div className="text-xs text-muted-foreground mb-0.5">
+                              Зарегистрирован: {fpRegistered}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {fpDeviceInfo}
+                            </div>
+                            
+                            {/* Stats */}
+                            <div className="flex items-center gap-3 mt-2">
+                              <div className="flex items-center gap-1">
+                                <Star className="h-3 w-3 text-yellow-500" />
+                                <span className="text-xs">{fpVotingStats?.given_stars || 0}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Heart className="h-3 w-3 text-red-500" />
+                                <span className="text-xs">{fpVotingStats?.given_hearts || 0}</span>
+                              </div>
+                            </div>
+                            
+                            {/* Ratings section if exists */}
+                            {fpVotingStats && fpVotingStats.total_ratings > 0 && (
+                              <div className="mt-2 pt-2 border-t border-border">
+                                <div className="flex items-center gap-1 text-xs font-medium mb-1">
+                                  <Star className="h-3 w-3 text-yellow-500" />
+                                  <span>Ratings ({fpVotingStats.total_ratings})</span>
+                                </div>
+                                {fpVotingStats.voting_week_intervals && (
+                                  <div className="text-xs text-blue-600">
+                                    Week: {fpVotingStats.voting_week_intervals[0]} ({fpVotingStats.total_ratings} votes)
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </Card>
+              )}
+            </div>
           );
         })}
       </div>
