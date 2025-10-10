@@ -155,8 +155,16 @@ export function AdminPastWeekTab({
     setUpdatingStatuses(prev => new Set(prev).add(participant.id));
     try {
       const changes = pendingPastChanges[participant.id];
-      if (changes?.admin_status) {
-        await onStatusChange(participant, changes.admin_status);
+      if (changes) {
+        // Create updated participant object with both status and week_interval if changed
+        const updatedParticipant = {
+          ...participant,
+          ...(changes.admin_status && { admin_status: changes.admin_status }),
+          ...(changes.week_interval && { week_interval: changes.week_interval })
+        };
+        
+        // Call onStatusChange with the new status (keeping the signature)
+        await onStatusChange(updatedParticipant, changes.admin_status || participant.admin_status);
       }
       // Clear pending changes
       setPendingPastChanges(prev => {
