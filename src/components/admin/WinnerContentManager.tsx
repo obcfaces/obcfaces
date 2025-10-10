@@ -452,8 +452,8 @@ export function WinnerContentManager({
         </CardHeader>
         <CardContent className="space-y-4 p-0 sm:p-6">
           {/* Winner card - full width on mobile with border */}
-          <div className="px-4 sm:px-0">
-            <div className="border rounded-lg overflow-hidden bg-white w-full">
+          <div className="px-0 sm:px-0">
+            <div className="border rounded-none sm:rounded-lg overflow-hidden bg-white w-full">
               {/* First row - contestant card styled like on site */}
               <div className="flex h-36 sm:h-40 md:h-44 gap-px relative">
                 <div className="relative w-24 sm:w-28 md:w-32">
