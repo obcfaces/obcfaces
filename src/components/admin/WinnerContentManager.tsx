@@ -151,8 +151,8 @@ export function WinnerContentManager({
   const handleSave = async () => {
     if (!participantId && !userId) {
       toast({
-        title: "Ошибка",
-        description: "Не указан ID участника или пользователя",
+        title: "Error",
+        description: "No participant or user ID specified",
         variant: "destructive"
       });
       return;
@@ -189,14 +189,14 @@ export function WinnerContentManager({
       }
 
       toast({
-        title: "Успех",
-        description: "Контент победителя сохранен"
+        title: "Success",
+        description: "Winner content saved"
       });
     } catch (error) {
       console.error('Error saving winner content:', error);
       toast({
-        title: "Ошибка",
-        description: "Не удалось сохранить контент",
+        title: "Error",
+        description: "Failed to save content",
         variant: "destructive"
       });
     } finally {
@@ -207,7 +207,7 @@ export function WinnerContentManager({
   const handleDelete = async () => {
     if (!content.id) return;
 
-    if (!confirm('Вы уверены, что хотите удалить контент победителя?')) {
+    if (!confirm('Are you sure you want to delete winner content?')) {
       return;
     }
 
@@ -228,14 +228,14 @@ export function WinnerContentManager({
       });
 
       toast({
-        title: "Успех",
-        description: "Контент победителя удален"
+        title: "Success",
+        description: "Winner content deleted"
       });
     } catch (error) {
       console.error('Error deleting winner content:', error);
       toast({
-        title: "Ошибка",
-        description: "Не удалось удалить контент",
+        title: "Error",
+        description: "Failed to delete content",
         variant: "destructive"
       });
     }
@@ -248,7 +248,7 @@ export function WinnerContentManager({
     // Validate file type
     if (!file.type.startsWith('image/')) {
       toast({
-        title: "Ошибка",
+        title: "Error",
         description: "Please select an image",
         variant: "destructive"
       });
@@ -258,8 +258,8 @@ export function WinnerContentManager({
     // Validate file size (max 10MB for images)
     if (file.size > 10 * 1024 * 1024) {
       toast({
-        title: "Ошибка",
-        description: "Размер изображения не должен превышать 10MB",
+        title: "Error",
+        description: "Image size must not exceed 10MB",
         variant: "destructive"
       });
       return;
@@ -287,14 +287,14 @@ export function WinnerContentManager({
       setContent(prev => ({ ...prev, payment_proof_url: publicUrl }));
 
       toast({
-        title: "Успех",
-        description: "Фото успешно загружено"
+        title: "Success",
+        description: "Photo uploaded successfully"
       });
     } catch (error) {
       console.error('Error uploading photo:', error);
       toast({
-        title: "Ошибка",
-        description: "Не удалось загрузить фото",
+        title: "Error",
+        description: "Failed to upload photo",
         variant: "destructive"
       });
     } finally {
@@ -312,7 +312,7 @@ export function WinnerContentManager({
     // Validate file type
     if (!file.type.startsWith('video/')) {
       toast({
-        title: "Ошибка",
+        title: "Error",
         description: "Please select a video",
         variant: "destructive"
       });
@@ -322,8 +322,8 @@ export function WinnerContentManager({
     // Validate file size (max 50MB for videos)
     if (file.size > 50 * 1024 * 1024) {
       toast({
-        title: "Ошибка",
-        description: "Размер видео не должен превышать 50MB",
+        title: "Error",
+        description: "Video size must not exceed 50MB",
         variant: "destructive"
       });
       return;
@@ -351,14 +351,14 @@ export function WinnerContentManager({
       setContent(prev => ({ ...prev, testimonial_video_url: publicUrl }));
 
       toast({
-        title: "Успех",
-        description: "Видео успешно загружено"
+        title: "Success",
+        description: "Video uploaded successfully"
       });
     } catch (error) {
       console.error('Error uploading video:', error);
       toast({
-        title: "Ошибка",
-        description: "Не удалось загрузить видео",
+        title: "Error",
+        description: "Failed to upload video",
         variant: "destructive"
       });
     } finally {
@@ -374,181 +374,186 @@ export function WinnerContentManager({
   }
 
   if (!participantData) {
-    return <div className="p-4">Нет данных участника</div>;
+    return <div className="p-4">No participant data</div>;
   }
 
+  // Calculate week interval from participant data
+  const weekInterval = (participantData.application_data as any)?.week_interval || 'N/A';
+
   return (
-    <Card className="w-full max-w-2xl">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Crown className="h-5 w-5 text-yellow-600" />
-          Контент победительницы
-          {participantName && <span className="text-sm font-normal">({participantName})</span>}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Preview section - всегда показываем */}
-        <div className="space-y-4">
-          <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
-            <Eye className="h-4 w-4" />
-            Предварительный просмотр
-          </h4>
-          
-          {/* Карточка победителя - первый ряд (используем CompactCardLayout) */}
-          <div className="border rounded-lg overflow-hidden bg-white">
-            <div className="flex h-36 sm:h-40 md:h-44 gap-px relative">
-              <div className="relative">
-                <img 
-                  src={(participantData.application_data as any)?.facePhotoUrl || (participantData.application_data as any)?.photo1_url || ''} 
-                  alt="Face"
-                  className="w-24 sm:w-28 md:w-32 h-full object-cover"
-                />
-                <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold min-w-[20px] h-[20px] flex items-center justify-center">
-                  1
+    <div className="w-full">
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Crown className="h-5 w-5 text-yellow-600" />
+            Winner Content - Week {weekInterval}
+            {participantName && <span className="text-sm font-normal">({participantName})</span>}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Preview section */}
+          <div className="space-y-4">
+            <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+              <Eye className="h-4 w-4" />
+              Preview
+            </h4>
+            
+            {/* Winner card - full width on mobile */}
+            <div className="border rounded-lg overflow-hidden bg-white w-full">
+              {/* First row - contestant card styled like on site */}
+              <div className="flex h-36 sm:h-40 md:h-44 gap-px relative">
+                <div className="relative">
+                  <img 
+                    src={(participantData.application_data as any)?.facePhotoUrl || (participantData.application_data as any)?.photo1_url || ''} 
+                    alt="Face"
+                    className="w-24 sm:w-28 md:w-32 h-full object-cover"
+                  />
+                  <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold min-w-[20px] h-[20px] flex items-center justify-center">
+                    1
+                  </div>
                 </div>
-              </div>
-              <div className="relative">
-                <img 
-                  src={(participantData.application_data as any)?.fullBodyPhotoUrl || (participantData.application_data as any)?.photo2_url || ''} 
-                  alt="Full body"
-                  className="w-24 sm:w-28 md:w-32 h-full object-cover"
-                />
-              </div>
-              <div className="flex-1 p-1 sm:p-2 md:p-3 flex flex-col relative bg-white">
-                <div className="flex items-start justify-between">
-                  <div className="min-w-0 flex-1 mr-2">
-                    <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">
-                      {(participantData.application_data as any)?.firstName || (participantData.application_data as any)?.first_name} {(participantData.application_data as any)?.lastName || (participantData.application_data as any)?.last_name}
-                    </h3>
-                    <div className="text-xs sm:text-sm text-muted-foreground font-normal">
-                      {(participantData.application_data as any)?.age} yo · {(participantData.application_data as any)?.weight || (participantData.application_data as any)?.weight_kg} kg · {(participantData.application_data as any)?.height || (participantData.application_data as any)?.height_cm} cm
-                    </div>
-                    <div className="text-sm sm:text-base text-contest-blue truncate">
-                      {getCountryDisplayName((participantData.application_data as any)?.country || '')} · {(participantData.application_data as any)?.city}
+                <div className="relative">
+                  <img 
+                    src={(participantData.application_data as any)?.fullBodyPhotoUrl || (participantData.application_data as any)?.photo2_url || ''} 
+                    alt="Full body"
+                    className="w-24 sm:w-28 md:w-32 h-full object-cover"
+                  />
+                </div>
+                <div className="flex-1 p-1 sm:p-2 md:p-3 flex flex-col relative bg-white">
+                  <div className="flex items-start justify-between">
+                    <div className="min-w-0 flex-1 mr-2">
+                      <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">
+                        {(participantData.application_data as any)?.firstName || (participantData.application_data as any)?.first_name} {(participantData.application_data as any)?.lastName || (participantData.application_data as any)?.last_name}
+                      </h3>
+                      <div className="text-xs sm:text-sm text-muted-foreground font-normal">
+                        {(participantData.application_data as any)?.age} yo · {(participantData.application_data as any)?.weight || (participantData.application_data as any)?.weight_kg} kg · {(participantData.application_data as any)?.height || (participantData.application_data as any)?.height_cm} cm
+                      </div>
+                      <div className="text-sm sm:text-base text-contest-blue truncate">
+                        {getCountryDisplayName((participantData.application_data as any)?.country || '')} · {(participantData.application_data as any)?.city}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-            
-            {/* Второй ряд - контент победительницы с загрузкой */}
-            <div className="border-t">
-              <div className="flex h-36 sm:h-40 md:h-44 gap-px relative">
-                {/* Payment proof photo - с кнопкой загрузки и удаления */}
-                <div className="relative w-24 sm:w-28 md:w-32 group">
-                  {content.payment_proof_url ? (
-                    <>
-                      <img 
-                        src={content.payment_proof_url} 
-                        alt="Payment proof" 
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                        <Button
-                          type="button"
-                          onClick={() => photoInputRef.current?.click()}
-                          disabled={uploadingPhoto}
-                          size="sm"
-                          variant="secondary"
-                        >
-                          <Upload className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          type="button"
-                          onClick={() => setContent(prev => ({ ...prev, payment_proof_url: '' }))}
-                          size="sm"
-                          variant="destructive"
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </>
-                  ) : (
-                    <div 
-                      className="w-full h-full bg-gray-100 flex flex-col items-center justify-center text-xs text-gray-400 cursor-pointer hover:bg-gray-200 transition-colors"
-                      onClick={() => photoInputRef.current?.click()}
-                    >
-                      <ImageIcon className="h-6 w-6 mb-1" />
-                      <span>Фото</span>
-                      <span className="text-[10px]">Кликните</span>
-                    </div>
-                  )}
-                  <input
-                    ref={photoInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handlePhotoUpload}
-                    className="hidden"
-                  />
-                </div>
-
-                {/* Testimonial video - с кнопкой загрузки и удаления */}
-                <div className="relative w-24 sm:w-28 md:w-32 group">
-                  {content.testimonial_video_url ? (
-                    <>
-                      <video 
-                        src={content.testimonial_video_url}
-                        className="w-full h-full object-cover"
-                        playsInline
-                      />
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                        <Button
-                          type="button"
-                          onClick={() => videoInputRef.current?.click()}
-                          disabled={uploadingVideo}
-                          size="sm"
-                          variant="secondary"
-                        >
-                          <Upload className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          type="button"
-                          onClick={() => setContent(prev => ({ ...prev, testimonial_video_url: '' }))}
-                          size="sm"
-                          variant="destructive"
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
-                      {!uploadingVideo && (
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none group-hover:opacity-0 transition-opacity">
-                          <div className="bg-black/50 rounded-full p-3">
-                            <Play className="w-6 h-6 text-white" fill="white" />
-                          </div>
+              
+              {/* Second row - winner content */}
+              <div className="border-t">
+                <div className="flex h-36 sm:h-40 md:h-44 gap-px relative">
+                  {/* Payment proof photo */}
+                  <div className="relative w-24 sm:w-28 md:w-32 group">
+                    {content.payment_proof_url ? (
+                      <>
+                        <img 
+                          src={content.payment_proof_url} 
+                          alt="Payment proof" 
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                          <Button
+                            type="button"
+                            onClick={() => photoInputRef.current?.click()}
+                            disabled={uploadingPhoto}
+                            size="sm"
+                            variant="secondary"
+                          >
+                            <Upload className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            type="button"
+                            onClick={() => setContent(prev => ({ ...prev, payment_proof_url: '' }))}
+                            size="sm"
+                            variant="destructive"
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
                         </div>
-                      )}
-                    </>
-                  ) : (
-                    <div 
-                      className="w-full h-full bg-gray-100 flex flex-col items-center justify-center text-xs text-gray-400 cursor-pointer hover:bg-gray-200 transition-colors"
-                      onClick={() => videoInputRef.current?.click()}
-                    >
-                      <Video className="h-6 w-6 mb-1" />
-                      <span>Видео</span>
-                      <span className="text-[10px]">Кликните</span>
-                    </div>
-                  )}
-                  <input
-                    ref={videoInputRef}
-                    type="file"
-                    accept="video/*"
-                    onChange={handleVideoUpload}
-                    className="hidden"
-                  />
-                </div>
+                      </>
+                    ) : (
+                      <div 
+                        className="w-full h-full bg-gray-100 flex flex-col items-center justify-center text-xs text-gray-400 cursor-pointer hover:bg-gray-200 transition-colors"
+                        onClick={() => photoInputRef.current?.click()}
+                      >
+                        <ImageIcon className="h-6 w-6 mb-1" />
+                        <span>Photo</span>
+                        <span className="text-[10px]">Click</span>
+                      </div>
+                    )}
+                    <input
+                      ref={photoInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handlePhotoUpload}
+                      className="hidden"
+                    />
+                  </div>
 
-                {/* Testimonial text - с полем ввода */}
-                <div className="flex-1 p-1 sm:p-2 md:p-3 bg-white overflow-auto">
-                  <Textarea
-                    placeholder="Введите текст отзыва победительницы..."
-                    value={content.testimonial_text || ''}
-                    onChange={(e) => setContent(prev => ({ ...prev, testimonial_text: e.target.value }))}
-                    className="w-full h-full text-xs italic resize-none border-0 focus-visible:ring-0 p-0"
-                  />
+                  {/* Testimonial video */}
+                  <div className="relative w-24 sm:w-28 md:w-32 group">
+                    {content.testimonial_video_url ? (
+                      <>
+                        <video 
+                          src={content.testimonial_video_url}
+                          className="w-full h-full object-cover"
+                          playsInline
+                        />
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                          <Button
+                            type="button"
+                            onClick={() => videoInputRef.current?.click()}
+                            disabled={uploadingVideo}
+                            size="sm"
+                            variant="secondary"
+                          >
+                            <Upload className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            type="button"
+                            onClick={() => setContent(prev => ({ ...prev, testimonial_video_url: '' }))}
+                            size="sm"
+                            variant="destructive"
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                        {!uploadingVideo && (
+                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none group-hover:opacity-0 transition-opacity">
+                            <div className="bg-black/50 rounded-full p-3">
+                              <Play className="w-6 h-6 text-white" fill="white" />
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div 
+                        className="w-full h-full bg-gray-100 flex flex-col items-center justify-center text-xs text-gray-400 cursor-pointer hover:bg-gray-200 transition-colors"
+                        onClick={() => videoInputRef.current?.click()}
+                      >
+                        <Video className="h-6 w-6 mb-1" />
+                        <span>Video</span>
+                        <span className="text-[10px]">Click</span>
+                      </div>
+                    )}
+                    <input
+                      ref={videoInputRef}
+                      type="file"
+                      accept="video/*"
+                      onChange={handleVideoUpload}
+                      className="hidden"
+                    />
+                  </div>
+
+                  {/* Testimonial text */}
+                  <div className="flex-1 p-1 sm:p-2 md:p-3 bg-white overflow-auto">
+                    <Textarea
+                      placeholder="Enter winner testimonial text..."
+                      value={content.testimonial_text || ''}
+                      onChange={(e) => setContent(prev => ({ ...prev, testimonial_text: e.target.value }))}
+                      className="w-full h-full text-xs italic resize-none border-0 focus-visible:ring-0 p-0"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
         </div>
 
         <div className="flex gap-2 pt-4">
@@ -558,7 +563,7 @@ export function WinnerContentManager({
             className="flex-1"
           >
             <Save className="h-4 w-4 mr-2" />
-            {saving ? 'Сохранение...' : 'Сохранить'}
+            {saving ? 'Saving...' : 'Save'}
           </Button>
           
           {content.id && (
@@ -573,5 +578,6 @@ export function WinnerContentManager({
         </div>
       </CardContent>
     </Card>
+    </div>
   );
 }
