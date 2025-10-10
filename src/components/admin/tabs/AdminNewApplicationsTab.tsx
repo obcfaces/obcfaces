@@ -108,7 +108,7 @@ export function AdminNewApplicationsTab({
                           <img 
                             src={photo1}
                             alt="Portrait"
-                            className="w-full h-36 object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                            className="w-full h-[149px] object-cover cursor-pointer hover:opacity-90 transition-opacity"
                             onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 0, `${firstName} ${lastName}`)}
                           />
                           {['this week', 'next week', 'next week on site', 'pre next week'].includes(participant.admin_status || '') && (
@@ -123,7 +123,7 @@ export function AdminNewApplicationsTab({
                           <img 
                             src={photo2} 
                             alt="Full length"
-                            className="w-full h-36 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                            className="w-full h-[149px] object-cover cursor-pointer hover:opacity-90 transition-opacity"
                             onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 1, `${firstName} ${lastName}`)}
                           />
                         </div>
@@ -145,7 +145,11 @@ export function AdminNewApplicationsTab({
                       </span>
                     </div>
                     
-                    <div className="text-xs text-muted-foreground mb-1">
+                    <div 
+                      className="text-xs text-muted-foreground mb-1 cursor-pointer hover:text-foreground transition-colors"
+                      onClick={() => onEdit(participant)}
+                      title="Click to view full application details"
+                    >
                       {appData.city} {appData.state} {appData.country}
                     </div>
 
@@ -230,7 +234,7 @@ export function AdminNewApplicationsTab({
                           <img 
                             src={photo1} 
                             alt="Portrait" 
-                            className="w-full h-36 object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                            className="w-full h-[149px] object-cover cursor-pointer hover:opacity-90 transition-opacity"
                             onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 0, `${firstName} ${lastName}`)}
                           />
                         </div>
@@ -240,7 +244,7 @@ export function AdminNewApplicationsTab({
                           <img 
                             src={photo2} 
                             alt="Full length" 
-                            className="w-full h-36 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                            className="w-full h-[149px] object-cover cursor-pointer hover:opacity-90 transition-opacity"
                             onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 1, `${firstName} ${lastName}`)}
                           />
                         </div>
@@ -261,7 +265,11 @@ export function AdminNewApplicationsTab({
                             {firstName} {lastName}
                           </span>
                         </div>
-                        <div className="text-[10px] text-muted-foreground">
+                        <div 
+                          className="text-[10px] text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
+                          onClick={() => onEdit(participant)}
+                          title="Click to view full application details"
+                        >
                           {appData.city}, {appData.country}
                         </div>
                       </div>
