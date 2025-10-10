@@ -153,8 +153,15 @@ const ApplicationCardWithHistory = ({
   onRestore,
   getStatusBackgroundColor,
 }: any) => {
-  const { history } = useApplicationHistory(participant.id);
+  const { history, loading } = useApplicationHistory(participant.id);
   const historyCount = history.length;
+
+  console.log('ApplicationCard:', {
+    participantId: participant.id,
+    historyCount,
+    loading,
+    historyItems: history
+  });
 
   return (
     <div className="space-y-0">
@@ -164,15 +171,15 @@ const ApplicationCardWithHistory = ({
           {submittedDate && (
             <Badge 
               variant="outline" 
-              className="absolute top-1 left-1 z-20 text-[10px] px-1.5 py-0 h-4 bg-background/90 border shadow-sm"
+              className="absolute top-0 left-0 z-20 text-xs rounded-none rounded-br-md font-normal"
             >
-              {submittedDate.toLocaleDateString('ru-RU', { 
-                day: '2-digit', 
-                month: '2-digit',
-                year: '2-digit'
-              })} {submittedDate.toLocaleTimeString('ru-RU', { 
+              {submittedDate.toLocaleDateString('en-GB', { 
+                day: 'numeric', 
+                month: 'short' 
+              })} {submittedDate.toLocaleTimeString('en-GB', { 
                 hour: '2-digit', 
-                minute: '2-digit' 
+                minute: '2-digit',
+                hour12: false 
               })}
             </Badge>
           )}
@@ -180,9 +187,9 @@ const ApplicationCardWithHistory = ({
           {/* History badge - right top corner */}
           {historyCount > 0 && (
             <div
-              className="absolute top-1 right-1 z-20 bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-[10px] font-bold cursor-pointer hover:bg-primary/90 shadow-sm"
+              className="absolute top-1 right-1 z-20 bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold cursor-pointer hover:bg-primary/90 shadow-md transition-all"
               onClick={() => toggleHistoryExpand(participant.id)}
-              title={`${historyCount} edit${historyCount > 1 ? 's' : ''}`}
+              title={`${historyCount} version${historyCount > 1 ? 's' : ''} - click to ${expandedHistory.has(participant.id) ? 'hide' : 'show'}`}
             >
               {historyCount}
             </div>
