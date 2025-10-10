@@ -131,14 +131,7 @@ export type Database = {
             foreignKeyName: "contest_application_history_application_id_fkey"
             columns: ["application_id"]
             isOneToOne: false
-            referencedRelation: "_archived_contest_applications"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "contest_application_history_application_id_fkey"
-            columns: ["application_id"]
-            isOneToOne: false
-            referencedRelation: "contest_applications_backup"
+            referencedRelation: "weekly_contest_participants"
             referencedColumns: ["id"]
           },
         ]
