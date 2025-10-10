@@ -9141,7 +9141,52 @@ const Admin = () => {
             </TabsContent>
 
             <TabsContent value="new-all">
-              <AdminAllParticipantsTab />
+              <AdminAllParticipantsTab
+                participants={weeklyParticipants}
+                profiles={profiles}
+                onViewPhotos={openPhotoModal}
+                onEdit={(participant) => {
+                  setEditingParticipantData({
+                    id: participant.id,
+                    user_id: participant.user_id,
+                    application_data: participant.application_data,
+                    status: participant.admin_status
+                  });
+                  setShowEditModal(true);
+                }}
+                onStatusChange={async (participant, newStatus) => {
+                  const appData = participant.application_data || {};
+                  const participantName = `${appData.first_name} ${appData.last_name}`;
+                  const result = await updateParticipantStatusWithHistory(
+                    participant.id,
+                    newStatus as ParticipantStatus,
+                    participantName
+                  );
+                  if (result.success) {
+                    await fetchWeeklyParticipants();
+                  }
+                }}
+                onViewVoters={(participant) => {
+                  setSelectedParticipantForVoters({
+                    id: participant.id,
+                    name: participant.name
+                  });
+                  setVotersModalOpen(true);
+                }}
+                onViewStatusHistory={(participantId, participantName, statusHistory) => {
+                  setSelectedStatusHistory({
+                    participantId,
+                    participantName,
+                    statusHistory
+                  });
+                  setStatusHistoryModalOpen(true);
+                }}
+                onOpenWinnerModal={(participantId, userId, name) => {
+                  setSelectedWinner({ participantId, userId, name });
+                  setShowWinnerContentModal(true);
+                }}
+                getAvailableWeekIntervals={getAvailableWeekIntervals}
+              />
             </TabsContent>
 
             <TabsContent value="new-registrations">
