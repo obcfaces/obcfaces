@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Edit, Copy, Trash2 } from 'lucide-react';
 import { ContestApplication, ParticipantStatus } from '@/types/admin';
 import { REJECTION_REASONS } from '@/components/reject-reason-modal';
+import { LoadingSpinner } from '@/components/admin/LoadingSpinner';
 
 interface AdminNewApplicationsTabProps {
   applications: ContestApplication[];
@@ -20,6 +21,7 @@ interface AdminNewApplicationsTabProps {
   onReject: (app: ContestApplication) => void;
   onDelete: (app: ContestApplication) => void;
   onRestore: (app: ContestApplication) => void;
+  loading?: boolean;
 }
 
 export function AdminNewApplicationsTab({
@@ -33,7 +35,12 @@ export function AdminNewApplicationsTab({
   onReject,
   onDelete,
   onRestore,
+  loading = false,
 }: AdminNewApplicationsTabProps) {
+  if (loading) {
+    return <LoadingSpinner message="Загрузка заявок..." />;
+  }
+
   const displayApplications = showDeleted ? deletedApplications : applications;
 
   const getStatusBackgroundColor = (status: string) => {

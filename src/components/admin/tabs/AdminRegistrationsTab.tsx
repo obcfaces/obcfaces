@@ -6,10 +6,11 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { ProfileData } from '@/types/admin';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { ChevronDown, Star, Heart, Copy, Facebook, Loader2 } from 'lucide-react';
+import { ChevronDown, Star, Heart, Copy, Facebook } from 'lucide-react';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { UAParser } from 'ua-parser-js';
 import { useToast } from '@/hooks/use-toast';
+import { LoadingSpinner } from '@/components/admin/LoadingSpinner';
 
 interface AdminRegistrationsTabProps {
   profiles: ProfileData[];
@@ -30,6 +31,7 @@ interface AdminRegistrationsTabProps {
   userActivityData: Record<string, any>;
   isEmailDomainWhitelisted: (email: string) => boolean;
   emailDomainStats: any[];
+  loading?: boolean;
 }
 
 export function AdminRegistrationsTab({
@@ -51,6 +53,7 @@ export function AdminRegistrationsTab({
   userActivityData,
   isEmailDomainWhitelisted,
   emailDomainStats,
+  loading = false,
 }: AdminRegistrationsTabProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [verificationFilter, setVerificationFilter] = useState('all');
@@ -292,6 +295,11 @@ export function AdminRegistrationsTab({
       setExpandedFingerprint(`${fingerprintId}-${profileId}`);
     }
   };
+
+  // Show loading state
+  if (loading) {
+    return <LoadingSpinner message="Загрузка пользователей..." />;
+  }
 
   return (
     <div className="space-y-4">

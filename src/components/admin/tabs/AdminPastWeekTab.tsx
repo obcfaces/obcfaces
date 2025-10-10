@@ -13,6 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { LoadingSpinner } from '@/components/admin/LoadingSpinner';
 
 interface AdminPastWeekTabProps {
   participants: WeeklyContestParticipant[];
@@ -35,6 +36,7 @@ interface AdminPastWeekTabProps {
   setPastStatusFilter?: (value: string) => void;
   pastWeekIntervalFilter?: string;
   setPastWeekIntervalFilter?: (value: string) => void;
+  loading?: boolean;
 }
 
 export function AdminPastWeekTab({
@@ -58,7 +60,12 @@ export function AdminPastWeekTab({
   setPastStatusFilter = () => {},
   pastWeekIntervalFilter = 'all',
   setPastWeekIntervalFilter = () => {},
+  loading = false,
 }: AdminPastWeekTabProps) {
+  if (loading) {
+    return <LoadingSpinner message="Загрузка прошедших недель..." />;
+  }
+
   const [expandedDesktopItems, setExpandedDesktopItems] = useState<Set<string>>(new Set());
   const [pendingPastChanges, setPendingPastChanges] = useState<Record<string, { admin_status?: string; week_interval?: string }>>({});
   const [updatingStatuses, setUpdatingStatuses] = useState<Set<string>>(new Set());

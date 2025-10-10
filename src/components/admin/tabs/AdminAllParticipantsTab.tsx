@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Edit, Heart, Star, Info, Copy, Video } from 'lucide-react';
 import { WeeklyContestParticipant } from '@/types/admin';
+import { LoadingSpinner } from '@/components/admin/LoadingSpinner';
 
 interface AdminAllParticipantsTabProps {
   participants: WeeklyContestParticipant[];
@@ -18,6 +19,7 @@ interface AdminAllParticipantsTabProps {
   onViewStatusHistory?: (participantId: string, participantName: string, statusHistory: any) => void;
   onOpenWinnerModal?: (participantId: string, userId: string, name: string) => void;
   getAvailableWeekIntervals?: () => { value: string; label: string; }[];
+  loading?: boolean;
 }
 
 export function AdminAllParticipantsTab({
@@ -30,7 +32,12 @@ export function AdminAllParticipantsTab({
   onViewStatusHistory,
   onOpenWinnerModal,
   getAvailableWeekIntervals = () => [],
+  loading = false,
 }: AdminAllParticipantsTabProps) {
+  if (loading) {
+    return <LoadingSpinner message="Загрузка всех участников..." />;
+  }
+
   const [statusFilter, setStatusFilter] = useState('all');
   const [weekIntervalFilter, setWeekIntervalFilter] = useState('all');
   const [expandedDesktopItems, setExpandedDesktopItems] = useState<Set<string>>(new Set());
