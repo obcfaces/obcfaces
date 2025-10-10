@@ -185,7 +185,7 @@ const ApplicationCardWithHistory = ({
           {/* History badge - above edit button */}
           {historyCount > 0 && (
             <div
-              className="absolute bottom-8 left-0 z-20 bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold cursor-pointer hover:bg-primary/90 shadow-lg transition-all border-2 border-background"
+              className="absolute bottom-10 left-0 z-20 bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold cursor-pointer hover:bg-primary/90 shadow-lg transition-all border-2 border-background"
               onClick={() => setIsHistoryExpanded(!isHistoryExpanded)}
               title={`${historyCount} edit${historyCount > 1 ? 's' : ''} - click to ${isHistoryExpanded ? 'hide' : 'show'}`}
             >
@@ -522,32 +522,34 @@ const ApplicationCardWithHistory = ({
 
                 {/* Desktop layout */}
                 <div className="hidden md:flex md:overflow-visible">
-                  {/* Photos */}
-                  <div className="w-[25ch] flex-shrink-0 p-0">
-                    <div className="flex gap-px">
+                  {/* Photos - Fixed width */}
+                  <div className="w-[300px] flex-shrink-0 p-0">
+                    <div className="flex gap-px h-[149px]">
                       {historyItem.application_data?.photo1_url && (
-                        <div className="w-full">
+                        <div className="w-[150px] h-[149px] flex-shrink-0 cursor-pointer">
                           <img 
                             src={historyItem.application_data.photo1_url}
                             alt="Portrait"
-                            className="w-full h-[149px] object-cover"
+                            className="w-full h-full object-cover hover:opacity-90 transition-opacity"
+                            onClick={() => onViewPhotos([historyItem.application_data?.photo1_url, historyItem.application_data?.photo2_url].filter(Boolean), 0, `${historyItem.application_data?.first_name} ${historyItem.application_data?.last_name}`)}
                           />
                         </div>
                       )}
                       {historyItem.application_data?.photo2_url && (
-                        <div className="w-full">
+                        <div className="w-[150px] h-[149px] flex-shrink-0 cursor-pointer">
                           <img 
                             src={historyItem.application_data.photo2_url} 
                             alt="Full length"
-                            className="w-full h-[149px] object-cover"
+                            className="w-full h-full object-cover hover:opacity-90 transition-opacity"
+                            onClick={() => onViewPhotos([historyItem.application_data?.photo1_url, historyItem.application_data?.photo2_url].filter(Boolean), 1, `${historyItem.application_data?.first_name} ${historyItem.application_data?.last_name}`)}
                           />
                         </div>
                       )}
                     </div>
                   </div>
 
-                  {/* Information */}
-                  <div className="w-[25ch] flex-shrink-0 p-4">
+                  {/* Information - Fixed width */}
+                  <div className="w-[300px] flex-shrink-0 p-4">
                     <div className="flex items-center gap-2 mb-1">
                       <Avatar className="h-6 w-6 flex-shrink-0">
                         <AvatarImage src={historyItem.application_data?.photo1_url || ''} />
@@ -584,27 +586,33 @@ const ApplicationCardWithHistory = ({
                 {/* Mobile layout */}
                 <div className="md:hidden">
                   <div className="flex w-full">
-                    <div className="flex gap-px w-[50vw] flex-shrink-0">
-                      {historyItem.application_data?.photo1_url && (
-                        <div className="w-1/2">
-                          <img 
-                            src={historyItem.application_data.photo1_url} 
-                            alt="Portrait" 
-                            className="w-full h-[149px] object-cover"
-                          />
-                        </div>
-                      )}
-                      {historyItem.application_data?.photo2_url && (
-                        <div className="w-1/2">
-                          <img 
-                            src={historyItem.application_data.photo2_url} 
-                            alt="Full length" 
-                            className="w-full h-[149px] object-cover"
-                          />
-                        </div>
-                      )}
+                    {/* Photos - Fixed width */}
+                    <div className="w-[200px] flex-shrink-0 p-0">
+                      <div className="flex gap-px h-[149px]">
+                        {historyItem.application_data?.photo1_url && (
+                          <div className="w-[100px] h-[149px] flex-shrink-0 cursor-pointer">
+                            <img 
+                              src={historyItem.application_data.photo1_url} 
+                              alt="Portrait" 
+                              className="w-full h-full object-cover hover:opacity-90 transition-opacity"
+                              onClick={() => onViewPhotos([historyItem.application_data?.photo1_url, historyItem.application_data?.photo2_url].filter(Boolean), 0, `${historyItem.application_data?.first_name} ${historyItem.application_data?.last_name}`)}
+                            />
+                          </div>
+                        )}
+                        {historyItem.application_data?.photo2_url && (
+                          <div className="w-[100px] h-[149px] flex-shrink-0 cursor-pointer">
+                            <img 
+                              src={historyItem.application_data.photo2_url} 
+                              alt="Full length" 
+                              className="w-full h-full object-cover hover:opacity-90 transition-opacity"
+                              onClick={() => onViewPhotos([historyItem.application_data?.photo1_url, historyItem.application_data?.photo2_url].filter(Boolean), 1, `${historyItem.application_data?.first_name} ${historyItem.application_data?.last_name}`)}
+                            />
+                          </div>
+                        )}
+                      </div>
                     </div>
 
+                    {/* Info section */}
                     <div className="flex-1 p-2">
                       <div className="flex items-center gap-1 mb-0.5">
                         <Avatar className="h-5 w-5">
