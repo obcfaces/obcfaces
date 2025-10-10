@@ -228,13 +228,13 @@ const ApplicationCardWithHistory = ({
             <Edit className="w-4 h-4" />
           </Button>
           
-          {/* Desktop layout */}
-          <div className="hidden md:flex md:overflow-visible h-[149px]">
+          {/* Desktop/Tablet layout */}
+          <div className="hidden md:flex h-[149px]">
             {/* Column 1: Photos - Fixed width */}
-            <div className="w-[300px] h-[149px] flex-shrink-0 p-0">
+            <div className="w-[200px] h-[149px] flex-shrink-0">
               <div className="flex gap-px h-[149px]">
                 {photo1 && (
-                  <div className="w-[150px] h-[149px] flex-shrink-0 relative overflow-hidden">
+                  <div className="w-[100px] h-[149px] flex-shrink-0 relative overflow-hidden">
                     <img 
                       src={photo1}
                       alt="Portrait"
@@ -249,7 +249,7 @@ const ApplicationCardWithHistory = ({
                   </div>
                 )}
                 {photo2 && (
-                  <div className="w-[150px] h-[149px] flex-shrink-0 relative overflow-hidden">
+                  <div className="w-[100px] h-[149px] flex-shrink-0 relative overflow-hidden">
                     <img 
                       src={photo2} 
                       alt="Full length"
@@ -259,76 +259,77 @@ const ApplicationCardWithHistory = ({
                   </div>
                 )}
                 {!photo2 && (
-                  <div className="w-[150px] h-[149px] flex-shrink-0 bg-muted flex items-center justify-center border border-border">
+                  <div className="w-[100px] h-[149px] flex-shrink-0 bg-muted flex items-center justify-center border border-border overflow-hidden">
                     <div className="text-center text-muted-foreground">
-                      <p className="text-sm font-medium">No Photo 2</p>
-                      <p className="text-xs mt-1">Check application_data</p>
+                      <p className="text-xs font-medium">No Photo 2</p>
                     </div>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Column 2: Information - Fixed width */}
-            <div className="w-[300px] h-[149px] flex-shrink-0 p-4 overflow-hidden">
-              <div className="flex items-center gap-2 mb-1">
-                <Avatar className="h-6 w-6 flex-shrink-0">
-                  <AvatarImage src={photo1 || ''} />
-                  <AvatarFallback className="text-xs">
-                    {firstName?.charAt(0) || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-sm font-semibold whitespace-nowrap flex items-center gap-1">
-                  {firstName} {lastName} {appData.birth_year ? new Date().getFullYear() - parseInt(appData.birth_year) : ''}
-                </span>
-              </div>
-              
-              <div 
-                className="text-xs text-muted-foreground mb-1 cursor-pointer hover:text-foreground transition-colors flex items-center gap-1"
-                onClick={() => setExpandedId(expandedId === participant.id ? null : participant.id)}
-                title="Click to view full application data"
-              >
-                <span>{appData.city} {appData.state} {appData.country}</span>
-                {expandedId === participant.id ? (
-                  <ChevronUp className="h-3 w-3" />
-                ) : (
-                  <ChevronDown className="h-3 w-3" />
-                )}
-              </div>
-              
-              {/* Expandable application data */}
-              {expandedId === participant.id && (
-                <div className="text-sm text-muted-foreground mb-2 max-h-32 overflow-y-auto">
-                  {Object.entries(appData).map(([key, value], index) => {
-                    if (key.includes('url') || key.includes('photo') || !value) return null;
-                    return (
-                      <span key={key}>
-                        {String(value)}
-                        {index < Object.entries(appData).filter(([k, v]) => !k.includes('url') && !k.includes('photo') && v).length - 1 ? ', ' : ''}
-                      </span>
-                    );
-                  })}
+            {/* Column 2: Information */}
+            <div className="flex-1 h-[149px] p-4 overflow-hidden flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <Avatar className="h-6 w-6 flex-shrink-0">
+                    <AvatarImage src={photo1 || ''} />
+                    <AvatarFallback className="text-xs">
+                      {firstName?.charAt(0) || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm font-semibold whitespace-nowrap flex items-center gap-1">
+                    {firstName} {lastName} {appData.birth_year ? new Date().getFullYear() - parseInt(appData.birth_year) : ''}
+                  </span>
                 </div>
-              )}
-
-              <div className="text-xs text-muted-foreground mb-1">
-                {appData.email && (
-                  <div className="flex items-center gap-1">
-                    <span 
-                      className="cursor-pointer" 
-                      title={appData.email}
-                    >
-                      {appData.email.substring(0, 15)}...
-                    </span>
-                    <Copy 
-                      className="h-3 w-3 cursor-pointer hover:text-foreground" 
-                      onClick={() => navigator.clipboard.writeText(appData.email || '')}
-                    />
+                
+                <div 
+                  className="text-xs text-muted-foreground mb-1 cursor-pointer hover:text-foreground transition-colors flex items-center gap-1"
+                  onClick={() => setExpandedId(expandedId === participant.id ? null : participant.id)}
+                  title="Click to view full application data"
+                >
+                  <span>{appData.city} {appData.state} {appData.country}</span>
+                  {expandedId === participant.id ? (
+                    <ChevronUp className="h-3 w-3" />
+                  ) : (
+                    <ChevronDown className="h-3 w-3" />
+                  )}
+                </div>
+                
+                {/* Expandable application data */}
+                {expandedId === participant.id && (
+                  <div className="text-sm text-muted-foreground mb-2 max-h-20 overflow-y-auto">
+                    {Object.entries(appData).map(([key, value], index) => {
+                      if (key.includes('url') || key.includes('photo') || !value) return null;
+                      return (
+                        <span key={key}>
+                          {String(value)}
+                          {index < Object.entries(appData).filter(([k, v]) => !k.includes('url') && !k.includes('photo') && v).length - 1 ? ', ' : ''}
+                        </span>
+                      );
+                    })}
                   </div>
                 )}
+
+                <div className="text-xs text-muted-foreground mb-1">
+                  {appData.email && (
+                    <div className="flex items-center gap-1">
+                      <span 
+                        className="cursor-pointer truncate" 
+                        title={appData.email}
+                      >
+                        {appData.email.substring(0, 20)}...
+                      </span>
+                      <Copy 
+                        className="h-3 w-3 flex-shrink-0 cursor-pointer hover:text-foreground" 
+                        onClick={() => navigator.clipboard.writeText(appData.email || '')}
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
               
-              <div className="flex items-center gap-2 mt-2">
+              <div className="flex items-center gap-2">
                 <Select 
                   value={participant.admin_status || 'pending'}
                   onValueChange={(value) => {
@@ -339,7 +340,7 @@ const ApplicationCardWithHistory = ({
                     }
                   }}
                 >
-                  <SelectTrigger className={`w-[100px] h-6 text-xs ${getStatusBackgroundColor(participant.admin_status || 'pending')}`}>
+                  <SelectTrigger className={`w-[120px] h-7 text-xs ${getStatusBackgroundColor(participant.admin_status || 'pending')}`}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="z-[9999] bg-popover border shadow-lg">
