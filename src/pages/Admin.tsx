@@ -3202,11 +3202,6 @@ const Admin = () => {
             console.log('📑 Tab changed to:', tab);
             setActiveTab(tab);
           }} className="space-y-6">
-            {/* First Row: New Refactored Tabs */}
-            <div className="mb-3 text-sm font-semibold text-muted-foreground">
-              🔧 New Structure (Testing)
-            </div>
-            
             {/* Mobile layout for new tabs */}
             <div className="md:hidden">
               <TabsList className="grid grid-cols-9 w-full gap-1">
@@ -3272,11 +3267,7 @@ const Admin = () => {
             </TabsList>
 
             {/* Old Tabs - Don't Use */}
-            <div className="border-t pt-4 mt-6">
-              <div className="mb-3 text-sm font-bold text-red-600">
-                ⚠️ DON'T USE - Old Structure (Commented for Testing)
-              </div>
-              
+            <div className="border-t pt-4 mt-6 hidden">
               {/* COMMENTED OUT - Testing new tabs first
               <div className="md:hidden">
                 <TabsList className="grid grid-cols-6 w-full opacity-50">
