@@ -181,10 +181,10 @@ const ApplicationCardWithHistory = ({
             </Badge>
           )}
 
-          {/* History badge - visible circle showing edit count */}
+          {/* History badge - top right corner of info area */}
           {historyCount > 0 && (
             <div
-              className="absolute bottom-2 right-2 z-20 bg-primary text-primary-foreground rounded-full w-10 h-10 flex items-center justify-center text-sm font-bold cursor-pointer hover:bg-primary/90 shadow-lg transition-all border-2 border-background"
+              className="absolute top-0 right-0 z-20 bg-primary text-primary-foreground rounded-full w-10 h-10 flex items-center justify-center text-sm font-bold cursor-pointer hover:bg-primary/90 shadow-lg transition-all border-2 border-background"
               onClick={() => setIsHistoryExpanded(!isHistoryExpanded)}
               title={`${historyCount} edit${historyCount > 1 ? 's' : ''} - click to ${isHistoryExpanded ? 'hide' : 'show'}`}
             >
