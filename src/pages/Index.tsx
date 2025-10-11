@@ -50,7 +50,8 @@ const Index = () => {
 
   // Test auto-translate function
   const handleTestTranslation = async () => {
-    console.log('🔄 Starting auto-translate...');
+    const testText = 'Welcome to the beauty contest!';
+    console.log('🔄 Starting auto-translate for:', testText);
     setIsTranslating(true);
     try {
       // Call auto-translate edge function
@@ -67,11 +68,10 @@ const Index = () => {
         toast.success(`✅ Translated ${translated} keys`);
         console.log('✅ Auto-translate result:', data);
         
-        if (translated > 0) {
-          // Force refresh the translation by clearing cache and re-fetching
-          console.log('🔄 Reloading page...');
-          setTimeout(() => window.location.reload(), 1000);
-        }
+        // Immediately fetch the new translation
+        const newTranslation = await t(testText);
+        console.log('🔄 New translation:', newTranslation);
+        setTestTranslation(newTranslation);
       }
     } catch (error) {
       console.error('💥 Translation error:', error);
