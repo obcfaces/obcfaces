@@ -112,7 +112,7 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
       // Parse status history from prop
       let entries = parseStatusHistory(statusHistory);
       
-      // Get participant data to check for initial pending status
+      // Get participant data to add initial created status
       try {
         const [firstName, ...lastNameParts] = participantName.split(' ');
         const lastName = lastNameParts.join(' ');
@@ -129,37 +129,14 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
         if (participant) {
           setParticipantData(participant);
           
-          // Add initial pending status when card was created (created_at)
-          const hasInitialPending = entries.some(e => 
-            e.changed_at === participant.created_at
-          );
-          
-          if (!hasInitialPending && participant.created_at) {
-            entries.push({
-              status: 'pending',
-              changed_at: participant.created_at,
-              changed_by_email: 'user',
-              change_reason: 'Application created',
-              week_interval: ''
-            });
-          }
-          
-          // Add resubmission status if submitted_at differs from created_at
-          if (participant.submitted_at && participant.submitted_at !== participant.created_at) {
-            const hasSubmittedEntry = entries.some(e => 
-              e.changed_at === participant.submitted_at
-            );
-            
-            if (!hasSubmittedEntry) {
-              entries.push({
-                status: 'pending',
-                changed_at: participant.submitted_at,
-                changed_by_email: 'user',
-                change_reason: 'Application resubmitted by user',
-                week_interval: ''
-              });
-            }
-          }
+          // ALWAYS add initial pending status when card was created
+          entries.push({
+            status: 'pending',
+            changed_at: participant.created_at,
+            changed_by_email: 'user',
+            change_reason: 'Application created',
+            week_interval: ''
+          });
         }
       } catch (error) {
         console.error('Error loading participant data:', error);
