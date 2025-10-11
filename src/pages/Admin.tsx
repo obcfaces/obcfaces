@@ -3425,12 +3425,12 @@ const Admin = () => {
                   
                   // Apply filter based on type
                   if (selectedNewAppDay.filter === 'approved') {
-                    // Show applications that were CHANGED TO approved status on this day
-                    // Check status_history for this status change on this day
+                    // Show applications that were CHANGED TO pre/next/this week statuses on this day
+                    // Check status_history for these status changes on this day
                     const statusHistory = app.status_history || {};
-                    const approvedStatuses = ['pre next week', 'next week', 'next week on site', 'this week', 'past'];
+                    const reservedStatuses = ['pre next week', 'next week', 'next week on site', 'this week', 'past'];
                     
-                    return approvedStatuses.some(status => {
+                    return reservedStatuses.some(status => {
                       const statusData = statusHistory[status];
                       if (!statusData || !statusData.changed_at) return false;
                       
