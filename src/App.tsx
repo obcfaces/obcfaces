@@ -117,7 +117,8 @@ const App = () => {
                   </div>
                 }>
                   <Routes>
-                    <Route path="/" element={<Index />} />
+                    {/* Root redirect to default locale */}
+                    <Route path="/" element={<Navigate to="/en-ph" replace />} />
                     
                     {/* Legacy redirect for /contest */}
                     <Route path="/contest" element={<LegacyContestRedirect />} />
@@ -135,8 +136,8 @@ const App = () => {
                     <Route path="/verify" element={<VerifyEmail />} />
                     <Route path="/test-transition" element={<TestTransition />} />
                     
-                    {/* Locale-based contest routes */}
-                    <Route path="/:locale" element={<Contest />} />
+                    {/* Locale-based routes */}
+                    <Route path="/:locale" element={<Index />} />
                     <Route path="/:locale/contest" element={<Contest />} />
                     <Route path="/:locale/contest/:week" element={<Contest />} />
                     
