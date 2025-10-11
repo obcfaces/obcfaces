@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { ThumbsUp, MessageCircle, Star, Pencil, Send, Share, Share2, ExternalLink, Upload, ArrowUpRight, ThumbsDown, Crown } from "lucide-react";
 import { useWinnerContent } from "@/hooks/useWinnerContent";
+import { useTranslation } from "@/hooks/useTranslation";
 
 import winnerPaymentImage from "@/assets/winner-payment.jpg";
 import winnerVideo from "@/assets/winner-video.mp4";
@@ -87,6 +88,8 @@ export function ContestantCard({
   weekOffset = 0,
   hideCardActions = false
 }: ContestantCardProps) {
+  const { t } = useTranslation();
+  
   // Debug log to check weekOffset value and prevent excessive re-renders
   console.log(`ContestantCard ${name}: weekOffset = ${weekOffset}, isWinner = ${isWinner}, userId = ${propUser?.id || 'none'}`);
   
@@ -548,11 +551,11 @@ export function ContestantCard({
                         variant="white"
                       />
                     </div>
-                    <span className="text-xs text-gray-600 text-center leading-tight">Rate from 1 (lowest)<br />to 5 (highest)</span>
+                    <span className="text-xs text-gray-600 text-center leading-tight">{t("Rate from 1 (lowest)")}<br />{t("to 5 (highest)")}</span>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center gap-1.5">
-                    <span className="text-base font-medium text-gray-600 text-center">Rate from 1 (lowest) 5 (highest)</span>
+                    <span className="text-base font-medium text-gray-600 text-center">{t("Rate from 1 (lowest)")} {t("to 5 (highest)")}</span>
                     <div className="scale-[1.6] sm:scale-[1.8]">
                       <StarRating 
                         rating={userRating}
@@ -620,11 +623,11 @@ export function ContestantCard({
                       }}
                     />
                   </div>
-                  <span className="text-xs text-gray-600 text-center leading-tight">Rate from 1 (lowest)<br />to 5 (highest)</span>
+                  <span className="text-xs text-gray-600 text-center leading-tight">{t("Rate from 1 (lowest)")}<br />{t("to 5 (highest)")}</span>
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center gap-1.5">
-                  <span className="text-base font-medium text-gray-600 text-center">Rate from 1 (lowest) 5 (highest)</span>
+                  <span className="text-base font-medium text-gray-600 text-center">{t("Rate from 1 (lowest)")} {t("to 5 (highest)")}</span>
                   <div className="scale-[1.6] sm:scale-[1.8]">
                     <StarRating 
                       rating={0}
@@ -662,18 +665,18 @@ export function ContestantCard({
               {/* Example text area with photo requirements */}
               {isExample && (
                 <div className="bg-yellow-200 text-black px-4 py-3">
-                  <div className="text-sm font-semibold mb-3">How your photos should look:</div>
+                  <div className="text-sm font-semibold mb-3">{t("How your photos should look:")}</div>
                   <div className="grid grid-cols-2 gap-6 text-xs">
                     <div className="space-y-1">
-                      <div>• Look like an ID photo</div>
-                      <div>• No makeup</div>
-                      <div>• No filters</div>
-                      <div>• No glasses allowed</div>
+                      <div>{t("• Look like an ID photo")}</div>
+                      <div>{t("• No makeup")}</div>
+                      <div>{t("• No filters")}</div>
+                      <div>{t("• No glasses allowed")}</div>
                     </div>
                     <div className="space-y-1">
-                      <div>• Whole body from head to toe</div>
-                      <div>• Wear tight/fitted clothes. No dresses, skirts, heels</div>
-                      <div>• No bags or backpacks</div>
+                      <div>{t("• Whole body from head to toe")}</div>
+                      <div>{t("• Wear tight/fitted clothes. No dresses, skirts, heels")}</div>
+                      <div>{t("• No bags or backpacks")}</div>
                     </div>
                   </div>
                 </div>
@@ -697,7 +700,7 @@ export function ContestantCard({
                   {/* Example Badge in corner of first photo */}
                   {isExample && (
                     <div className="absolute top-1 left-1 bg-yellow-500 text-white px-1.5 py-0.5 text-xs font-bold rounded">
-                      Example
+                      {t("Example")}
                     </div>
                   )}
                 </div>
@@ -731,7 +734,7 @@ export function ContestantCard({
                  aria-label="Like"
                >
                   <ThumbsUp className={cn("w-4 h-4", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")} strokeWidth={1} />
-                  <span className={cn("hidden sm:inline", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>Like</span>
+                  <span className={cn("hidden sm:inline", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>{t("Like")}</span>
                     <span className={cn((isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>{cardData.likes}</span>
                </button>
                {showDislike && (
@@ -744,8 +747,8 @@ export function ContestantCard({
                    onClick={handleDislike}
                    aria-label="Dislike"
                  >
-                   <ThumbsDown className="w-4 h-4" />
-                   <span className="hidden sm:inline">Dislike</span>
+                    <ThumbsDown className="w-4 h-4" />
+                    <span className="hidden sm:inline">{t("Dislike")}</span>
                    <span>{dislikesCount}</span>
                  </button>
                )}
@@ -759,7 +762,7 @@ export function ContestantCard({
                   aria-label="Comments"
                 >
                   <MessageCircle className={cn("w-4 h-4", hasCommented ? "text-contest-blue" : "text-gray-500")} strokeWidth={1} />
-                  <span className="hidden sm:inline">Comment</span>
+                  <span className="hidden sm:inline">{t("Comment")}</span>
                    <span>{cardData.comments}</span>
                 </button>
                <button
@@ -773,7 +776,7 @@ export function ContestantCard({
                  aria-label="Share"
                >
                   <Share2 className="w-4 h-4" strokeWidth={1} />
-                  <span className="hidden sm:inline">Share</span>
+                  <span className="hidden sm:inline">{t("Share")}</span>
                </button>
             </div>
            )}
