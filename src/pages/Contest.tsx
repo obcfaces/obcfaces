@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Helmet } from "react-helmet-async";
+import { SEOHead } from "@/components/SEOHead";
 import { ContestHeader } from "@/components/contest-header";
 import { ContestWeeksRenderer } from "@/components/ContestWeeksRenderer";
 import { PublicCountryProvider, usePublicCountry } from "@/contexts/PublicCountryContext";
@@ -27,11 +27,11 @@ const ContestContent = () => {
 
   return (
     <>
-      <Helmet>
-        <title>Contest – Weekly Entries</title>
-        <meta name="description" content="Browse weekly contest entries and finalists." />
-        <link rel="canonical" href="/contest" />
-      </Helmet>
+      <SEOHead
+        title="Contest – Weekly Beauty Competition Entries"
+        description="Browse weekly beauty contest entries and finalists. Vote for your favorite contestants and see past winners."
+        canonicalPath="/contest"
+      />
 
       <main className="min-h-screen bg-background">
         <ContestHeader activeSection={activeSection} onSectionChange={setActiveSection} />
@@ -41,6 +41,7 @@ const ContestContent = () => {
             viewMode={viewMode}
             countryCode={countryCode}
             timezone={timezone}
+            enableVirtualization={true}
           />
         </div>
       </main>
