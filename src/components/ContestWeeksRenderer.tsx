@@ -1,11 +1,14 @@
 import { ContestSection } from "@/components/contest-section";
 import { NextWeekSection } from "@/components/next-week-section";
 import { usePastWeekIntervals } from "@/hooks/usePastWeekIntervals";
+import { VirtualizedList } from "@/components/performance/VirtualizedList";
+import { useMemo } from "react";
 
 interface ContestWeeksRendererProps {
   viewMode: 'compact' | 'full';
   countryCode?: string;
   timezone?: string;
+  enableVirtualization?: boolean;
 }
 
 const formatInterval = (interval: string): string => {
@@ -34,9 +37,35 @@ const formatInterval = (interval: string): string => {
 export const ContestWeeksRenderer = ({ 
   viewMode, 
   countryCode = "PH", 
-  timezone = "Asia/Manila" 
+  timezone = "Asia/Manila",
+  enableVirtualization = true
 }: ContestWeeksRendererProps) => {
   const { intervals: pastWeekIntervals } = usePastWeekIntervals(countryCode, timezone);
+
+  // Prepare past week items for virtualization
+  const pastWeekItems = useMemo(() => {
+    return pastWeekIntervals.map((item) => {
+      const adjustedWeeksAgo = item.weeksAgo + 1;
+      const weekLabel = adjustedWeeksAgo === 1 ? '1 WEEK AGO' : `${adjustedWeeksAgo} WEEKS AGO`;
+      
+      return {
+        id: item.interval,
+        component: (
+          <ContestSection
+            key={item.interval}
+            title={weekLabel}
+            titleSuffix="(Closed)"
+            subtitle={formatInterval(item.interval)}
+            centerSubtitle
+            showWinner={true}
+            viewMode={viewMode}
+            weekOffset={-adjustedWeeksAgo}
+            weekInterval={item.interval}
+          />
+        )
+      };
+    });
+  }, [pastWeekIntervals, viewMode]);
 
   return (
     <>
@@ -54,25 +83,18 @@ export const ContestWeeksRenderer = ({
         />
       </section>
       
-      {/* Dynamically generate sections for all past weeks */}
-      {pastWeekIntervals.map((item) => {
-        const adjustedWeeksAgo = item.weeksAgo + 1;
-        const weekLabel = adjustedWeeksAgo === 1 ? '1 WEEK AGO' : `${adjustedWeeksAgo} WEEKS AGO`;
-        
-        return (
-          <ContestSection
-            key={item.interval}
-            title={weekLabel}
-            titleSuffix="(Closed)"
-            subtitle={formatInterval(item.interval)}
-            centerSubtitle
-            showWinner={true}
-            viewMode={viewMode}
-            weekOffset={-adjustedWeeksAgo}
-            weekInterval={item.interval}
-          />
-        );
-      })}
+      {/* Virtualized past weeks for performance */}
+      {enableVirtualization && pastWeekItems.length > 3 ? (
+        <VirtualizedList
+          items={pastWeekItems}
+          itemHeight={600}
+          containerHeight={800}
+          renderItem={(item) => item.component}
+        />
+      ) : (
+        // Fallback to regular rendering for small lists
+        pastWeekItems.map(item => item.component)
+      )}
     </>
   );
 };

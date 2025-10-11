@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+import { SEOHead } from "@/components/SEOHead";
 import { ContestHeader } from "@/components/contest-header";
 import { ContestWeeksRenderer } from "@/components/ContestWeeksRenderer";
 import ContestFilters from "@/components/contest-filters";
@@ -45,6 +46,12 @@ const Index = () => {
   console.log('Index component rendering, viewMode:', viewMode);
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="OBC – Online Beauty Contest | Vote for Your Favorite"
+        description="Join the international online beauty contest. Vote for contestants, participate in weekly competitions, and win prizes. Open to women aged 18-35."
+        canonicalPath="/"
+      />
+      
       <ContestHeader 
         activeSection={activeSection} 
         onSectionChange={setActiveSection} 
@@ -72,6 +79,7 @@ const Index = () => {
             viewMode={viewMode}
             countryCode="PH"
             timezone="Asia/Manila"
+            enableVirtualization={true}
           />
 
 
