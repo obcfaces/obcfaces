@@ -145,12 +145,19 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
         if (participant) {
           setParticipantData(participant);
           
-          // ALWAYS add initial pending status when card was created
+          // Convert created_at from UTC to Manila timezone
+          const createdDate = new Date(participant.created_at);
+          const manilaCreatedDate = new Date(createdDate.toLocaleString('en-US', { timeZone: 'Asia/Manila' }));
+          const manilaCreatedStr = manilaCreatedDate.toISOString().slice(0, 19).replace('T', ' ');
+          
           console.log('✅ Participant data:', participant);
-          console.log('✅ Adding initial pending with created_at:', participant.created_at);
+          console.log('✅ created_at UTC:', participant.created_at);
+          console.log('✅ created_at Manila:', manilaCreatedStr);
+          
+          // Add initial pending status with Manila time
           entries.push({
             status: 'pending',
-            changed_at: participant.created_at,
+            changed_at: manilaCreatedStr,
             changed_by_email: 'user',
             change_reason: 'Application created',
             week_interval: ''
@@ -203,11 +210,18 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
   const formatDateTime = (dateStr: string) => {
     try {
       const date = new Date(dateStr);
-      const manilaDate = new Date(date.toLocaleString('en-US', { timeZone: 'Asia/Manila' }));
-      const day = manilaDate.getDate();
-      const month = manilaDate.toLocaleString('en', { month: 'short', timeZone: 'Asia/Manila' }).toLowerCase();
-      const hours = String(manilaDate.getHours()).padStart(2, '0');
-      const minutes = String(manilaDate.getMinutes()).padStart(2, '0');
+      // If time looks like it's already in Manila timezone (from status_history), don't convert
+      // Otherwise convert from UTC to Manila
+      const isAlreadyManila = dateStr.includes(' ') && !dateStr.includes('T') && !dateStr.includes('Z');
+      
+      const displayDate = isAlreadyManila 
+        ? date 
+        : new Date(date.toLocaleString('en-US', { timeZone: 'Asia/Manila' }));
+      
+      const day = displayDate.getDate();
+      const month = displayDate.toLocaleString('en', { month: 'short', timeZone: 'Asia/Manila' }).toLowerCase();
+      const hours = String(displayDate.getHours()).padStart(2, '0');
+      const minutes = String(displayDate.getMinutes()).padStart(2, '0');
       return `${day} ${month} ${hours}:${minutes}`;
     } catch {
       return dateStr;
@@ -266,9 +280,9 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
     return 'Syst';
   };
 
-  // Sort from OLDEST to NEWEST (ascending) so creation is first
+  // Sort from NEWEST to OLDEST (descending) - latest events on top
   const sortedEntries = enrichedEntries.sort((a, b) => 
-    new Date(a.changed_at).getTime() - new Date(b.changed_at).getTime()
+    new Date(b.changed_at).getTime() - new Date(a.changed_at).getTime()
   );
 
   return (
