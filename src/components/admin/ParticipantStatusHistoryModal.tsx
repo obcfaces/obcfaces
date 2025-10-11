@@ -116,22 +116,37 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
       
       // Get participant data to add initial created status
       try {
-        const [firstName, ...lastNameParts] = participantName.split(' ');
-        const lastName = lastNameParts.join(' ');
+        let participant = null;
         
-        const { data: participant } = await supabase
-          .from('weekly_contest_participants')
-          .select('created_at, submitted_at, admin_status')
-          .ilike('application_data->>first_name', firstName)
-          .ilike('application_data->>last_name', lastName)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
+        // If we have participantId, use it directly (faster and more reliable)
+        if (participantId) {
+          const { data } = await supabase
+            .from('weekly_contest_participants')
+            .select('id, created_at, submitted_at, admin_status')
+            .eq('id', participantId)
+            .single();
+          participant = data;
+        } else {
+          // Fallback to name search
+          const [firstName, ...lastNameParts] = participantName.split(' ');
+          const lastName = lastNameParts.join(' ');
+          
+          const { data } = await supabase
+            .from('weekly_contest_participants')
+            .select('id, created_at, submitted_at, admin_status')
+            .ilike('application_data->>first_name', firstName)
+            .ilike('application_data->>last_name', lastName)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+          participant = data;
+        }
         
         if (participant) {
           setParticipantData(participant);
           
           // ALWAYS add initial pending status when card was created
+          console.log('Adding initial pending with created_at:', participant.created_at);
           entries.push({
             status: 'pending',
             changed_at: participant.created_at,
