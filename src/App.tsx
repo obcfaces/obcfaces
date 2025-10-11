@@ -33,14 +33,46 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 // Redirect components for routing
 function CountryRedirect() {
   const { cc } = useParams();
+  const location = useLocation();
   const savedLang = localStorage.getItem("ui_lang") || "en";
-  return <Navigate to={`/${savedLang}-${cc}`} replace />;
+  const query = location.search || "";
+  
+  // Normalize country code to uppercase
+  const normalizedCc = cc?.toLowerCase() || "ph";
+  
+  return <Navigate to={`/${savedLang}-${normalizedCc}${query}`} replace />;
 }
 
 function LegacyContestRedirect() {
+  const location = useLocation();
   const savedLang = localStorage.getItem("ui_lang") || "en";
   const savedCc = localStorage.getItem("ui_cc") || "ph";
-  return <Navigate to={`/${savedLang}-${savedCc}/contest`} replace />;
+  const query = location.search || "";
+  
+  return <Navigate to={`/${savedLang}-${savedCc}/contest${query}`} replace />;
+}
+
+function LocaleNormalizer() {
+  const { locale } = useParams();
+  const location = useLocation();
+  
+  if (!locale) return <Navigate to="/en-ph" replace />;
+  
+  // Normalize to lowercase
+  const normalized = locale.toLowerCase();
+  
+  // Check if already normalized
+  if (locale !== normalized) {
+    return <Navigate to={`/${normalized}${location.pathname.substring(locale.length + 1)}${location.search}`} replace />;
+  }
+  
+  // Validate locale format (lang-country)
+  const localePattern = /^[a-z]{2}-[a-z]{2}$/;
+  if (!localePattern.test(normalized)) {
+    return <Navigate to="/en-ph" replace />;
+  }
+  
+  return null;
 }
 
 const queryClient = new QueryClient();
