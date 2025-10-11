@@ -3,17 +3,23 @@
  * TypeScript интерфейсы для админ-панели
  */
 
+import { ALL_COUNTRIES, PRIORITY_LOCALES } from '@/data/locale-config';
+
 export type ParticipantStatus = 'pending' | 'rejected' | 'pre next week' | 'this week' | 'next week' | 'next week on site' | 'past';
 
 export interface ContestCountryConfig {
   code: string;
   name: string;
   flag: string;
-  timezone: string;
-  capital: string;
+  timezone?: string;
+  capital?: string;
 }
 
-export const CONTEST_COUNTRIES: ContestCountryConfig[] = [
+// Use all countries from the locale config
+export const CONTEST_COUNTRIES: ContestCountryConfig[] = ALL_COUNTRIES.filter(Boolean);
+
+// Fallback to basic countries if data isn't loaded yet
+export const BASIC_COUNTRIES: ContestCountryConfig[] = [
   { code: 'PH', name: 'Philippines', flag: '🇵🇭', timezone: 'Asia/Manila', capital: 'Manila' },
   { code: 'US', name: 'United States', flag: '🇺🇸', timezone: 'America/New_York', capital: 'New York' },
   { code: 'RU', name: 'Russia', flag: '🇷🇺', timezone: 'Europe/Moscow', capital: 'Moscow' },
@@ -22,6 +28,7 @@ export const CONTEST_COUNTRIES: ContestCountryConfig[] = [
   { code: 'FR', name: 'France', flag: '🇫🇷', timezone: 'Europe/Paris', capital: 'Paris' },
   { code: 'ES', name: 'Spain', flag: '🇪🇸', timezone: 'Europe/Madrid', capital: 'Madrid' },
   { code: 'IT', name: 'Italy', flag: '🇮🇹', timezone: 'Europe/Rome', capital: 'Rome' },
+  { code: 'KZ', name: 'Kazakhstan', flag: '🇰🇿', timezone: 'Asia/Almaty', capital: 'Astana' },
 ];
 
 export interface UserRole {
