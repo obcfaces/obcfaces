@@ -54,10 +54,8 @@ const ContestContent = () => {
             weekOffset={0}
           />
           
-          {/* Dynamically generate sections for all past weeks EXCEPT 15/09-21/09/25 */}
-          {pastWeekIntervals
-            .filter(item => item.interval !== '15/09-21/09/25') // Исключаем 15/09-21/09/25
-            .map((item) => {
+          {/* Dynamically generate sections for all past weeks */}
+          {pastWeekIntervals.map((item) => {
             // Add +1 to weeksAgo because THIS WEEK takes the current week slot
             const adjustedWeeksAgo = item.weeksAgo + 1;
             const weekLabel = adjustedWeeksAgo === 1 ? '1 WEEK AGO' : `${adjustedWeeksAgo} WEEKS AGO`;
@@ -102,32 +100,6 @@ const ContestContent = () => {
               />
             );
           })}
-          
-          {/* HARDCODED 4 WEEKS AGO SECTION - 15/09-21/09/25 - ВСЕГДА ПОКАЗЫВАЕТСЯ */}
-          <ContestSection
-            key="hardcoded-4-weeks-ago"
-            title="4 WEEKS AGO"
-            subtitle="15 Sep - 21 Sep 2025"
-            description="See the winners from 4 weeks ago"
-            isActive={false}
-            showWinner={true}
-            viewMode={viewMode}
-            weekOffset={-4}
-            weekInterval="15/09-21/09/25"
-          />
-          
-          {/* HARDCODED 4 WEEKS AGO SECTION - 15/09-21/09/25 */}
-          <ContestSection
-            key="15/09-21/09/25"
-            title="4 WEEKS AGO"
-            subtitle="15 Sep - 21 Sep 2025"
-            description="See the winners from 4 weeks ago"
-            isActive={false}
-            showWinner={true}
-            viewMode={viewMode}
-            weekOffset={-4}
-            weekInterval="15/09-21/09/25"
-          />
         </div>
       </main>
     </>
