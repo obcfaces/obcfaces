@@ -374,6 +374,75 @@ export type Database = {
           },
         ]
       }
+      i18n_keys: {
+        Row: {
+          created_at: string | null
+          default_text: string
+          id: string
+          key: string
+        }
+        Insert: {
+          created_at?: string | null
+          default_text: string
+          id?: string
+          key: string
+        }
+        Update: {
+          created_at?: string | null
+          default_text?: string
+          id?: string
+          key?: string
+        }
+        Relationships: []
+      }
+      i18n_missing: {
+        Row: {
+          created_at: string | null
+          default_text: string
+          id: string
+          key: string
+          target_lang: string
+        }
+        Insert: {
+          created_at?: string | null
+          default_text: string
+          id?: string
+          key: string
+          target_lang: string
+        }
+        Update: {
+          created_at?: string | null
+          default_text?: string
+          id?: string
+          key?: string
+          target_lang?: string
+        }
+        Relationships: []
+      }
+      i18n_values: {
+        Row: {
+          id: string
+          key: string
+          lang: string
+          text: string
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          key: string
+          lang: string
+          text: string
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          key?: string
+          lang?: string
+          text?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       like_counts: {
         Row: {
           content_id: string
@@ -1310,6 +1379,37 @@ export type Database = {
       }
     }
     Views: {
+      analytics_conversion_metrics: {
+        Row: {
+          conversion_rate: number | null
+          today_registrations: number | null
+          total_users: number | null
+          weekly_voters: number | null
+        }
+        Relationships: []
+      }
+      analytics_registrations_per_day: {
+        Row: {
+          day: string | null
+          signups: number | null
+        }
+        Relationships: []
+      }
+      analytics_top_countries_week: {
+        Row: {
+          country: string | null
+          user_count: number | null
+        }
+        Relationships: []
+      }
+      analytics_votes_per_day: {
+        Row: {
+          avg_rating: number | null
+          day: string | null
+          votes: number | null
+        }
+        Relationships: []
+      }
       cached_participant_engagement: {
         Row: {
           avg_rating: number | null
@@ -2248,6 +2348,14 @@ export type Database = {
       }
       refresh_voting_stats_cache: {
         Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      report_missing_translation: {
+        Args: {
+          default_text_param: string
+          target_languages: string[]
+          translation_key: string
+        }
         Returns: undefined
       }
       rotate_weekly_contests: {
