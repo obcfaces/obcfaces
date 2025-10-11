@@ -1,146 +1,24 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { ContestSection } from "@/components/contest-section";
 import { ContestHeader } from "@/components/contest-header";
 import { NextWeekSection } from "@/components/next-week-section";
-import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
 import { PublicCountryProvider, usePublicCountry } from "@/contexts/PublicCountryContext";
-import { getCountryCapitalTimezone } from "@/utils/weekIntervals";
+import { useAdminStatus } from "@/hooks/useAdminStatus";
+import { usePastWeekIntervals } from "@/hooks/usePastWeekIntervals";
 
 type ViewMode = 'compact' | 'full';
 
 const ContestContent = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('compact');
   const [activeSection, setActiveSection] = useState("Contest");
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [pastWeekIntervals, setPastWeekIntervals] = useState<Array<{interval: string, weeksAgo: number}>>([]);
-  const navigate = useNavigate();
   const { countryCode, timezone } = usePublicCountry();
   
-  // Helper function to get current Monday in country's timezone
-  const getCurrentMonday = () => {
-    const now = new Date();
-    // Get current date in country's timezone
-    const countryTime = new Date(now.toLocaleString("en-US", {timeZone: timezone}));
-    const currentDayOfWeek = countryTime.getDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
-    
-    // If today is Monday (1), daysToSubtract should be 0
-    // If today is Sunday (0), daysToSubtract should be 6
-    const daysToSubtract = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
-    
-    const currentMonday = new Date(countryTime);
-    currentMonday.setDate(countryTime.getDate() - daysToSubtract);
-    currentMonday.setHours(0, 0, 0, 0);
-    
-    console.log('🗓️ Today:', countryTime.toLocaleDateString('en-US'), 'Day:', currentDayOfWeek);
-    console.log('🗓️ Current Monday:', currentMonday.toLocaleDateString('en-US'));
-    
-    return currentMonday;
-  };
-  
-  // Helper function to parse week_interval and get the Monday date
-  const parseIntervalToMonday = (interval: string): Date | null => {
-    try {
-      // Format: "DD/MM-DD/MM/YY"
-      const parts = interval.split('-');
-      if (parts.length !== 2) return null;
-      
-      // First part is "DD/MM" (Monday)
-      const startParts = parts[0].split('/');
-      if (startParts.length !== 2) return null;
-      
-      // Second part is "DD/MM/YY" (Sunday) - we get year from here
-      const endParts = parts[1].split('/');
-      if (endParts.length !== 3) return null;
-      
-      const day = parseInt(startParts[0]);
-      const month = parseInt(startParts[1]) - 1; // JS months are 0-indexed
-      const year = parseInt(endParts[2]);
-      const fullYear = year < 50 ? 2000 + year : 1900 + year;
-      
-      return new Date(fullYear, month, day, 0, 0, 0, 0);
-    } catch (error) {
-      console.error('Error parsing interval:', interval, error);
-      return null;
-    }
-  };
-  
-  useEffect(() => {
-    const checkAdminStatus = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          const { data: roles } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', session.user.id);
-          
-          setIsAdmin(roles?.some(role => role.role === 'admin') || false);
-        }
-      } catch (error) {
-        console.error('Error checking admin status:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    const loadPastWeekIntervals = async () => {
-      try {
-        console.log('=== LOADING PAST WEEK INTERVALS ===');
-        const { data, error } = await supabase
-          .from('weekly_contest_participants')
-          .select('week_interval')
-          .eq('admin_status', 'past')
-          .eq('is_active', true)
-          .is('deleted_at', null);
-        
-        if (error) {
-          console.error('Error loading past week intervals:', error);
-          return;
-        }
-        
-        const uniqueIntervals = Array.from(new Set(data?.map(p => p.week_interval).filter(Boolean) as string[]));
-        
-        const currentMonday = getCurrentMonday();
-        
-        // Используем Map для хранения уникальных интервалов
-        const intervalsMap = new Map<string, {interval: string, weeksAgo: number}>();
-        
-        uniqueIntervals.forEach(interval => {
-          const intervalMonday = parseIntervalToMonday(interval);
-          if (!intervalMonday) {
-            return;
-          }
-          
-          const diffTime = currentMonday.getTime() - intervalMonday.getTime();
-          const diffDays = Math.floor(diffTime / (24 * 60 * 60 * 1000));
-          const weeksAgo = Math.floor(diffDays / 7);
-          
-          intervalsMap.set(interval, {
-            interval,
-            weeksAgo
-          });
-        });
-        
-        // Конвертируем Map в массив и сортируем
-        const intervalsWithWeeks = Array.from(intervalsMap.values())
-          .sort((a, b) => a.weeksAgo - b.weeksAgo);
-        
-        console.log('✅ Final intervals for', countryCode, ':', intervalsWithWeeks);
-        
-        setPastWeekIntervals(intervalsWithWeeks);
-      } catch (error) {
-        console.error('Error loading past week intervals:', error);
-      }
-    };
-    
-    checkAdminStatus();
-    loadPastWeekIntervals();
-  }, [countryCode, timezone]);
+  // Use optimized hooks
+  const { isAdmin, loading } = useAdminStatus();
+  const { intervals: pastWeekIntervals, loading: intervalsLoading } = usePastWeekIntervals(countryCode, timezone);
 
-  if (loading) {
+  if (loading || intervalsLoading) {
     return (
       <main className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
