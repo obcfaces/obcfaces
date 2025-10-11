@@ -66,6 +66,7 @@ export interface ContestApplication {
   is_active: boolean;
   notes?: string;
   admin_status?: ParticipantStatus;
+  status_history?: any;
 }
 
 export interface WeeklyContest {
