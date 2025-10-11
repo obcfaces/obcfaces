@@ -1405,6 +1405,10 @@ export type Database = {
           approved_applications: number
           day_date: string
           day_name: string
+          day_of_week: number
+          rejected_count: number
+          sort_order: number
+          status_changed_count: number
           total_applications: number
         }[]
       }
