@@ -129,19 +129,36 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
         if (participant) {
           setParticipantData(participant);
           
-          // Add initial pending status if not in history
-          const hasPendingEntry = entries.some(e => 
-            e.status === 'pending' || e.status === 'pending (re-submitted)'
+          // Add initial pending status when card was created (created_at)
+          const hasInitialPending = entries.some(e => 
+            e.changed_at === participant.created_at
           );
           
-          if (!hasPendingEntry && participant.submitted_at) {
+          if (!hasInitialPending && participant.created_at) {
             entries.push({
               status: 'pending',
-              changed_at: participant.submitted_at,
+              changed_at: participant.created_at,
               changed_by_email: 'user',
-              change_reason: 'Application submitted',
+              change_reason: 'Application created',
               week_interval: ''
             });
+          }
+          
+          // Add resubmission status if submitted_at differs from created_at
+          if (participant.submitted_at && participant.submitted_at !== participant.created_at) {
+            const hasSubmittedEntry = entries.some(e => 
+              e.changed_at === participant.submitted_at
+            );
+            
+            if (!hasSubmittedEntry) {
+              entries.push({
+                status: 'pending',
+                changed_at: participant.submitted_at,
+                changed_by_email: 'user',
+                change_reason: 'Application resubmitted by user',
+                week_interval: ''
+              });
+            }
           }
         }
       } catch (error) {
