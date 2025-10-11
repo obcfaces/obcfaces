@@ -50,23 +50,31 @@ const Index = () => {
 
   // Test auto-translate function
   const handleTestTranslation = async () => {
+    console.log('🔄 Starting auto-translate...');
     setIsTranslating(true);
     try {
       // Call auto-translate edge function
+      console.log('📞 Calling auto-translate edge function...');
       const { data, error } = await supabase.functions.invoke('auto-translate');
+      
+      console.log('📦 Response:', { data, error });
       
       if (error) {
         toast.error(`Translation error: ${error.message}`);
-        console.error('Auto-translate error:', error);
+        console.error('❌ Auto-translate error:', error);
       } else {
-        toast.success(`Translated ${data?.translated || 0} keys`);
-        console.log('Auto-translate result:', data);
+        const translated = data?.translated || 0;
+        toast.success(`✅ Translated ${translated} keys`);
+        console.log('✅ Auto-translate result:', data);
         
-        // Force refresh the translation by clearing cache and re-fetching
-        window.location.reload();
+        if (translated > 0) {
+          // Force refresh the translation by clearing cache and re-fetching
+          console.log('🔄 Reloading page...');
+          setTimeout(() => window.location.reload(), 1000);
+        }
       }
     } catch (error) {
-      console.error('Translation error:', error);
+      console.error('💥 Translation error:', error);
       toast.error('Failed to call auto-translate function');
     } finally {
       setIsTranslating(false);
