@@ -4,113 +4,130 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, TrendingUp, Users, Vote, Globe, Clock } from "lucide-react";
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
+interface RegistrationData {
+  day: string;
+  signups: number;
+}
+
+
+interface VotingData {
+  day: string;
+  votes: number;
+  avg_rating: number;
+}
+
+interface CountryData {
+  country: string;
+  user_count: number;
+}
+
+interface MetricsData {
+  totalUsers: number;
+  totalVotes: number;
+  totalParticipants: number;
+  todayRegistrations: number;
+}
+
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))', 'hsl(var(--muted))'];
 
 export function AdminAnalyticsDashboard() {
-  // Fetch key metrics
-  const { data: metrics, isLoading: metricsLoading } = useQuery({
-    queryKey: ['admin-analytics-metrics'],
+  // Fetch key metrics from analytics views
+  const { data: conversionMetrics, isLoading: metricsLoading } = useQuery({
+    queryKey: ['admin-analytics-conversion'],
     queryFn: async () => {
-      const [
-        { count: totalUsers },
-        { count: totalVotes },
-        { count: totalParticipants },
-        { count: todayRegistrations },
-      ] = await Promise.all([
-        supabase.from('profiles').select('*', { count: 'exact', head: true }),
-        supabase.from('contestant_ratings').select('*', { count: 'exact', head: true }),
-        supabase.from('weekly_contest_participants').select('*', { count: 'exact', head: true }).eq('is_active', true),
-        supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', new Date(new Date().setHours(0,0,0,0)).toISOString()),
-      ]);
+      const { data, error } = await supabase
+        .from('analytics_conversion_metrics')
+        .select('*')
+        .maybeSingle();
 
+      if (error) throw error;
+      
       return {
-        totalUsers: totalUsers || 0,
-        totalVotes: totalVotes || 0,
-        totalParticipants: totalParticipants || 0,
-        todayRegistrations: todayRegistrations || 0,
+        totalUsers: data?.total_users || 0,
+        weeklyVoters: data?.weekly_voters || 0,
+        todayRegistrations: data?.today_registrations || 0,
+        conversionRate: data?.conversion_rate || 0,
       };
     },
     staleTime: 60 * 1000, // 1 minute
   });
 
-  // Fetch registration trend (last 7 days)
-  const { data: registrationTrend } = useQuery({
+  const { data: totalVotes } = useQuery({
+    queryKey: ['admin-analytics-total-votes'],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from('contestant_ratings')
+        .select('*', { count: 'exact', head: true });
+      return count || 0;
+    },
+    staleTime: 60 * 1000,
+  });
+
+  const { data: totalParticipants } = useQuery({
+    queryKey: ['admin-analytics-total-participants'],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from('weekly_contest_participants')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_active', true);
+      return count || 0;
+    },
+    staleTime: 60 * 1000,
+  });
+
+  // Fetch registration trend from analytics view
+  const { data: registrationTrend } = useQuery<RegistrationData[]>({
     queryKey: ['admin-analytics-registration-trend'],
     queryFn: async () => {
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      const { data, error } = await supabase
+        .from('analytics_registrations_per_day')
+        .select('*')
+        .order('day', { ascending: true })
+        .limit(30);
 
-      const { data } = await supabase
-        .from('profiles')
-        .select('created_at')
-        .gte('created_at', sevenDaysAgo.toISOString())
-        .order('created_at', { ascending: true });
+      if (error) throw error;
 
-      // Group by date
-      const grouped = (data || []).reduce((acc, item) => {
-        const date = new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        acc[date] = (acc[date] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
-
-      return Object.entries(grouped).map(([date, count]) => ({
-        date,
-        registrations: count,
+      return (data || []).map(item => ({
+        day: new Date(item.day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        signups: item.signups,
       }));
     },
     staleTime: 5 * 60 * 1000,
   });
 
-  // Fetch voting activity (last 7 days)
-  const { data: votingTrend } = useQuery({
+  // Fetch voting activity from analytics view
+  const { data: votingTrend } = useQuery<VotingData[]>({
     queryKey: ['admin-analytics-voting-trend'],
     queryFn: async () => {
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      const { data, error } = await supabase
+        .from('analytics_votes_per_day')
+        .select('*')
+        .order('day', { ascending: true })
+        .limit(30);
 
-      const { data } = await supabase
-        .from('contestant_ratings')
-        .select('created_at, rating')
-        .gte('created_at', sevenDaysAgo.toISOString())
-        .order('created_at', { ascending: true });
+      if (error) throw error;
 
-      const grouped = (data || []).reduce((acc, item) => {
-        const date = new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        if (!acc[date]) {
-          acc[date] = { votes: 0, avgRating: 0, ratings: [] };
-        }
-        acc[date].votes += 1;
-        acc[date].ratings.push(item.rating);
-        return acc;
-      }, {} as Record<string, { votes: number; avgRating: number; ratings: number[] }>);
-
-      return Object.entries(grouped).map(([date, data]) => ({
-        date,
-        votes: data.votes,
-        avgRating: (data.ratings.reduce((a, b) => a + b, 0) / data.ratings.length).toFixed(1),
+      return (data || []).map(item => ({
+        day: new Date(item.day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        votes: item.votes,
+        avg_rating: item.avg_rating ? parseFloat(String(item.avg_rating)) : 0,
       }));
     },
     staleTime: 5 * 60 * 1000,
   });
 
-  // Fetch geographic distribution
-  const { data: geoData } = useQuery({
+  // Fetch geographic distribution from analytics view
+  const { data: geoData } = useQuery<CountryData[]>({
     queryKey: ['admin-analytics-geo'],
     queryFn: async () => {
-      const { data } = await supabase
-        .from('profiles')
-        .select('country')
-        .not('country', 'is', null);
+      const { data, error } = await supabase
+        .from('analytics_top_countries_week')
+        .select('*')
+        .limit(10);
 
-      const grouped = (data || []).reduce((acc, item) => {
-        acc[item.country] = (acc[item.country] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
-
-      return Object.entries(grouped)
-        .map(([country, count]) => ({ country, count }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 10);
+      if (error) throw error;
+      
+      return data || [];
     },
     staleTime: 10 * 60 * 1000,
   });
@@ -133,9 +150,9 @@ export function AdminAnalyticsDashboard() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics?.totalUsers.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{conversionMetrics?.totalUsers.toLocaleString() || 0}</div>
             <p className="text-xs text-muted-foreground">
-              +{metrics?.todayRegistrations} today
+              +{conversionMetrics?.todayRegistrations || 0} today
             </p>
           </CardContent>
         </Card>
@@ -146,7 +163,7 @@ export function AdminAnalyticsDashboard() {
             <Vote className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics?.totalVotes.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{totalVotes?.toLocaleString() || 0}</div>
             <p className="text-xs text-muted-foreground">
               All-time voting activity
             </p>
@@ -159,7 +176,7 @@ export function AdminAnalyticsDashboard() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics?.totalParticipants}</div>
+            <div className="text-2xl font-bold">{totalParticipants || 0}</div>
             <p className="text-xs text-muted-foreground">
               Current contest
             </p>
@@ -190,11 +207,11 @@ export function AdminAnalyticsDashboard() {
             <ResponsiveContainer width="100%" height={250}>
               <LineChart data={registrationTrend || []}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
+                <XAxis dataKey="day" />
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Line type="monotone" dataKey="registrations" stroke="hsl(var(--primary))" strokeWidth={2} />
+                <Line type="monotone" dataKey="signups" stroke="hsl(var(--primary))" strokeWidth={2} name="Registrations" />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
@@ -208,11 +225,11 @@ export function AdminAnalyticsDashboard() {
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={votingTrend || []}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
+                <XAxis dataKey="day" />
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="votes" fill="hsl(var(--primary))" />
+                <Bar dataKey="votes" fill="hsl(var(--primary))" name="Votes" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -230,16 +247,17 @@ export function AdminAnalyticsDashboard() {
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
-                  data={geoData || []}
+                  data={geoData as any[] || []}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ country, count }) => `${country}: ${count}`}
+                  label={(entry: any) => `${entry.country}: ${entry.user_count}`}
                   outerRadius={80}
                   fill="hsl(var(--primary))"
-                  dataKey="count"
+                  dataKey="user_count"
+                  nameKey="country"
                 >
-                  {(geoData || []).map((entry, index) => (
+                  {(geoData || []).map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
