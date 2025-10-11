@@ -101,7 +101,36 @@ export function AdminNewApplicationsTab({
         // Try multiple possible keys for photo URLs to handle different data formats
         const photo1 = appData.photo_1_url || appData.photo1_url || appData.photo1Url || appData.photoUrl1 || '';
         const photo2 = appData.photo_2_url || appData.photo2_url || appData.photo2Url || appData.photoUrl2 || '';
-        const submittedDate = participant.submitted_at ? new Date(participant.submitted_at) : null;
+        
+        // Get the latest status change date from status_history or fallback to submitted_at
+        const getLatestStatusChangeDate = () => {
+          const statusHistory = participant.status_history;
+          if (!statusHistory || typeof statusHistory !== 'object') {
+            return participant.submitted_at ? new Date(participant.submitted_at) : null;
+          }
+          
+          const dates: Date[] = [];
+          
+          // Extract all dates from status_history
+          Object.entries(statusHistory).forEach(([key, data]: [string, any]) => {
+            if (key === 'changed_at' || key === 'changed_by' || key === 'change_reason') return;
+            if (!data || typeof data !== 'object') return;
+            
+            const dateStr = data.changed_at || data.timestamp;
+            if (dateStr) {
+              dates.push(new Date(dateStr));
+            }
+          });
+          
+          // Return the most recent date
+          if (dates.length > 0) {
+            return new Date(Math.max(...dates.map(d => d.getTime())));
+          }
+          
+          return participant.submitted_at ? new Date(participant.submitted_at) : null;
+        };
+        
+        const submittedDate = getLatestStatusChangeDate();
 
         return (
           <ApplicationCardWithHistory
