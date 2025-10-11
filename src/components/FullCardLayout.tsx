@@ -1,7 +1,7 @@
 import { ThumbsUp, MessageCircle, Share2, ThumbsDown, Crown, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn, getCountryDisplayName } from "@/lib/utils";
-import { VotingOverlay } from "./VotingOverlay";
+import { VotingOverlay } from "@/features/contest/components/VotingOverlay";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface WinnerContent {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { ContestantCard } from "@/components/contest-card";
+import { ContestantCard } from "./ContestCard";
 import { supabase } from "@/integrations/supabase/client";
-import { useContestParticipants } from "@/hooks/useContestParticipants";
+import { useContestParticipants } from "../hooks/useContestParticipants";
 
 import contestant1Face from "@/assets/contestant-1-face.jpg";
 import contestant1Full from "@/assets/contestant-1-full.jpg";

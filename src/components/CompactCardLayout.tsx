@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ThumbsUp, MessageCircle, Share2, ThumbsDown, Eye, Play } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn, getCountryDisplayName } from "@/lib/utils";
-import { VotingOverlay } from "./VotingOverlay";
+import { VotingOverlay } from "@/features/contest/components/VotingOverlay";
 
 interface WinnerContent {
   payment_proof_url?: string;

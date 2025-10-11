@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { SEOHead } from "@/components/SEOHead";
-import { ContestHeader } from "@/components/contest-header";
-import { ContestWeeksRenderer } from "@/components/ContestWeeksRenderer";
+import { ContestHeader } from "../components/ContestHeader";
+import { ContestWeeksRenderer } from "../components/ContestWeeksRenderer";
 import { PublicCountryProvider, usePublicCountry } from "@/contexts/PublicCountryContext";
 import { useAdminStatus } from "@/hooks/useAdminStatus";
 

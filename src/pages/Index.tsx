@@ -1,12 +1,10 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { SEOHead } from "@/components/SEOHead";
-import { ContestHeader } from "@/components/contest-header";
-import { ContestWeeksRenderer } from "@/components/ContestWeeksRenderer";
-import ContestFilters from "@/components/contest-filters";
+import { ContestHeader, ContestWeeksRenderer, ContestFiltersComponent as ContestFilters } from "@/features/contest";
 import { EditableContent } from "@/components/editable-content";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import type { Category } from "@/components/contest-filters";
+import type { Category } from "@/features/contest/components/ContestFilters";
 import { useAdminStatus } from "@/hooks/useAdminStatus";
 
 const Index = () => {

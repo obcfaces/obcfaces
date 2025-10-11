@@ -30,9 +30,9 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import cityTimezones from 'city-timezones';
 import { AdminPhotoModal } from '@/components/admin-photo-modal';
 import { RejectReasonModal, REJECTION_REASONS } from '@/components/reject-reason-modal';
-import { VotersModal } from '@/components/voters-modal';
-import { NextWeekVotersModal } from '@/components/next-week-voters-modal';
-import { ContestParticipationModal } from '@/components/contest-participation-modal';
+import { VotersModal } from '@/features/contest/components/VotersModal';
+import { NextWeekVotersModal } from '@/features/contest/components/NextWeekVotersModal';
+import { ContestParticipationModal } from '@/features/contest/components/ContestParticipationModal';
 import { ApplicationEditHistory } from '@/components/ApplicationEditHistory';
 import { ExpandableApplicationHistory } from '@/components/ExpandableApplicationHistory';
 

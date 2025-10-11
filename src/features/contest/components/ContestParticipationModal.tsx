@@ -17,7 +17,7 @@ import SearchableSelect from "@/components/ui/searchable-select";
 import { getCitiesForLocation } from '@/lib/location-utils';
 import testContestantFace from "@/assets/example-face-photo.jpg";
 import testContestantFull from "@/assets/example-full-photo.jpg";
-import { ContestSuccessModal } from "@/components/contest-success-modal";
+import { ContestSuccessModal } from "./ContestSuccessModal";
 
 interface ContestParticipationModalProps {
   children?: React.ReactNode;

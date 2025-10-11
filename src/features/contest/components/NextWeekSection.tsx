@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { ThumbsUp, ThumbsDown, RotateCcw } from "lucide-react";
-import { ContestantCard } from "@/components/contest-card";
+import { ContestantCard } from "./ContestCard";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
