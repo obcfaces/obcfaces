@@ -7,12 +7,26 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useLanguage, languages } from "@/contexts/LanguageContext";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const LanguageSelector = () => {
   const { currentLanguage, setLanguage } = useLanguage();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLanguageChange = (language: any) => {
     setLanguage(language);
+    
+    // Extract current country from URL (e.g., /en-ph -> ph)
+    const currentPath = location.pathname;
+    const localeMatch = currentPath.match(/^\/([a-z]{2})-([a-z]{2})/);
+    
+    if (localeMatch) {
+      const currentCountry = localeMatch[2];
+      const newLocale = `${language.code}-${currentCountry}`;
+      const newPath = currentPath.replace(/^\/[a-z]{2}-[a-z]{2}/, `/${newLocale}`);
+      navigate(newPath + location.search, { replace: true });
+    }
   };
 
   return (

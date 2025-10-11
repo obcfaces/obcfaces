@@ -1,22 +1,27 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate, useParams } from "react-router-dom";
 import { SEOHead } from "@/components/SEOHead";
 import { ContestHeader, ContestWeeksRenderer, ContestFiltersComponent as ContestFilters } from "@/features/contest";
 import { EditableContent } from "@/components/editable-content";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { useLanguage, languages } from "@/contexts/LanguageContext";
 import type { Category } from "@/features/contest/components/ContestFilters";
 import { useAdminStatus } from "@/hooks/useAdminStatus";
-import { useTranslation } from "@/hooks/useTranslation";
-import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 
 const Index = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { locale } = useParams<{ locale: string }>();
   const { isAdmin } = useAdminStatus();
+  const { currentLanguage, setLanguage } = useLanguage();
   
-  // Initialize state from URL params or defaults
-  const [country, setCountry] = useState<string>(() => searchParams.get("country") || "PH");
+  // Parse locale from URL (e.g., "en-ph" -> lang: "en", country: "PH")
+  const [urlLang, urlCountry] = (locale || "en-ph").split("-");
+  
+  // Initialize state from URL locale or defaults
+  const [country, setCountry] = useState<string>(() => {
+    return urlCountry?.toUpperCase() || "PH";
+  });
   const [gender, setGender] = useState<'male' | 'female'>(() => {
     const param = searchParams.get("gender");
     return (param === "male" || param === "female") ? param : "female";
@@ -30,16 +35,34 @@ const Index = () => {
     return (searchParams.get("category") as "" | Category) || "";
   });
 
-  // Sync filters to URL
+  // Sync URL locale with language context on mount
   useEffect(() => {
+    const matchingLang = languages.find(lang => lang.code === urlLang);
+    if (matchingLang && matchingLang.code !== currentLanguage.code) {
+      setLanguage(matchingLang);
+    }
+  }, [urlLang, setLanguage]);
+
+  // Update URL when filters change
+  useEffect(() => {
+    const currentLang = currentLanguage.code;
+    const currentCountry = country.toLowerCase();
+    const newLocale = `${currentLang}-${currentCountry}`;
+    
+    // Build query params
     const params = new URLSearchParams();
-    if (country !== "PH") params.set("country", country);
     if (gender !== "female") params.set("gender", gender);
     if (viewMode !== "compact") params.set("view", viewMode);
     if (category) params.set("category", category);
     
-    setSearchParams(params, { replace: true });
-  }, [country, gender, viewMode, category, setSearchParams]);
+    const query = params.toString() ? `?${params.toString()}` : '';
+    const newPath = `/${newLocale}${query}`;
+    
+    // Only navigate if locale actually changed
+    if (`/${locale}` !== `/${newLocale}`) {
+      navigate(newPath, { replace: true });
+    }
+  }, [country, currentLanguage.code, gender, viewMode, category, navigate, locale]);
 
   const handleCategoryChange = (newCategory: "" | Category) => {
     setCategory(newCategory);
