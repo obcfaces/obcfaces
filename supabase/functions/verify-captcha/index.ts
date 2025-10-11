@@ -9,7 +9,6 @@ const corsHeaders = {
 interface CaptchaVerificationRequest {
   token: string;
   action?: string;
-  minScore?: number;
 }
 
 serve(async (req) => {
@@ -18,41 +17,41 @@ serve(async (req) => {
   }
 
   try {
-    const { token, action = 'submit', minScore = 0.5 }: CaptchaVerificationRequest = 
+    const { token, action = 'submit' }: CaptchaVerificationRequest = 
       await req.json();
 
     if (!token) {
       throw new Error('CAPTCHA token is required');
     }
 
-    const RECAPTCHA_SECRET = Deno.env.get('RECAPTCHA_SECRET_KEY');
+    const TURNSTILE_SECRET = Deno.env.get('CLOUDFLARE_TURNSTILE_SECRET_KEY');
     
-    if (!RECAPTCHA_SECRET) {
-      console.error('RECAPTCHA_SECRET_KEY not configured');
+    if (!TURNSTILE_SECRET) {
+      console.error('CLOUDFLARE_TURNSTILE_SECRET_KEY not configured');
       throw new Error('CAPTCHA verification not configured');
     }
 
-    console.log(`🔐 Verifying CAPTCHA for action: ${action}`);
+    console.log(`🔐 Verifying Turnstile for action: ${action}`);
 
-    // Verify with Google reCAPTCHA API
-    const verificationUrl = 'https://www.google.com/recaptcha/api/siteverify';
+    // Verify with Cloudflare Turnstile API
+    const verificationUrl = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
     const verificationResponse = await fetch(verificationUrl, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
       },
-      body: new URLSearchParams({
-        secret: RECAPTCHA_SECRET,
+      body: JSON.stringify({
+        secret: TURNSTILE_SECRET,
         response: token,
       }),
     });
 
     const verificationData = await verificationResponse.json();
 
-    console.log('CAPTCHA verification result:', {
+    console.log('Turnstile verification result:', {
       success: verificationData.success,
-      score: verificationData.score,
-      action: verificationData.action
+      action: verificationData.action,
+      hostname: verificationData.hostname
     });
 
     // Get client info
@@ -78,7 +77,7 @@ serve(async (req) => {
 
     // Check verification result
     if (!verificationData.success) {
-      console.log('❌ CAPTCHA verification failed:', verificationData['error-codes']);
+      console.log('❌ Turnstile verification failed:', verificationData['error-codes']);
       
       // Log suspicious activity
       await supabaseClient.rpc('log_suspicious_activity', {
@@ -95,7 +94,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: 'CAPTCHA verification failed',
+          error: 'Security verification failed',
           details: verificationData['error-codes']
         }),
         {
@@ -105,44 +104,13 @@ serve(async (req) => {
       );
     }
 
-    // Check score (reCAPTCHA v3)
-    const score = verificationData.score || 0;
-    if (score < minScore) {
-      console.log(`⚠️  Low CAPTCHA score: ${score} (minimum: ${minScore})`);
-      
-      // Log low score activity
-      await supabaseClient.rpc('log_suspicious_activity', {
-        activity_user_id: userId,
-        activity_ip: ipAddress,
-        activity_type: 'low_captcha_score',
-        activity_details: { 
-          action,
-          score,
-          minScore
-        },
-        activity_severity: score < 0.3 ? 'high' : 'medium'
-      });
-
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Suspicious activity detected',
-          score
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
-
-    console.log(`✅ CAPTCHA verified successfully with score: ${score}`);
+    console.log(`✅ Turnstile verified successfully`);
 
     return new Response(
       JSON.stringify({ 
         success: true,
-        score,
-        action: verificationData.action
+        action: verificationData.action,
+        hostname: verificationData.hostname
       }),
       {
         status: 200,
