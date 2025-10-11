@@ -171,6 +171,8 @@ export class ParticipantsService {
 
   /**
    * Батч-загрузка статистики рейтингов для нескольких участников
+   * @param participantIds - Array of participant IDs
+   * @returns Array of rating stats mapped by participant_id
    */
   static async getParticipantStatsBulk(participantIds: string[]) {
     if (!participantIds || participantIds.length === 0) {
@@ -193,7 +195,13 @@ export class ParticipantsService {
           .in('id', batch);
 
         if (error) throw error;
-        return data || [];
+        
+        // Map to consistent format
+        return (data || []).map(item => ({
+          participant_id: item.id,
+          average_rating: item.average_rating || 0,
+          total_votes: item.total_votes || 0,
+        }));
       })
     );
 

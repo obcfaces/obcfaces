@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from "react";
+import React, { useMemo, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SearchableSelect, { type Option } from "@/components/ui/searchable-select";
@@ -6,6 +6,7 @@ import HeightFilterDropdown from "@/components/ui/height-filter-dropdown";
 import WeightFilterDropdown from "@/components/ui/weight-filter-dropdown";
 import LocaleCountryFilter from "@/components/locale-country-filter";
 import { AlignJustify, Grid2X2 } from "lucide-react";
+import { patchSearchParams } from "@/utils/urlFilters";
 
 type Gender = "male" | "female";
 export type Category = "teen" | "miss" | "ms" | "mrs";
@@ -76,52 +77,47 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
     if (urlView && urlView !== viewMode) onViewModeChange(urlView as ViewMode);
   }, []);
 
-  // Helper to update URL params
-  const updateUrlParam = (key: string, value: string | undefined) => {
-    const params = new URLSearchParams(searchParams);
-    if (value && value !== "" && value !== "all") {
-      params.set(key, value);
-    } else {
-      params.delete(key);
-    }
+  // Helper to update URL params using utility
+  const updateUrlParam = useCallback((key: string, value: string | undefined) => {
+    const params = patchSearchParams(searchParams, { [key]: value });
     setSearchParams(params, { replace: false });
-  };
+  }, [searchParams, setSearchParams]);
 
-  // Wrapped handlers to sync with URL
-  const handleGenderChange = (value: Gender) => {
+  // Wrapped handlers to sync with URL (memoized to prevent unnecessary re-renders)
+  const handleGenderChange = useCallback((value: Gender) => {
     onGenderChange(value);
     updateUrlParam("gender", value);
-  };
+  }, [onGenderChange, updateUrlParam]);
 
-  const handleAgeChange = (value: string) => {
+  const handleAgeChange = useCallback((value: string) => {
     onAgeChange?.(value);
     updateUrlParam("age", value);
-  };
+  }, [onAgeChange, updateUrlParam]);
 
-  const handleMaritalChange = (value: string) => {
+  const handleMaritalChange = useCallback((value: string) => {
     onMaritalStatusChange?.(value);
     updateUrlParam("marital", value);
-  };
+  }, [onMaritalStatusChange, updateUrlParam]);
 
-  const handleChildrenChange = (value: string) => {
+  const handleChildrenChange = useCallback((value: string) => {
     onHasChildrenChange?.(value);
     updateUrlParam("children", value);
-  };
+  }, [onHasChildrenChange, updateUrlParam]);
 
-  const handleHeightChange = (value: string) => {
+  const handleHeightChange = useCallback((value: string) => {
     onHeightChange?.(value);
     updateUrlParam("height", value);
-  };
+  }, [onHeightChange, updateUrlParam]);
 
-  const handleWeightChange = (value: string) => {
+  const handleWeightChange = useCallback((value: string) => {
     onWeightChange?.(value);
     updateUrlParam("weight", value);
-  };
+  }, [onWeightChange, updateUrlParam]);
 
-  const handleViewChange = (value: ViewMode) => {
+  const handleViewChange = useCallback((value: ViewMode) => {
     onViewModeChange(value);
     updateUrlParam("view", value);
-  };
+  }, [onViewModeChange, updateUrlParam]);
 
   const genderOptions: Option[] = useMemo(() => {
     const av = genderAvailability ?? { male: false, female: true };
