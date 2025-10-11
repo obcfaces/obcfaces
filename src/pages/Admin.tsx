@@ -493,6 +493,7 @@ const Admin = () => {
   const [nextWeekDailyStats, setNextWeekDailyStats] = useState<Array<{ day_name: string; like_count: number; dislike_count: number; total_votes: number }>>([]);
   const [nextWeekVotesStats, setNextWeekVotesStats] = useState<Record<string, { like_count: number; dislike_count: number }>>({});
   const [selectedDay, setSelectedDay] = useState<{ day: number; type: 'new' | 'approved' } | null>(null);
+  const [allApplicationsByDate, setAllApplicationsByDate] = useState<any[]>([]);
   const [selectedNewAppDay, setSelectedNewAppDay] = useState<{ date: string; filter: 'all' | 'approved' | 'rejected' } | null>(null);
   const [selectedRegistrationDay, setSelectedRegistrationDay] = useState<{ dayName: string; showSuspicious: boolean } | null>(null);
   const [selectedRegistrationFilter, setSelectedRegistrationFilter] = useState<{ 
@@ -2400,6 +2401,25 @@ const Admin = () => {
     setContestApplications(processedData);
   };
 
+  // Load all applications for the selected date when 'all' filter is active
+  useEffect(() => {
+    if (selectedNewAppDay?.filter === 'all') {
+      const loadAllApplicationsForDate = async () => {
+        const { data } = await supabase
+          .from('weekly_contest_participants')
+          .select('*')
+          .is('deleted_at', null)
+          .order('submitted_at', { ascending: false });
+        
+        if (data) {
+          setAllApplicationsByDate(data);
+        }
+      };
+      
+      loadAllApplicationsForDate();
+    }
+  }, [selectedNewAppDay]);
+
   const fetchDeletedApplications = async () => {
     const { data, error } = await supabase
       .from('weekly_contest_participants')
@@ -3431,7 +3451,7 @@ const Admin = () => {
 
               <AdminNewApplicationsTab
                 loading={tabLoading['new-applications']}
-                applications={selectedNewAppDay ? contestApplications.filter(app => {
+                applications={selectedNewAppDay ? (selectedNewAppDay.filter === 'all' ? allApplicationsByDate : contestApplications).filter(app => {
                   if (!app.submitted_at) return false;
                   
                   // Parse dates in Manila timezone for comparison
@@ -3448,6 +3468,11 @@ const Admin = () => {
                   
                   // Check if date matches
                   if (appDate !== filterDate) return false;
+                  
+                  // For 'all' filter, show all applications submitted on this day
+                  if (selectedNewAppDay.filter === 'all') {
+                    return true;
+                  }
                   
                   // Apply filter based on type
                   if (selectedNewAppDay.filter === 'approved') {
@@ -3490,8 +3515,7 @@ const Admin = () => {
                     return changedDate === filterDate;
                   }
                   
-                  // 'all' filter - show all applications SUBMITTED on this day
-                  return true;
+                  return false;
                 }) : contestApplications}
                 deletedApplications={deletedApplications}
                 showDeleted={showDeletedApplications}
