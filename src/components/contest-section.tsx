@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { ContestantCard } from "@/components/contest-card";
 import { supabase } from "@/integrations/supabase/client";
+import { useContestParticipants } from "@/hooks/useContestParticipants";
 
 import contestant1Face from "@/assets/contestant-1-face.jpg";
 import contestant1Full from "@/assets/contestant-1-full.jpg";
@@ -63,6 +64,12 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminParticipants, setAdminParticipants] = useState<any[]>([]);
+  
+  // Use optimized hook for participant loading
+  const { 
+    fetchParticipantsByStatus, 
+    loadUserRatingsForParticipants: loadUserRatings 
+  } = useContestParticipants();
 
   // Check admin status
   const checkAdminStatus = async (userId: string) => {
@@ -72,9 +79,9 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         .select('role')
         .eq('user_id', userId)
         .eq('role', 'admin')
-        .single();
+        .maybeSingle();
       
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         console.error('Error checking admin status:', error);
         return false;
       }
@@ -88,169 +95,20 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
 
   // Load participants for NEXT WEEK section - FOR ALL USERS
   const loadNextWeekParticipants = async () => {
-    try {
-      console.log('Loading NEXT WEEK participants for all users...');
-      
-      // Get participants with admin_status = 'next week' or 'next week on site' for current week
-      const { data: participants, error } = await supabase
-        .from('weekly_contest_participants')
-        .select('*')
-        .in('admin_status', ['next week', 'next week on site'])
-        .eq('is_active', true)
-        .is('deleted_at', null)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error loading NEXT WEEK participants:', error);
-        return [];
-      }
-
-      console.log('Raw NEXT WEEK participants data:', participants?.length);
-
-      if (!participants || participants.length === 0) {
-        return [];
-      }
-
-      // Fetch profiles using secure RPC function (works for ALL users - authenticated and unauthenticated)
-      const userIds = participants.map(p => p.user_id);
-      const { data: profilesData } = await (supabase.rpc as any)('get_public_contest_participant_photos', { participant_user_ids: userIds });
-      
-      const profiles = (profilesData || []) as Array<{ 
-        id: string; 
-        photo_1_url: string | null; 
-        photo_2_url: string | null; 
-        avatar_url: string | null;
-        age: number | null;
-        city: string | null;
-        country: string | null;
-        height_cm: number | null;
-        weight_kg: number | null;
-      }>;
-
-      // Attach profiles to participants
-      const participantsWithProfiles = participants.map(participant => ({
-        ...participant,
-        profiles: profiles?.find(p => p.id === participant.user_id) || null
-      }));
-
-      return participantsWithProfiles || [];
-    } catch (error) {
-      console.error('Error loading NEXT WEEK participants:', error);
-      return [];
-    }
+    console.log('Loading NEXT WEEK participants for all users...');
+    return await fetchParticipantsByStatus(['next week', 'next week on site']);
   };
   
   // Generic function to load past week participants by week_interval
   const loadPastWeekParticipantsByInterval = async (interval: string) => {
-    try {
-      console.log(`🔄 Loading participants for interval: ${interval}`);
-      
-      const { data: participants, error } = await supabase
-        .from('weekly_contest_participants')
-        .select('*')
-        .eq('admin_status', 'past')
-        .eq('is_active', true)
-        .is('deleted_at', null)
-        .eq('week_interval', interval);
-
-      if (error) {
-        console.error(`❌ Error loading participants for ${interval}:`, error);
-        return [];
-      }
-
-      console.log(`✅ Found ${participants?.length} participants for ${interval}`);
-
-      if (!participants || participants.length === 0) {
-        return [];
-      }
-
-      const userIds = participants.map(p => p.user_id);
-      const { data: profilesData } = await (supabase.rpc as any)('get_public_contest_participant_photos', { participant_user_ids: userIds });
-      
-      const profiles = (profilesData || []) as Array<{ 
-        id: string; 
-        photo_1_url: string | null; 
-        photo_2_url: string | null; 
-        avatar_url: string | null;
-        age: number | null;
-        city: string | null;
-        country: string | null;
-        height_cm: number | null;
-        weight_kg: number | null;
-      }>;
-
-      const participantsWithProfiles = participants.map(participant => ({
-        ...participant,
-        profiles: profiles?.find(p => p.id === participant.user_id) || null
-      }));
-
-      return participantsWithProfiles || [];
-    } catch (error) {
-      console.error(`Error loading participants for ${interval}:`, error);
-      return [];
-    }
+    console.log(`🔄 Loading participants for interval: ${interval}`);
+    return await fetchParticipantsByStatus('past', interval);
   };
 
   // Load participants for THIS WEEK section - FOR ALL USERS
   const loadThisWeekParticipants = async () => {
-    try {
-      console.log('🔄 Loading THIS WEEK participants for all users...');
-      
-      // Get participants with admin_status = 'this week' for current week - NO LIMIT!
-      const { data: participants, error } = await supabase
-        .from('weekly_contest_participants')
-        .select('*')
-        .eq('admin_status', 'this week')
-        .eq('is_active', true)
-        .is('deleted_at', null)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('❌ Error loading THIS WEEK participants:', error);
-        return [];
-      }
-
-      console.log(`✅ Raw THIS WEEK participants data: ${participants?.length} participants loaded`);
-      console.log('📋 Participants list:', participants?.map(p => {
-        const appData = (p.application_data as any) || {};
-        return {
-          name: `${appData.first_name || ''} ${appData.last_name || ''}`.trim(),
-          id: p.id
-        };
-      }));
-
-      if (!participants || participants.length === 0) {
-        console.warn('⚠️ No THIS WEEK participants found');
-        return [];
-      }
-
-      // Fetch profiles using secure RPC function (works for ALL users - authenticated and unauthenticated)
-      const userIds = participants.map(p => p.user_id);
-      const { data: profilesData } = await (supabase.rpc as any)('get_public_contest_participant_photos', { participant_user_ids: userIds });
-      
-      const profiles = (profilesData || []) as Array<{ 
-        id: string; 
-        photo_1_url: string | null; 
-        photo_2_url: string | null; 
-        avatar_url: string | null;
-        age: number | null;
-        city: string | null;
-        country: string | null;
-        height_cm: number | null;
-        weight_kg: number | null;
-      }>;
-
-      // Attach profiles to participants
-      const participantsWithProfiles = participants.map(participant => ({
-        ...participant,
-        profiles: profiles?.find(p => p.id === participant.user_id) || null
-      }));
-
-      return participantsWithProfiles || [];
-    } catch (error) {
-      console.error('Error loading THIS WEEK participants:', error);
-      return [];
-    }
+    console.log('🔄 Loading THIS WEEK participants for all users...');
+    return await fetchParticipantsByStatus('this week');
   };
 
   // Load participants for 1 WEEK AGO section - FOR ALL USERS
@@ -390,50 +248,6 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     }
   };
 
-  // Load user ratings for all participants BEFORE rendering
-  const loadUserRatingsForParticipants = async (participants: any[], userId: string) => {
-    if (!userId || !participants || participants.length === 0) {
-      return {};
-    }
-    
-    console.log('Loading user ratings for', participants.length, 'participants');
-    
-    const participantIds = participants
-      .map(p => p.id)
-      .filter(id => id && id !== '00000000-0000-0000-0000-000000000000');
-    
-    if (participantIds.length === 0) {
-      return {};
-    }
-    
-    try {
-      // Load all ratings for this user in one query
-      const { data: ratings, error } = await supabase
-        .from('contestant_ratings')
-        .select('participant_id, rating')
-        .eq('user_id', userId)
-        .in('participant_id', participantIds);
-      
-      if (error) {
-        console.error('Error loading user ratings:', error);
-        return {};
-      }
-      
-      // Convert to map for quick lookup
-      const ratingsMap: Record<string, number> = {};
-      ratings?.forEach(r => {
-        if (r.participant_id) {
-          ratingsMap[r.participant_id] = r.rating;
-        }
-      });
-      
-      console.log('Loaded user ratings map:', ratingsMap);
-      return ratingsMap;
-    } catch (error) {
-      console.error('Error loading user ratings:', error);
-      return {};
-    }
-  };
 
   // Load admin participants for 3 WEEKS AGO section (participants with admin_status = 'past' and specific week interval)
   const loadThreeWeeksAgoAdminParticipants = async () => {
@@ -625,7 +439,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       let userRatingsMap: Record<string, number> = {};
       if (currentUser?.id && participantsData.length > 0) {
         console.log('Loading user ratings for authenticated user:', currentUser.id);
-        userRatingsMap = await loadUserRatingsForParticipants(participantsData, currentUser.id);
+        userRatingsMap = await loadUserRatings(participantsData, currentUser.id);
       }
       
       // Store participants data with ratings info
@@ -682,7 +496,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       let userRatingsMap: Record<string, number> = {};
       if (user?.id && participantsData.length > 0) {
         console.log('Loading user ratings for authenticated user:', user.id);
-        userRatingsMap = await loadUserRatingsForParticipants(participantsData, user.id);
+        userRatingsMap = await loadUserRatings(participantsData, user.id);
       }
       
       // Use the newly loaded participants data
