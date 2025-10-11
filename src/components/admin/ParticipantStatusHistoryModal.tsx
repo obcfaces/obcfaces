@@ -53,14 +53,22 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
           // Only keep entries that have objects with changed_at
           return data !== null && data !== undefined && typeof data === 'object' && data.changed_at;
         })
-        .map(([status, data]: [string, any]) => ({
-          status,
-          changed_at: data.changed_at || data.timestamp || new Date().toISOString(),
-          changed_by: data.changed_by || data.changed_via,
-          changed_by_email: data.changed_by_email,
-          week_interval: data.week_interval || '',
-          change_reason: data.change_reason || data.reason
-        }));
+        .map(([status, data]: [string, any]) => {
+          // Handle pending resubmissions (keys like "pending_resubmit_2025-10-11_12:30:45")
+          let displayStatus = status;
+          if (status.startsWith('pending_resubmit_')) {
+            displayStatus = 'pending (re-submitted)';
+          }
+          
+          return {
+            status: displayStatus,
+            changed_at: data.changed_at || data.timestamp || new Date().toISOString(),
+            changed_by: data.changed_by || data.changed_via,
+            changed_by_email: data.changed_by_email,
+            week_interval: data.week_interval || '',
+            change_reason: data.change_reason || data.reason
+          };
+        });
     }
     
     if (Array.isArray(history)) {
@@ -140,6 +148,8 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
       case 'past':
         return 'outline';
       case 'pending':
+      case 'pending (re-submitted)':
+        return 'secondary';
       case 'approved':
         return 'secondary';
       case 'rejected':
@@ -150,6 +160,11 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
   };
 
   const getChangedByDisplay = (entry: StatusHistoryEntry) => {
+    // Check if this was user action
+    if (entry.changed_by_email === 'user' || entry.change_reason?.includes('User') || entry.change_reason?.includes('submitted')) {
+      return 'user';
+    }
+    
     if (entry.changed_by_email) {
       // Show first 4 characters of email
       return entry.changed_by_email.substring(0, 4);
