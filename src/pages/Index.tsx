@@ -61,6 +61,9 @@ const Index = () => {
       } else {
         toast.success(`Translated ${data?.translated || 0} keys`);
         console.log('Auto-translate result:', data);
+        
+        // Force refresh the translation by clearing cache and re-fetching
+        window.location.reload();
       }
     } catch (error) {
       console.error('Translation error:', error);
