@@ -756,6 +756,7 @@ const ApplicationCardWithHistory = ({
         isOpen={showStatusHistoryModal}
         onClose={() => setShowStatusHistoryModal(false)}
         participantName={`${firstName} ${lastName}`}
+        participantId={participant.id}
         statusHistory={participant.status_history}
       />
       

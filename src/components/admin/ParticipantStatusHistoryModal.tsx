@@ -22,6 +22,7 @@ interface ParticipantStatusHistoryModalProps {
   isOpen: boolean;
   onClose: () => void;
   participantName: string;
+  participantId?: string;
   statusHistory?: any;
 }
 
@@ -29,6 +30,7 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
   isOpen,
   onClose,
   participantName,
+  participantId,
   statusHistory,
 }) => {
   const [enrichedEntries, setEnrichedEntries] = useState<StatusHistoryEntry[]>([]);
@@ -216,8 +218,12 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
   };
 
   const getChangedByDisplay = (entry: StatusHistoryEntry) => {
-    // Check if this was user action
-    if (entry.changed_by_email === 'user' || entry.change_reason?.includes('User') || entry.change_reason?.includes('submitted')) {
+    // Check if this was user action (user edited/resubmitted)
+    if (entry.changed_by_email === 'user' || 
+        entry.change_reason?.toLowerCase().includes('user') || 
+        entry.change_reason?.toLowerCase().includes('submitted') ||
+        entry.change_reason?.toLowerCase().includes('created') ||
+        entry.change_reason?.toLowerCase().includes('resubmitted')) {
       return 'user';
     }
     
@@ -226,20 +232,16 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
       return entry.changed_by_email.substring(0, 4);
     }
     
-    // Check if this was a user edit (when user re-submits after rejection)
-    if (entry.change_reason && entry.change_reason.includes('User edited')) {
-      return 'user';
+    // If we have changed_by UUID, it's admin - show first 4 chars of UUID
+    if (entry.changed_by) {
+      return entry.changed_by.substring(0, 4);
     }
     
+    // If there's a change_reason mentioning function/automatic, show System
     if (entry.change_reason) {
-      // If there's a change_reason, it might indicate an automatic change
       if (entry.change_reason.includes('function') || entry.change_reason.includes('automatic')) {
         return 'Syst';
       }
-    }
-    
-    if (entry.changed_by) {
-      return entry.changed_by.substring(0, 4);
     }
     
     return 'Syst';
@@ -253,7 +255,14 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto p-2 md:p-6">
         <DialogHeader className="pb-1 md:pb-4">
-          <DialogTitle className="text-xs md:text-lg">Status History - {participantName}</DialogTitle>
+          <DialogTitle className="text-xs md:text-lg">
+            Status History - {participantName}
+            {participantId && (
+              <span className="text-xs text-muted-foreground ml-2">
+                (ID: {participantId.substring(0, 8)}...)
+              </span>
+            )}
+          </DialogTitle>
         </DialogHeader>
         
         {loading ? (
