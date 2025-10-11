@@ -47,29 +47,52 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
     }
     
     if (typeof history === 'object' && !Array.isArray(history)) {
-      return Object.entries(history)
-        .filter(([status, data]: [string, any]) => {
-          // Filter out metadata fields that aren't status entries
-          if (status === 'changed_at' || status === 'changed_by' || status === 'change_reason') return false;
-          // Only keep entries that have objects with changed_at
-          return data !== null && data !== undefined && typeof data === 'object' && data.changed_at;
-        })
-        .map(([status, data]: [string, any]) => {
-          // Handle pending resubmissions (keys like "pending_resubmit_2025-10-11_12:30:45")
-          let displayStatus = status;
-          if (status.startsWith('pending_resubmit_')) {
-            displayStatus = 'pending (re-submitted)';
-          }
-          
-          return {
-            status: displayStatus,
+      const entries: StatusHistoryEntry[] = [];
+      
+      Object.entries(history).forEach(([key, data]: [string, any]) => {
+        // Skip metadata fields
+        if (key === 'changed_at' || key === 'changed_by' || key === 'change_reason') return;
+        
+        if (data === null || data === undefined || typeof data !== 'object') return;
+        
+        // Handle datetime keys (like "2025-10-10 07:54:00")
+        if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/.test(key)) {
+          // This is a status change event with datetime as key
+          const status = data.new_status || data.old_status || 'unknown';
+          entries.push({
+            status: status,
+            changed_at: key,
+            changed_by: data.changed_by,
+            changed_by_email: data.changed_by_email,
+            week_interval: data.week_interval || '',
+            change_reason: `Changed from ${data.old_status || '?'} to ${data.new_status || '?'}`
+          });
+        }
+        // Handle pending resubmissions (keys like "pending_resubmit_2025-10-11_12:30:45")
+        else if (key.startsWith('pending_resubmit_')) {
+          entries.push({
+            status: 'pending (re-submitted)',
+            changed_at: data.changed_at || data.timestamp || new Date().toISOString(),
+            changed_by: data.changed_by || data.changed_via,
+            changed_by_email: data.changed_by_email || 'user',
+            week_interval: data.week_interval || '',
+            change_reason: data.change_reason || data.reason || 'User re-submitted after rejection'
+          });
+        }
+        // Handle normal status entries
+        else if (data.changed_at || data.timestamp) {
+          entries.push({
+            status: key,
             changed_at: data.changed_at || data.timestamp || new Date().toISOString(),
             changed_by: data.changed_by || data.changed_via,
             changed_by_email: data.changed_by_email,
             week_interval: data.week_interval || '',
             change_reason: data.change_reason || data.reason
-          };
-        });
+          });
+        }
+      });
+      
+      return entries;
     }
     
     if (Array.isArray(history)) {
