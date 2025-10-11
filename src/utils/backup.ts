@@ -70,7 +70,7 @@ export class BackupManager {
         checksum
       };
 
-      // Store backup (in production, this would go to cloud storage)
+      // Store backup using IndexedDB
       await this.storeBackup(backupId, backupData, metadata);
 
       console.log('Backup created successfully:', metadata);
@@ -78,6 +78,9 @@ export class BackupManager {
 
     } catch (error) {
       console.error('Backup failed:', error);
+      if (error instanceof Error && error.name === 'QuotaExceededError') {
+        throw new Error('Backup too large. Consider reducing the number of tables or records.');
+      }
       throw error;
     }
   }
@@ -129,11 +132,51 @@ export class BackupManager {
     }
   }
 
-  // List available backups
+  // List available backups from IndexedDB
   async listBackups(): Promise<BackupMetadata[]> {
-    // In production, this would query your backup storage
-    const backups = JSON.parse(localStorage.getItem('backups') || '[]');
-    return backups.sort((a: BackupMetadata, b: BackupMetadata) => b.timestamp - a.timestamp);
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open('BackupDatabase', 1);
+      
+      request.onerror = () => {
+        console.error('Failed to open IndexedDB:', request.error);
+        resolve([]);
+      };
+      
+      request.onupgradeneeded = (event) => {
+        const db = (event.target as IDBOpenDBRequest).result;
+        if (!db.objectStoreNames.contains('backups')) {
+          db.createObjectStore('backups', { keyPath: 'id' });
+        }
+        if (!db.objectStoreNames.contains('metadata')) {
+          db.createObjectStore('metadata', { keyPath: 'id' });
+        }
+      };
+      
+      request.onsuccess = () => {
+        const db = request.result;
+        
+        if (!db.objectStoreNames.contains('metadata')) {
+          db.close();
+          resolve([]);
+          return;
+        }
+        
+        const transaction = db.transaction(['metadata'], 'readonly');
+        const metadataStore = transaction.objectStore('metadata');
+        const getAllRequest = metadataStore.getAll();
+        
+        getAllRequest.onsuccess = () => {
+          const backups = getAllRequest.result || [];
+          db.close();
+          resolve(backups.sort((a, b) => b.timestamp - a.timestamp));
+        };
+        
+        getAllRequest.onerror = () => {
+          db.close();
+          reject(getAllRequest.error);
+        };
+      };
+    });
   }
 
   // Delete old backups
@@ -254,41 +297,113 @@ export class BackupManager {
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
+  // Store backup data using IndexedDB for larger storage capacity
   private async storeBackup(
     backupId: string, 
     data: Record<string, any[]>, 
     metadata: BackupMetadata
   ): Promise<void> {
-    // In production, store in cloud storage (S3, Google Cloud, etc.)
-    // For demo, we'll use localStorage
-    const backups = JSON.parse(localStorage.getItem('backups') || '[]');
-    backups.push(metadata);
-    localStorage.setItem('backups', JSON.stringify(backups));
-    localStorage.setItem(`backup_${backupId}`, JSON.stringify(data));
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open('BackupDatabase', 1);
+      
+      request.onerror = () => reject(request.error);
+      
+      request.onupgradeneeded = (event) => {
+        const db = (event.target as IDBOpenDBRequest).result;
+        if (!db.objectStoreNames.contains('backups')) {
+          db.createObjectStore('backups', { keyPath: 'id' });
+        }
+        if (!db.objectStoreNames.contains('metadata')) {
+          db.createObjectStore('metadata', { keyPath: 'id' });
+        }
+      };
+      
+      request.onsuccess = () => {
+        const db = request.result;
+        const transaction = db.transaction(['backups', 'metadata'], 'readwrite');
+        
+        transaction.onerror = () => reject(transaction.error);
+        transaction.oncomplete = () => {
+          db.close();
+          resolve();
+        };
+        
+        const backupStore = transaction.objectStore('backups');
+        const metadataStore = transaction.objectStore('metadata');
+        
+        backupStore.put({ id: backupId, data });
+        metadataStore.put({ id: backupId, ...metadata });
+      };
+    });
   }
 
   private async retrieveBackup(backupId: string): Promise<{
     backupData: Record<string, any[]>;
     metadata: BackupMetadata;
   }> {
-    const backups = JSON.parse(localStorage.getItem('backups') || '[]');
-    const metadata = backups.find((b: BackupMetadata) => b.id === backupId);
-    
-    if (!metadata) {
-      throw new Error(`Backup ${backupId} not found`);
-    }
-
-    const backupData = JSON.parse(localStorage.getItem(`backup_${backupId}`) || '{}');
-    
-    return { backupData, metadata };
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open('BackupDatabase', 1);
+      
+      request.onerror = () => reject(request.error);
+      
+      request.onsuccess = () => {
+        const db = request.result;
+        const transaction = db.transaction(['backups', 'metadata'], 'readonly');
+        
+        const backupStore = transaction.objectStore('backups');
+        const metadataStore = transaction.objectStore('metadata');
+        
+        const backupRequest = backupStore.get(backupId);
+        const metadataRequest = metadataStore.get(backupId);
+        
+        let backupData: Record<string, any[]>;
+        let metadata: BackupMetadata;
+        
+        backupRequest.onsuccess = () => {
+          backupData = backupRequest.result?.data;
+        };
+        
+        metadataRequest.onsuccess = () => {
+          metadata = metadataRequest.result;
+        };
+        
+        transaction.oncomplete = () => {
+          db.close();
+          if (!backupData || !metadata) {
+            reject(new Error('Backup not found'));
+          } else {
+            resolve({ backupData, metadata });
+          }
+        };
+        
+        transaction.onerror = () => reject(transaction.error);
+      };
+    });
   }
 
   private async deleteBackup(backupId: string): Promise<void> {
-    const backups = JSON.parse(localStorage.getItem('backups') || '[]');
-    const updatedBackups = backups.filter((b: BackupMetadata) => b.id !== backupId);
-    
-    localStorage.setItem('backups', JSON.stringify(updatedBackups));
-    localStorage.removeItem(`backup_${backupId}`);
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open('BackupDatabase', 1);
+      
+      request.onerror = () => reject(request.error);
+      
+      request.onsuccess = () => {
+        const db = request.result;
+        const transaction = db.transaction(['backups', 'metadata'], 'readwrite');
+        
+        transaction.onerror = () => reject(transaction.error);
+        transaction.oncomplete = () => {
+          db.close();
+          resolve();
+        };
+        
+        const backupStore = transaction.objectStore('backups');
+        const metadataStore = transaction.objectStore('metadata');
+        
+        backupStore.delete(backupId);
+        metadataStore.delete(backupId);
+      };
+    });
   }
 
   private parseCSVData(csvString: string): Record<string, any[]> {
