@@ -266,8 +266,9 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
     return 'Syst';
   };
 
+  // Sort from OLDEST to NEWEST (ascending) so creation is first
   const sortedEntries = enrichedEntries.sort((a, b) => 
-    new Date(b.changed_at).getTime() - new Date(a.changed_at).getTime()
+    new Date(a.changed_at).getTime() - new Date(b.changed_at).getTime()
   );
 
   return (
