@@ -10,10 +10,10 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Edit, Copy, Trash2, ChevronDown, ChevronUp, MoreVertical, History } from 'lucide-react';
 import { ContestApplication, ParticipantStatus } from '@/types/admin';
 import { REJECTION_REASONS } from '@/components/reject-reason-modal';
-import { LoadingSpinner } from '@/components/admin/LoadingSpinner';
+import { LoadingSpinner } from '../LoadingSpinner';
 import { useApplicationHistory } from '@/hooks/useApplicationHistory';
 import { Country } from 'country-state-city';
-import { ParticipantStatusHistoryModal } from '@/components/admin/ParticipantStatusHistoryModal';
+import { ParticipantStatusHistoryModal } from '../ParticipantStatusHistoryModal';
 import { useAdminCountry } from '@/contexts/AdminCountryContext';
 import { formatDateInCountry } from '@/utils/weekIntervals';
 

@@ -13,7 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { LoadingSpinner } from '@/components/admin/LoadingSpinner';
+import { LoadingSpinner } from '../LoadingSpinner';
 
 interface AdminPastWeekTabProps {
   participants: WeeklyContestParticipant[];

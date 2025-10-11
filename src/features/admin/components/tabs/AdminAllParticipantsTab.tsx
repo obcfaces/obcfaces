@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Edit, Heart, Star, Info, Copy, Video } from 'lucide-react';
 import { WeeklyContestParticipant } from '@/types/admin';
-import { LoadingSpinner } from '@/components/admin/LoadingSpinner';
+import { LoadingSpinner } from '../LoadingSpinner';
 
 interface AdminAllParticipantsTabProps {
   participants: WeeklyContestParticipant[];

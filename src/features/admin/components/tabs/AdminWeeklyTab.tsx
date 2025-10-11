@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Edit, Heart, Star, Trophy, Copy, Info } from 'lucide-react';
 import { WeeklyContestParticipant } from '@/types/admin';
 import { Label } from '@/components/ui/label';
-import { LoadingSpinner } from '@/components/admin/LoadingSpinner';
+import { LoadingSpinner } from '../LoadingSpinner';
 
 interface AdminWeeklyTabProps {
   participants: WeeklyContestParticipant[];
