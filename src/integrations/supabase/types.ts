@@ -1389,7 +1389,7 @@ export type Database = {
         }[]
       }
       get_contestant_average_rating: {
-        Args: { contestant_name_param: string; participant_id_param?: string }
+        Args: { contestant_name_param: string }
         Returns: number
       }
       get_conversation_unread_count: {
@@ -1671,14 +1671,6 @@ export type Database = {
         Args: { target_contestant_name: string }
         Returns: {
           average_rating: number
-          total_votes: number
-        }[]
-      }
-      get_rating_stats: {
-        Args: { contestant_name_param: string; participant_id_param?: string }
-        Returns: {
-          average_rating: number
-          rating_distribution: Json
           total_votes: number
         }[]
       }
