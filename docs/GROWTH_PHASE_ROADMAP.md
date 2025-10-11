@@ -6,6 +6,50 @@ This roadmap outlines the transition from successful launch to sustainable growt
 
 ---
 
+## 📈 Key Growth Metrics
+
+### Core KPIs to Track
+
+| Metric | Baseline | Week 1 Target | Month 1 Target | How to Measure |
+|--------|----------|---------------|----------------|----------------|
+| **DAU (Daily Active Users)** | 50 | 100 | 500 | Supabase auth logs + analytics |
+| **Conversion to Registration** | 15% | 25% | 35% | Signups / Total visitors |
+| **Average Time on Site** | 2m 30s | 3m 30s | 5m+ | Session duration analytics |
+| **Voting Success Rate** | 60% | 75% | 85% | Successful votes / Total attempts |
+| **Weekly Retention (D7)** | 20% | 30% | 40% | Users active after 7 days |
+| **Participant Submission Rate** | 10% | 15% | 25% | New participants / Total users |
+
+### Growth Tracking Dashboard
+
+```
+📊 /admin/analytics (Coming in v1.1)
+
+┌─────────────────────────────────────────────┐
+│ Today's Snapshot                            │
+├─────────────────────────────────────────────┤
+│ DAU: 127 (+15% vs yesterday)                │
+│ New Registrations: 23                       │
+│ Total Votes Cast: 1,847                     │
+│ Active Participants: 89                     │
+│ Avg Session: 3m 42s                         │
+└─────────────────────────────────────────────┘
+
+📈 Week-over-Week Growth
+📊 Geographic Distribution Map
+⚡ Performance Metrics (LCP, INP, TTFB)
+🔥 Top Performing Countries/Regions
+```
+
+### Success Criteria for v1.1 Release
+
+- ✅ All 4 core metrics improving week-over-week
+- ✅ Zero critical bugs reported
+- ✅ LCP < 2.5s on 90th percentile
+- ✅ Translation coverage at 100% for EN/RU/ES
+- ✅ Automated release process working
+
+---
+
 ## 🎯 Phase 1: Analytics & Insights (Week 1-2)
 
 ### 📈 Admin Analytics Dashboard (`/admin/analytics`)
