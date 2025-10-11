@@ -32,6 +32,42 @@ export const MAIN_PAGE_TEXTS = [
   "Prizes & Verification",
   "Rules & Safety",
   "Questions or disputes?",
+  
+  // ContestCard - Voting and interactions
+  "Rate from 1 (lowest)",
+  "to 5 (highest)",
+  "Like",
+  "Dislike",
+  "Comment",
+  "Share",
+  "Example",
+  
+  // ContestCard - Example instructions
+  "How your photos should look:",
+  "• Look like an ID photo",
+  "• No makeup",
+  "• No filters",
+  "• No glasses allowed",
+  "• Whole body from head to toe",
+  "• Wear tight/fitted clothes. No dresses, skirts, heels",
+  "• No bags or backpacks",
+  
+  // PhotoModal
+  "No comments yet. Be the first!",
+  "Write a comment for this photo...",
+  
+  // Footer
+  "OBC - Online Beauty Contest",
+  "The world's weekly online beauty contest. A global platform that celebrates natural beauty and talent in different categories of participants, offering exciting prizes and international recognition.",
+  "Quick Links",
+  "My Account",
+  "Messages",
+  "Likes",
+  "Legal",
+  "Terms of Service",
+  "Privacy Policy",
+  "All rights reserved.",
+  "Made with",
 ];
 
 export async function seedMissingTranslations(targetLang: string = 'es') {

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { X, ChevronLeft, ChevronRight, ThumbsUp, MessageCircle, Send, Share2, ThumbsDown } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -80,6 +81,7 @@ export function PhotoModal({
   const [isDisliked, setIsDisliked] = useState(false);
   const [isUserVoted, setIsUserVoted] = useState(isVoted);
   const { toast } = useToast();
+  const { t } = useTranslation();
   
   // Use card data hook for contestant data
   const cardData = useCardData(contestantName, user?.id);
@@ -596,8 +598,8 @@ export function PhotoModal({
                     </div>
                   ))}
                   {currentPhotoComments.length === 0 && (
-                    <p className="text-gray-500 text-center py-4 text-sm">
-                      No comments yet. Be the first!
+                  <p className="text-gray-500 text-center py-4 text-sm">
+                      {t("No comments yet. Be the first!")}
                     </p>
                   )}
                 </div>
@@ -610,7 +612,7 @@ export function PhotoModal({
                     ref={textareaRef}
                     value={commentText}
                     onChange={(e) => setCommentText(e.target.value)}
-                    placeholder="Write a comment for this photo..."
+                    placeholder={t("Write a comment for this photo...")}
                     className="flex-1 resize-none min-h-[44px] max-h-[44px] text-sm overflow-hidden"
                     rows={1}
                     onKeyDown={(e) => {
