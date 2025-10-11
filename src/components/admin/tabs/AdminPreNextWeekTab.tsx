@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Edit, Info } from 'lucide-react';
 import { WeeklyContestParticipant } from '@/types/admin';
 import { LoadingSpinner } from '@/components/admin/LoadingSpinner';
+import { useAdminCountry } from '@/contexts/AdminCountryContext';
+import { formatDateInCountry } from '@/utils/weekIntervals';
 
 interface AdminPreNextWeekTabProps {
   participants: WeeklyContestParticipant[];
@@ -25,9 +27,19 @@ export function AdminPreNextWeekTab({
   onStatusHistory,
   loading = false,
 }: AdminPreNextWeekTabProps) {
+  const { selectedCountry } = useAdminCountry();
+
+  const filteredParticipants = useMemo(() => {
+    return participants.filter(p => {
+      const country = p.application_data?.country || p.profiles?.country;
+      return country === selectedCountry;
+    });
+  }, [participants, selectedCountry]);
+
   if (loading) {
     return <LoadingSpinner message="Loading pre next week list..." />;
   }
+  
   const getStatusBackgroundColor = (status: string) => {
     switch (status) {
       case 'pre next week':
@@ -47,9 +59,9 @@ export function AdminPreNextWeekTab({
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Pre Next Week</h2>
+      <h2 className="text-2xl font-bold">Pre Next Week ({filteredParticipants.length})</h2>
 
-      {participants.map((participant) => {
+      {filteredParticipants.map((participant) => {
         const appData = participant.application_data || {};
         const firstName = appData.first_name || '';
         const lastName = appData.last_name || '';

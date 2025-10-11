@@ -168,3 +168,47 @@ export const createDynamicPastWeekFilters = () => {
   
   return filters;
 };
+
+/**
+ * convertToCountryTime
+ * Converts a UTC date to the specified country's timezone
+ */
+export function convertToCountryTime(date: Date | string, countryCode: string): Date {
+  const timezone = getCountryCapitalTimezone(countryCode);
+  const utcDate = typeof date === 'string' ? new Date(date) : date;
+  const timeString = utcDate.toLocaleString('en-US', { timeZone: timezone });
+  return new Date(timeString);
+}
+
+/**
+ * formatDateInCountry
+ * Formats a date in the specified country's timezone
+ * Format: "11 oct 12:48"
+ */
+export function formatDateInCountry(date: Date | string, countryCode: string): string {
+  const countryDate = convertToCountryTime(date, countryCode);
+  
+  const day = countryDate.getDate();
+  const month = countryDate.toLocaleString('en-US', { month: 'short' }).toLowerCase();
+  const hours = String(countryDate.getHours()).padStart(2, '0');
+  const minutes = String(countryDate.getMinutes()).padStart(2, '0');
+  
+  return `${day} ${month} ${hours}:${minutes}`;
+}
+
+/**
+ * formatFullDateInCountry
+ * Formats a full date with year in the specified country's timezone
+ * Format: "11 Oct 2025 12:48"
+ */
+export function formatFullDateInCountry(date: Date | string, countryCode: string): string {
+  const countryDate = convertToCountryTime(date, countryCode);
+  
+  const day = countryDate.getDate();
+  const month = countryDate.toLocaleString('en-US', { month: 'short' });
+  const year = countryDate.getFullYear();
+  const hours = String(countryDate.getHours()).padStart(2, '0');
+  const minutes = String(countryDate.getMinutes()).padStart(2, '0');
+  
+  return `${day} ${month} ${year} ${hours}:${minutes}`;
+}

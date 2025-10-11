@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +14,8 @@ import { LoadingSpinner } from '@/components/admin/LoadingSpinner';
 import { useApplicationHistory } from '@/hooks/useApplicationHistory';
 import { Country } from 'country-state-city';
 import { ParticipantStatusHistoryModal } from '@/components/admin/ParticipantStatusHistoryModal';
+import { useAdminCountry } from '@/contexts/AdminCountryContext';
+import { formatDateInCountry } from '@/utils/weekIntervals';
 
 interface AdminNewApplicationsTabProps {
   applications: ContestApplication[];
@@ -44,12 +46,28 @@ export function AdminNewApplicationsTab({
 }: AdminNewApplicationsTabProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [expandedHistory, setExpandedHistory] = useState<Set<string>>(new Set());
+  const { selectedCountry } = useAdminCountry();
   
   if (loading) {
     return <LoadingSpinner message="Loading applications..." />;
   }
 
-  const displayApplications = showDeleted ? deletedApplications : applications;
+  // Filter by selected country
+  const filteredApplications = useMemo(() => {
+    return applications.filter(app => {
+      const country = app.application_data?.country;
+      return country === selectedCountry;
+    });
+  }, [applications, selectedCountry]);
+
+  const filteredDeletedApplications = useMemo(() => {
+    return deletedApplications.filter(app => {
+      const country = app.application_data?.country;
+      return country === selectedCountry;
+    });
+  }, [deletedApplications, selectedCountry]);
+
+  const displayApplications = showDeleted ? filteredDeletedApplications : filteredApplications;
 
   const getStatusBackgroundColor = (status: string) => {
     switch (status) {

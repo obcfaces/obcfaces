@@ -23,7 +23,7 @@ import { MiniStars } from '@/components/mini-stars';
 import { 
   Calendar, FileText, UserCog, Eye, Edit, Check, X, Trash2, 
   RotateCcw, Copy, Facebook, Minus, AlertCircle, Trophy, ChevronDown, ChevronUp, Shield, Info,
-  Star, Heart, Loader2, Video
+  Star, Heart, Loader2, Video, Globe
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -49,6 +49,13 @@ import { AdminAllParticipantsTab } from '@/components/admin/tabs/AdminAllPartici
 import { AdminRegistrationsTab } from '@/components/admin/tabs/AdminRegistrationsTab';
 import { AdminStatisticsTab } from '@/components/admin/tabs/AdminStatisticsTab';
 import { BackupTrigger } from '@/components/admin/BackupTrigger';
+import { AdminCountryProvider, useAdminCountry } from '@/contexts/AdminCountryContext';
+import { CONTEST_COUNTRIES } from '@/types/admin';
+import { 
+  getWeekIntervalForStatus, 
+  getAvailableWeekIntervals, 
+  createDynamicPastWeekFilters 
+} from '@/utils/weekIntervals';
 
 // Unified status type for participants - only real statuses from DB
 type ParticipantStatus = 'pending' | 'rejected' | 'pre next week' | 'this week' | 'next week' | 'next week on site' | 'past';
@@ -69,194 +76,6 @@ const isReasonDuplicate = (rejectionReason: string, reasonTypes: string[]) => {
          predefinedReasons.every(reason => rejectionReason.includes(reason));
 };
 
-// =============================================
-// ЦЕНТРАЛЬНАЯ СИСТЕМА ОПРЕДЕЛЕНИЯ НЕДЕЛЬНЫХ ИНТЕРВАЛОВ
-// =============================================
-
-/**
- * Получить временную зону столицы страны
- */
-const getCountryCapitalTimezone = (countryCode: string): string => {
-  const timezones: { [key: string]: string } = {
-    'PH': 'Asia/Manila',     // Philippines
-    'US': 'America/New_York', // United States
-    'RU': 'Europe/Moscow',   // Russia
-    'GB': 'Europe/London',   // United Kingdom
-    'DE': 'Europe/Berlin',   // Germany
-    'FR': 'Europe/Paris',    // France
-    'ES': 'Europe/Madrid',   // Spain
-    'IT': 'Europe/Rome',     // Italy
-    // Добавить другие страны по необходимости
-  };
-  
-  return timezones[countryCode] || 'UTC';
-};
-
-/**
- * ГЛАВНАЯ ФУНКЦИЯ: Получить правильный интервал недели (понедельник-воскресенье)
- * для заданной даты в указанной стране
- */
-const getStrictWeekInterval = (date: Date, countryCode: string = 'PH'): { start: Date, end: Date, formatted: string } => {
-  const timezone = getCountryCapitalTimezone(countryCode);
-  
-  // Конвертировать дату в временную зону страны
-  const localDate = new Date(date.toLocaleString("en-US", { timeZone: timezone }));
-  
-  // Найти понедельник этой недели (ISO week - понедельник = 1, воскресенье = 0)
-  const dayOfWeek = localDate.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-  const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Если воскресенье, то -6, иначе 1 - день недели
-  
-  const monday = new Date(localDate);
-  monday.setDate(localDate.getDate() + mondayOffset);
-  monday.setHours(0, 0, 0, 0);
-  
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
-  sunday.setHours(23, 59, 59, 999);
-  
-  // Форматирование: dd/mm - dd/mm/yy - используем правильный год события
-  const formatDate = (d: Date) => d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' });
-  const formatYear = (d: Date) => String(d.getFullYear()).slice(-2);
-  
-  const formatted = `${formatDate(monday)}-${formatDate(sunday)}/${formatYear(sunday)}`;
-  
-  // Remove console logs for performance
-  // console.log(`STRICT WEEK CALCULATION: Input: ${date.toISOString()}, Country: ${countryCode}, Timezone: ${timezone}`);
-  // console.log(`STRICT WEEK RESULT: Monday: ${monday.toISOString()}, Sunday: ${sunday.toISOString()}, Formatted: ${formatted}`);
-  
-  return {
-    start: monday,
-    end: sunday,
-    formatted
-  };
-};
-
-/**
- * Получить текущую неделю для страны
- */
-const getCurrentWeekInterval = (countryCode: string = 'PH') => {
-  return getStrictWeekInterval(new Date(), countryCode);
-};
-
-/**
- * Получить неделю N недель назад
- */
-const getPastWeekInterval = (weeksAgo: number, countryCode: string = 'PH') => {
-  // Правильные интервалы для 2025 года
-  const intervals = {
-    1: { start: new Date('2025-09-22'), end: new Date('2025-09-28'), formatted: '22/09-28/09/25' },
-    2: { start: new Date('2025-09-15'), end: new Date('2025-09-21'), formatted: '15/09-21/09/25' },
-    3: { start: new Date('2025-09-08'), end: new Date('2025-09-14'), formatted: '08/09-14/09/25' },
-    4: { start: new Date('2025-09-01'), end: new Date('2025-09-07'), formatted: '01/09-07/09/25' }
-  };
-  return intervals[weeksAgo as keyof typeof intervals] || intervals[1];
-};
-
-/**
- * Получить неделю N недель вперед
- */
-const getFutureWeekInterval = (weeksAhead: number, countryCode: string = 'PH') => {
-  // Правильные интервалы для 2025 года
-  const intervals = {
-    1: { start: new Date('2025-10-06'), end: new Date('2025-10-12'), formatted: '06/10-12/10/25' },
-    2: { start: new Date('2025-10-13'), end: new Date('2025-10-19'), formatted: '13/10-19/10/25' },
-    3: { start: new Date('2025-10-20'), end: new Date('2025-10-26'), formatted: '20/10-26/10/25' }
-  };
-  return intervals[weeksAhead as keyof typeof intervals] || intervals[1];
-};
-
-/**
- * Получить week_interval для admin_status (динамически на основе текущей даты)
- */
-const getWeekIntervalForStatus = (adminStatus: string): string => {
-  const currentWeek = getCurrentWeekInterval('PH');
-  const nextWeek = getFutureWeekInterval(1, 'PH');
-  const pastWeek = getPastWeekInterval(1, 'PH');
-  
-  const statusMapping: { [key: string]: string } = {
-    'this week': currentWeek.formatted,
-    'next week': nextWeek.formatted,
-    'next week on site': nextWeek.formatted,
-    'pre next week': nextWeek.formatted,
-    'past': pastWeek.formatted,
-  };
-  
-  return statusMapping[adminStatus] || currentWeek.formatted;
-};
-
-/**
- * Получить список доступных интервалов недель начиная с текущей недели
- */
-const getAvailableWeekIntervals = () => {
-  const intervals = [];
-  const currentDate = new Date();
-  
-  // Добавляем текущую неделю и следующие недели
-  for (let i = 0; i < 12; i++) {
-    const weekDate = new Date(currentDate);
-    weekDate.setDate(currentDate.getDate() + (i * 7));
-    const weekInterval = getStrictWeekInterval(weekDate, 'PH');
-    
-    intervals.push({
-      value: weekInterval.formatted,
-      label: weekInterval.formatted
-    });
-  }
-  
-  // Добавляем прошлые недели
-  for (let i = 1; i <= 8; i++) {
-    const weekDate = new Date(currentDate);
-    weekDate.setDate(currentDate.getDate() - (i * 7));
-    const weekInterval = getStrictWeekInterval(weekDate, 'PH');
-    
-    intervals.unshift({
-      value: weekInterval.formatted,
-      label: weekInterval.formatted
-    });
-  }
-  
-  return intervals;
-};
-
-// Helper function to get dynamic past week filters based on actual data
-const createDynamicPastWeekFilters = () => {
-  // Используем правильные статические интервалы для 2025 года
-  const staticWeeks = [
-    '06/10-12/10/25', // Текущая неделя (для past статуса после transition)
-    '29/09-05/10/25', // Бывший "1 week ago"
-    '22/09-28/09/25', // Бывший "2 weeks ago"  
-    '15/09-21/09/25', // Бывший "3 weeks ago"
-    '08/09-14/09/25', // 4 weeks ago
-    '01/09-07/09/25', // 5 weeks ago
-    '18/08-24/08/25'  // 6 weeks ago
-  ];
-  
-  // Return static weeks already sorted
-  const sortedWeeks = staticWeeks;
-  
-  // Create filters for each week - просто показываем интервал даты
-  const filters: Array<{ id: string; label: string; mobileLabel: string; weekInterval?: string }> = [
-    { id: 'all', label: 'All Past Weeks', mobileLabel: 'All Past' }
-  ];
-  
-  let weekCounter = 0; // Начинаем с 0 для первого интервала
-  sortedWeeks.forEach(week => {
-    // Лейбл - просто интервал дат
-    const filterLabel = week;
-    const mobileLabel = week;
-    
-    filters.push({
-      id: `past week ${weekCounter + 1}`,
-      label: filterLabel,
-      mobileLabel: mobileLabel,
-      weekInterval: week
-    });
-    
-    weekCounter++;
-  });
-  
-  return filters;
-};
 
 
 
@@ -373,7 +192,7 @@ interface WeeklyContestParticipant {
 }
 
 
-const Admin = () => {
+const AdminContent = () => {
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -402,7 +221,6 @@ const Admin = () => {
   const [selectedParticipantForVoters, setSelectedParticipantForVoters] = useState<{ id: string; name: string } | null>(null);
   const [nextWeekVotersModalOpen, setNextWeekVotersModalOpen] = useState(false);
   const [selectedParticipantForNextWeekVoters, setSelectedParticipantForNextWeekVoters] = useState<string>('');
-  const [countryFilter, setCountryFilter] = useState<string>('all');
   const [genderFilter, setGenderFilter] = useState<string>('all');
   const [adminStatusFilter, setAdminStatusFilter] = useState<string>('all'); // For Weekly tab
   const [registrationsStatusFilter, setRegistrationsStatusFilter] = useState<string>('all'); // For Registrations/New tab
@@ -411,6 +229,8 @@ const Admin = () => {
   const [showDeletedAll, setShowDeletedAll] = useState(false);
   const [deleteConfirmParticipant, setDeleteConfirmParticipant] = useState<{ id: string; name: string } | null>(null);
   const [filteredWeeklyParticipants, setFilteredWeeklyParticipants] = useState<any[]>([]);
+  
+  const { selectedCountry, setSelectedCountry, timezone } = useAdminCountry();
   const [selectedUserApplications, setSelectedUserApplications] = useState<string | null>(null);
   const [editingApplicationId, setEditingApplicationId] = useState<string | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -3248,6 +3068,44 @@ const Admin = () => {
             <BackupTrigger />
           </div>
 
+          {/* Global Country Filter */}
+          <Card className="mb-6 bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
+            <CardContent className="pt-6">
+              <div className="flex flex-col md:flex-row md:items-center gap-4">
+                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                  <Globe className="w-4 h-4" />
+                  <span>Contest Country:</span>
+                </div>
+                <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+                  <SelectTrigger className="w-full md:w-[280px] bg-background">
+                    <SelectValue>
+                      {CONTEST_COUNTRIES.find(c => c.code === selectedCountry) && (
+                        <span className="flex items-center gap-2">
+                          <span className="text-xl">{CONTEST_COUNTRIES.find(c => c.code === selectedCountry)!.flag}</span>
+                          <span>{CONTEST_COUNTRIES.find(c => c.code === selectedCountry)!.name}</span>
+                        </span>
+                      )}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CONTEST_COUNTRIES.map(country => (
+                      <SelectItem key={country.code} value={country.code}>
+                        <span className="flex items-center gap-2">
+                          <span className="text-xl">{country.flag}</span>
+                          <span>{country.name}</span>
+                          <span className="text-xs text-muted-foreground ml-auto">({country.capital})</span>
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Badge variant="secondary" className="w-fit">
+                  {timezone}
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+
           <Tabs value={activeTab} onValueChange={(tab) => {
             console.log('📑 Tab changed to:', tab);
             setActiveTab(tab);
@@ -4538,6 +4396,14 @@ const Admin = () => {
         </AlertDialogContent>
       </AlertDialog>
     </>
+  );
+};
+
+const Admin = () => {
+  return (
+    <AdminCountryProvider>
+      <AdminContent />
+    </AdminCountryProvider>
   );
 };
 
