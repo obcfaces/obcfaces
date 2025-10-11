@@ -83,18 +83,14 @@ export const ContestWeeksRenderer = ({
         />
       </section>
       
-      {/* Virtualized past weeks for performance */}
-      {enableVirtualization && pastWeekItems.length > 3 ? (
-        <VirtualizedList
-          items={pastWeekItems}
-          itemHeight={600}
-          containerHeight={800}
-          renderItem={(item) => item.component}
-        />
-      ) : (
-        // Fallback to regular rendering for small lists
-        pastWeekItems.map(item => item.component)
-      )}
+      {/* Past weeks - regular rendering to prevent overlapping */}
+      <div className="space-y-4">
+        {pastWeekItems.map(item => (
+          <div key={item.id} className="w-full">
+            {item.component}
+          </div>
+        ))}
+      </div>
     </>
   );
 };
