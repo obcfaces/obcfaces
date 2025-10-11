@@ -12,7 +12,7 @@ interface RateLimitRequest {
   windowMinutes?: number;
 }
 
-const DEFAULT_MAX_REQUESTS = 60;
+const DEFAULT_MAX_REQUESTS = 30;
 const DEFAULT_WINDOW_MINUTES = 1;
 
 serve(async (req) => {
