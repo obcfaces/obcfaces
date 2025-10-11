@@ -1,0 +1,42 @@
+{
+  "name": "OBC Face Contest",
+  "short_name": "OBC Face",
+  "description": "Online Beauty Contest - Weekly Face Contest Platform",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/obc-favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/obc-favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["entertainment", "social"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Contest",
+      "short_name": "Contest",
+      "description": "View current contest",
+      "url": "/",
+      "icons": []
+    },
+    {
+      "name": "Admin",
+      "short_name": "Admin",
+      "description": "Admin panel",
+      "url": "/admin",
+      "icons": []
+    }
+  ]
+}

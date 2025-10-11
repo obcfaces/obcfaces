@@ -31,16 +31,22 @@ const MemoizedContestantCardComponent: React.FC<MemoizedContestantCardProps> = (
   return <ContestantCard {...props} />;
 };
 
-// Memoize with shallow comparison of props
+// Deep memoization with all critical props
 export const MemoizedContestantCard = memo(
   MemoizedContestantCardComponent,
   (prevProps, nextProps) => {
+    // Compare all props that affect rendering
     return (
       prevProps.profileId === nextProps.profileId &&
+      prevProps.participantId === nextProps.participantId &&
       prevProps.viewMode === nextProps.viewMode &&
       prevProps.rating === nextProps.rating &&
       prevProps.isVoted === nextProps.isVoted &&
-      prevProps.rank === nextProps.rank
+      prevProps.rank === nextProps.rank &&
+      prevProps.name === nextProps.name &&
+      prevProps.userHasRated === nextProps.userHasRated &&
+      prevProps.isWinner === nextProps.isWinner &&
+      prevProps.weekInterval === nextProps.weekInterval
     );
   }
 );
