@@ -156,7 +156,7 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
           
           // Add initial pending status with Manila time
           entries.push({
-            status: 'pending',
+            status: 'created_at',
             changed_at: manilaCreatedStr,
             changed_by_email: 'user',
             change_reason: 'Application created',
@@ -230,6 +230,8 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status.toLowerCase()) {
+      case 'created_at':
+        return 'outline';
       case 'this week':
         return 'default';
       case 'next week':
