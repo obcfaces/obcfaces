@@ -1,6 +1,6 @@
-import { ContestSection } from "@/components/contest-section";
-import { NextWeekSection } from "@/components/next-week-section";
-import { usePastWeekIntervals } from "@/hooks/usePastWeekIntervals";
+import { ContestSection } from "./ContestSection";
+import { NextWeekSection } from "./NextWeekSection";
+import { usePastWeekIntervals } from "../hooks/usePastWeekIntervals";
 import { VirtualizedList } from "@/components/performance/VirtualizedList";
 import { useMemo } from "react";
 

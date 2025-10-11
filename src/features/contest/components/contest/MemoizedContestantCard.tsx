@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { ContestantCard } from '@/components/contest-card';
+import { ContestantCard } from "../ContestCard";
 
 interface MemoizedContestantCardProps {
   rank: number;

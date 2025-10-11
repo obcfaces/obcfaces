@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { useCardData } from "@/hooks/useCardData";
 import { useParticipantData } from "@/hooks/useParticipantData";
 import LoginModalContent from "@/components/login-modal-content";
-import { ContestParticipationModal } from "@/components/contest-participation-modal";
+import { ContestParticipationModal } from "@/features/contest/components/ContestParticipationModal";
 
 // Import contest images for mock display
 import contestant1Face from "@/assets/contestant-1-face.jpg";

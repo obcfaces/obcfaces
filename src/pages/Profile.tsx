@@ -17,7 +17,7 @@ import PostCard from "@/components/profile/PostCard";
 import LikedItem from "@/components/profile/LikedItem";
 import { PhotoModal } from "@/components/photo-modal";
 import { ProfilePhotoModal } from "@/components/profile-photo-modal";
-import { ContestParticipationModal } from "@/components/contest-participation-modal";
+import { ContestParticipationModal } from "@/features/contest/components/ContestParticipationModal";
 import CreatePostModal from "@/components/create-post-modal";
 import { REJECTION_REASONS, RejectReasonModal, RejectionReasonType } from "@/components/reject-reason-modal";
 import { AuthProtectedModal } from "@/components/auth-protected-modal";
