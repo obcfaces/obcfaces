@@ -31,6 +31,8 @@ const ContestContent = () => {
         title="Contest – Weekly Beauty Competition Entries"
         description="Browse weekly beauty contest entries and finalists. Vote for your favorite contestants and see past winners."
         canonicalPath="/contest"
+        locale={`${countryCode.toLowerCase()}-${timezone}`}
+        generateHreflang={true}
       />
 
       <main className="min-h-screen bg-background">

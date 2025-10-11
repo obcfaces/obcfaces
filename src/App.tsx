@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Navigate, useParams } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { lazy, Suspense } from "react";
 import Index from "./pages/Index";
@@ -30,7 +30,18 @@ const ResetPassword = lazy(() => import("./features/auth/pages/ResetPasswordPage
 const TestTransition = lazy(() => import("./pages/TestTransition"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
+// Redirect components for routing
+function CountryRedirect() {
+  const { cc } = useParams();
+  const savedLang = localStorage.getItem("ui_lang") || "en";
+  return <Navigate to={`/${savedLang}-${cc}`} replace />;
+}
 
+function LegacyContestRedirect() {
+  const savedLang = localStorage.getItem("ui_lang") || "en";
+  const savedCc = localStorage.getItem("ui_cc") || "ph";
+  return <Navigate to={`/${savedLang}-${savedCc}/contest`} replace />;
+}
 
 const queryClient = new QueryClient();
 
@@ -74,10 +85,10 @@ const App = () => {
                 }>
                   <Routes>
                     <Route path="/" element={<Index />} />
-                    {/* Legacy /contest route */}
-                    <Route path="/contest" element={<Contest />} />
-                    {/* Locale-specific contest routes (e.g., /en-ph, /ru-kz) */}
-                    <Route path="/:locale" element={<Contest />} />
+                    
+                    {/* Legacy redirect for /contest */}
+                    <Route path="/contest" element={<LegacyContestRedirect />} />
+                    
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/account" element={<Account />} />
                     <Route path="/u/:id" element={<Profile />} />
@@ -89,6 +100,15 @@ const App = () => {
                     <Route path="/likes" element={<Likes />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/test-transition" element={<TestTransition />} />
+                    
+                    {/* Locale-based contest routes */}
+                    <Route path="/:locale" element={<Contest />} />
+                    <Route path="/:locale/contest" element={<Contest />} />
+                    <Route path="/:locale/contest/:week" element={<Contest />} />
+                    
+                    {/* Country code redirect (e.g., /ph -> /en-ph) */}
+                    <Route path="/:cc" element={<CountryRedirect />} />
+                    
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>

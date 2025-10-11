@@ -1,4 +1,5 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SearchableSelect, { type Option } from "@/components/ui/searchable-select";
 import HeightFilterDropdown from "@/components/ui/height-filter-dropdown";
@@ -54,6 +55,73 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
   weight,
   onWeightChange,
 }) => {
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Sync filters with URL on mount
+  useEffect(() => {
+    const urlGender = searchParams.get("gender");
+    const urlAge = searchParams.get("age");
+    const urlMarital = searchParams.get("marital");
+    const urlChildren = searchParams.get("children");
+    const urlHeight = searchParams.get("height");
+    const urlWeight = searchParams.get("weight");
+    const urlView = searchParams.get("view");
+
+    if (urlGender && urlGender !== gender) onGenderChange(urlGender as Gender);
+    if (urlAge && urlAge !== age) onAgeChange?.(urlAge);
+    if (urlMarital && urlMarital !== maritalStatus) onMaritalStatusChange?.(urlMarital);
+    if (urlChildren && urlChildren !== hasChildren) onHasChildrenChange?.(urlChildren);
+    if (urlHeight && urlHeight !== height) onHeightChange?.(urlHeight);
+    if (urlWeight && urlWeight !== weight) onWeightChange?.(urlWeight);
+    if (urlView && urlView !== viewMode) onViewModeChange(urlView as ViewMode);
+  }, []);
+
+  // Helper to update URL params
+  const updateUrlParam = (key: string, value: string | undefined) => {
+    const params = new URLSearchParams(searchParams);
+    if (value && value !== "" && value !== "all") {
+      params.set(key, value);
+    } else {
+      params.delete(key);
+    }
+    setSearchParams(params, { replace: false });
+  };
+
+  // Wrapped handlers to sync with URL
+  const handleGenderChange = (value: Gender) => {
+    onGenderChange(value);
+    updateUrlParam("gender", value);
+  };
+
+  const handleAgeChange = (value: string) => {
+    onAgeChange?.(value);
+    updateUrlParam("age", value);
+  };
+
+  const handleMaritalChange = (value: string) => {
+    onMaritalStatusChange?.(value);
+    updateUrlParam("marital", value);
+  };
+
+  const handleChildrenChange = (value: string) => {
+    onHasChildrenChange?.(value);
+    updateUrlParam("children", value);
+  };
+
+  const handleHeightChange = (value: string) => {
+    onHeightChange?.(value);
+    updateUrlParam("height", value);
+  };
+
+  const handleWeightChange = (value: string) => {
+    onWeightChange?.(value);
+    updateUrlParam("weight", value);
+  };
+
+  const handleViewChange = (value: ViewMode) => {
+    onViewModeChange(value);
+    updateUrlParam("view", value);
+  };
 
   const genderOptions: Option[] = useMemo(() => {
     const av = genderAvailability ?? { male: false, female: true };
@@ -81,7 +149,7 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
         <div className="w-24 shrink-0">
           <SearchableSelect
             value={gender}
-            onValueChange={(v) => onGenderChange(v as Gender)}
+            onValueChange={(v) => handleGenderChange(v as Gender)}
             options={genderOptions}
             placeholder="Select gender"
             ariaLabel="Gender filter"
@@ -93,7 +161,7 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
         <div className="ml-auto flex items-center gap-1 shrink-0">
           <button
             type="button"
-            onClick={() => onViewModeChange("compact")}
+            onClick={() => handleViewChange("compact")}
             aria-pressed={viewMode === "compact"}
             aria-label="List view"
             className="p-1 rounded-md hover:bg-accent transition-colors"
@@ -106,7 +174,7 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
           </button>
           <button
             type="button"
-            onClick={() => onViewModeChange("full")}
+            onClick={() => handleViewChange("full")}
             aria-pressed={viewMode === "full"}
             aria-label="Grid view"
             className="p-1 rounded-md hover:bg-accent transition-colors"
@@ -125,7 +193,7 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
         {/* Age filter */}
         {onAgeChange && (
           <div className="w-24 shrink-0">
-            <Select value={age || ""} onValueChange={onAgeChange}>
+            <Select value={age || ""} onValueChange={handleAgeChange}>
               <SelectTrigger className="text-sm h-9 bg-background border border-input">
                 <SelectValue placeholder="Age" />
               </SelectTrigger>
@@ -143,7 +211,7 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
         {/* Marital Status filter */}
         {onMaritalStatusChange && (
           <div className="w-28 shrink-0">
-            <Select value={maritalStatus || ""} onValueChange={onMaritalStatusChange}>
+            <Select value={maritalStatus || ""} onValueChange={handleMaritalChange}>
               <SelectTrigger className="text-sm h-9 bg-background border border-input">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
@@ -161,7 +229,7 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
         {/* Has Children filter */}
         {onHasChildrenChange && (
           <div className="w-28 shrink-0">
-            <Select value={hasChildren || ""} onValueChange={onHasChildrenChange}>
+            <Select value={hasChildren || ""} onValueChange={handleChildrenChange}>
               <SelectTrigger className="text-sm h-9 bg-background border border-input">
                 <SelectValue placeholder="Children" />
               </SelectTrigger>
@@ -179,7 +247,7 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
           <div className="w-24 shrink-0">
             <HeightFilterDropdown
               value={height}
-              onSelect={(value) => onHeightChange?.(value.label)}
+              onSelect={(value) => handleHeightChange(value.label)}
               className="text-sm h-9 bg-background border border-input"
             />
           </div>
@@ -190,7 +258,7 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
           <div className="w-24 shrink-0">
             <WeightFilterDropdown
               value={weight}
-              onSelect={(value) => onWeightChange?.(value.label)}
+              onSelect={(value) => handleWeightChange(value.label)}
               className="text-sm h-9 bg-background border border-input"
             />
           </div>
