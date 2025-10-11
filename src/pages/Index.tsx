@@ -14,9 +14,6 @@ import { toast } from "sonner";
 const Index = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { isAdmin } = useAdminStatus();
-  const { t } = useTranslation();
-  const [testTranslation, setTestTranslation] = useState("");
-  const [isTranslating, setIsTranslating] = useState(false);
   
   // Initialize state from URL params or defaults
   const [country, setCountry] = useState<string>(() => searchParams.get("country") || "PH");
@@ -48,46 +45,6 @@ const Index = () => {
     setCategory(newCategory);
   };
 
-  // Test auto-translate function
-  const handleTestTranslation = async () => {
-    const testText = 'Welcome to the beauty contest!';
-    console.log('🔄 Starting auto-translate for:', testText);
-    setIsTranslating(true);
-    try {
-      // Call auto-translate edge function
-      console.log('📞 Calling auto-translate edge function...');
-      const { data, error } = await supabase.functions.invoke('auto-translate');
-      
-      console.log('📦 Response:', { data, error });
-      
-      if (error) {
-        toast.error(`Translation error: ${error.message}`);
-        console.error('❌ Auto-translate error:', error);
-      } else {
-        const translated = data?.translated || 0;
-        toast.success(`✅ Translated ${translated} keys`);
-        console.log('✅ Auto-translate result:', data);
-        
-        // Immediately fetch the new translation
-        const newTranslation = await t(testText);
-        console.log('🔄 New translation:', newTranslation);
-        setTestTranslation(newTranslation);
-      }
-    } catch (error) {
-      console.error('💥 Translation error:', error);
-      toast.error('Failed to call auto-translate function');
-    } finally {
-      setIsTranslating(false);
-    }
-  };
-
-  // Test translation key
-  useEffect(() => {
-    const testText = 'Welcome to the beauty contest!';
-    const translation = t(testText);
-    setTestTranslation(translation);
-    console.log('Test translation:', translation);
-  }, [t]);
   
   console.log('Index component rendering, viewMode:', viewMode);
   return (
@@ -106,23 +63,6 @@ const Index = () => {
       {/* Content area that changes based on active section */}
       {activeSection === "Contest" && (
         <>
-          {/* Test Auto-Translate Button (only for admins) */}
-          {isAdmin && (
-            <div className="max-w-6xl mx-auto px-6 pt-6">
-              <div className="bg-muted p-4 rounded-lg space-y-2">
-                <p className="text-sm font-mono">Test Translation: {testTranslation}</p>
-                <Button 
-                  onClick={handleTestTranslation}
-                  disabled={isTranslating}
-                  size="sm"
-                  variant="outline"
-                >
-                  {isTranslating ? 'Translating...' : 'Test Auto-Translate'}
-                </Button>
-              </div>
-            </div>
-          )}
-          
           <div className="max-w-6xl mx-auto px-6 pt-6 pb-6 rounded-lg shadow-lg shadow-foreground/15">
             <ContestFilters
               country={country}
