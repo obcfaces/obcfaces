@@ -170,6 +170,37 @@ export class ParticipantsService {
   }
 
   /**
+   * Батч-загрузка статистики рейтингов для нескольких участников
+   */
+  static async getParticipantStatsBulk(participantIds: string[]) {
+    if (!participantIds || participantIds.length === 0) {
+      return [];
+    }
+
+    // Используем параллельные запросы для батчей (по 50 ID)
+    const BATCH_SIZE = 50;
+    const batches: string[][] = [];
+    
+    for (let i = 0; i < participantIds.length; i += BATCH_SIZE) {
+      batches.push(participantIds.slice(i, i + BATCH_SIZE));
+    }
+
+    const results = await Promise.all(
+      batches.map(async (batch) => {
+        const { data, error } = await supabase
+          .from('weekly_contest_participants')
+          .select('id, total_votes, average_rating')
+          .in('id', batch);
+
+        if (error) throw error;
+        return data || [];
+      })
+    );
+
+    return results.flat();
+  }
+
+  /**
    * Получить уникальные страны из участников
    */
   static async getUniqueCountries() {

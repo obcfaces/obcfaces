@@ -36,6 +36,11 @@ export const PublicCountryProvider: React.FC<{ children: ReactNode }> = ({ child
 
   const navigateToLocale = (newCountryCode: string, newLanguageCode?: string) => {
     const lang = newLanguageCode || languageCode;
+    
+    // Save to localStorage for redirects
+    localStorage.setItem("ui_lang", lang);
+    localStorage.setItem("ui_cc", newCountryCode.toLowerCase());
+    
     navigate(`/${lang}-${newCountryCode.toLowerCase()}`);
   };
 
