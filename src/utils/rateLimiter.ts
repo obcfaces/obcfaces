@@ -60,6 +60,36 @@ export const withRateLimit = <T extends (...args: any[]) => Promise<any>>(
 };
 
 /**
+ * Predefined rate limit configurations for different operations
+ */
+export const rateLimitConfigs = {
+  // Authentication operations - strict limits
+  login: { endpoint: 'auth/login', maxRequests: 5, windowMinutes: 1 },
+  signup: { endpoint: 'auth/signup', maxRequests: 3, windowMinutes: 1 },
+  passwordReset: { endpoint: 'auth/password-reset', maxRequests: 3, windowMinutes: 5 },
+  
+  // Voting operations - moderate limits
+  vote: { endpoint: 'vote', maxRequests: 10, windowMinutes: 1 },
+  rating: { endpoint: 'rating', maxRequests: 15, windowMinutes: 1 },
+  
+  // File operations - strict limits
+  fileUpload: { endpoint: 'upload', maxRequests: 5, windowMinutes: 1 },
+  imageUpload: { endpoint: 'upload/image', maxRequests: 10, windowMinutes: 1 },
+  
+  // Read operations - generous limits
+  read: { endpoint: 'read', maxRequests: 60, windowMinutes: 1 },
+  search: { endpoint: 'search', maxRequests: 30, windowMinutes: 1 },
+  
+  // Social operations
+  like: { endpoint: 'like', maxRequests: 20, windowMinutes: 1 },
+  comment: { endpoint: 'comment', maxRequests: 10, windowMinutes: 1 },
+  message: { endpoint: 'message', maxRequests: 30, windowMinutes: 1 },
+  
+  // Application submission
+  contestApplication: { endpoint: 'contest/apply', maxRequests: 2, windowMinutes: 5 },
+} as const;
+
+/**
  * React hook for rate limiting
  */
 export const useRateLimit = (config: RateLimitConfig) => {
