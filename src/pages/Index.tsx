@@ -1,14 +1,13 @@
-import { useState, useEffect } from "react";
-
+import { useState } from "react";
 import { ContestHeader } from "@/components/contest-header";
 import { ContestSection } from "@/components/contest-section";
 import { NextWeekSection } from "@/components/next-week-section";
 import ContestFilters from "@/components/contest-filters";
-
 import { EditableContent } from "@/components/editable-content";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { supabase } from "@/integrations/supabase/client";
 import type { Category } from "@/components/contest-filters";
+import { useAdminStatus } from "@/hooks/useAdminStatus";
+import { usePastWeekIntervals } from "@/hooks/usePastWeekIntervals";
 
 // Helper function to get week range dates (Monday-Sunday) - правильные для 2025
 const getWeekRange = (weeksOffset: number = 0) => {
@@ -38,105 +37,10 @@ const Index = () => {
   const [gender, setGender] = useState<'male' | 'female'>("female");
   const [viewMode, setViewMode] = useState<'compact' | 'full'>("compact");
   const [activeSection, setActiveSection] = useState("Contest");
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [pastWeekIntervals, setPastWeekIntervals] = useState<Array<{interval: string, weeksAgo: number}>>([]);
-
-  // Helper to get current Monday
-  const getCurrentMonday = () => {
-    const now = new Date();
-    const philippineTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Manila"}));
-    const currentDayOfWeek = philippineTime.getDay();
-    const daysToSubtract = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
-    const currentMonday = new Date(philippineTime);
-    currentMonday.setDate(philippineTime.getDate() - daysToSubtract);
-    currentMonday.setHours(0, 0, 0, 0);
-    return currentMonday;
-  };
-
-  // Helper to parse week_interval to Monday date
-  const parseIntervalToMonday = (interval: string): Date | null => {
-    try {
-      const parts = interval.split('-');
-      if (parts.length !== 2) return null;
-      
-      const startParts = parts[0].split('/');
-      if (startParts.length !== 2) return null;
-      
-      const endParts = parts[1].split('/');
-      if (endParts.length !== 3) return null;
-      
-      const day = parseInt(startParts[0]);
-      const month = parseInt(startParts[1]) - 1;
-      const year = parseInt(endParts[2]);
-      const fullYear = year < 50 ? 2000 + year : 1900 + year;
-      
-      return new Date(fullYear, month, day, 0, 0, 0, 0);
-    } catch (error) {
-      console.error('Error parsing interval:', interval, error);
-      return null;
-    }
-  };
-
-  // Check if user is admin
-  useEffect(() => {
-    const checkAdminStatus = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          const { data: roles } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', session.user.id);
-          
-          setIsAdmin(roles?.some(role => role.role === 'admin') || false);
-        }
-      } catch (error) {
-        console.error('Error checking admin status:', error);
-      }
-    };
-    
-    const loadPastWeekIntervals = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('weekly_contest_participants')
-          .select('week_interval')
-          .eq('admin_status', 'past')
-          .eq('is_active', true)
-          .is('deleted_at', null);
-        
-        if (error) {
-          console.error('Error loading past week intervals:', error);
-          return;
-        }
-        
-        const uniqueIntervals = Array.from(new Set(data?.map(p => p.week_interval).filter(Boolean) as string[]));
-        const currentMonday = getCurrentMonday();
-        
-        const intervalsMap = new Map<string, {interval: string, weeksAgo: number}>();
-        
-        uniqueIntervals.forEach(interval => {
-          const intervalMonday = parseIntervalToMonday(interval);
-          if (!intervalMonday) return;
-          
-          const diffTime = currentMonday.getTime() - intervalMonday.getTime();
-          const diffDays = Math.floor(diffTime / (24 * 60 * 60 * 1000));
-          const weeksAgo = Math.floor(diffDays / 7);
-          
-          intervalsMap.set(interval, { interval, weeksAgo });
-        });
-        
-        const intervalsWithWeeks = Array.from(intervalsMap.values())
-          .sort((a, b) => a.weeksAgo - b.weeksAgo);
-        
-        setPastWeekIntervals(intervalsWithWeeks);
-      } catch (error) {
-        console.error('Error loading past week intervals:', error);
-      }
-    };
-    
-    checkAdminStatus();
-    loadPastWeekIntervals();
-  }, []);
+  
+  // Use optimized hooks
+  const { isAdmin } = useAdminStatus();
+  const { intervals: pastWeekIntervals } = usePastWeekIntervals("PH", "Asia/Manila");
   
   // Инициализация category из localStorage или "" по умолчанию
   const [category, setCategory] = useState<"" | Category>(() => {
