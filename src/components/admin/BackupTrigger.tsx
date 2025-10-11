@@ -27,6 +27,7 @@ interface BackupMetadata {
   totalRecords: number;
   size: number;
   checksum: string;
+  name?: string;
 }
 
 export const BackupTrigger = () => {
@@ -74,10 +75,10 @@ export const BackupTrigger = () => {
         ],
         batchSize: 1000,
         retentionDays: 30
-      });
+      }, backupName.trim() || undefined);
 
-      const timestamp = new Date().toLocaleString('en-US');
-      const displayName = backupName.trim() || `Backup ${timestamp}`;
+      const timestamp = new Date(metadata.timestamp).toLocaleString('en-US');
+      const displayName = metadata.name || `Backup ${timestamp}`;
       setLastBackup(displayName);
       setBackupName('');
       setShowNameInput(false);
@@ -189,7 +190,12 @@ export const BackupTrigger = () => {
                     className="flex items-center justify-between p-2 rounded-md hover:bg-accent text-sm"
                   >
                     <div className="flex-1">
-                      <p className="text-xs font-medium">
+                      {backup.name && (
+                        <p className="text-xs font-semibold mb-0.5">
+                          {backup.name}
+                        </p>
+                      )}
+                      <p className="text-xs text-muted-foreground">
                         {formatBackupDate(backup.timestamp)}
                       </p>
                       <p className="text-xs text-muted-foreground">
