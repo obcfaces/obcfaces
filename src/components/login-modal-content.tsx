@@ -38,7 +38,7 @@ const LoginModalContent = ({ onClose, defaultMode = "login", onAuthSuccess }: Lo
   }, [defaultMode]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [country, setCountry] = useState("");
