@@ -60,7 +60,7 @@ export const LazyImage = ({
     onError?.();
   };
 
-  // Generate optimized image URL (if using a CDN like Supabase Storage)
+  // Generate optimized image URL with WebP support
   const getOptimizedSrc = (originalSrc: string, width?: number) => {
     // For Supabase Storage, you can add transform parameters
     if (originalSrc.includes('supabase.co/storage')) {
@@ -69,9 +69,19 @@ export const LazyImage = ({
         url.searchParams.set('width', width.toString());
         url.searchParams.set('quality', '80');
       }
+      // Request WebP format if supported
+      if (supportsWebP()) {
+        url.searchParams.set('format', 'webp');
+      }
       return url.toString();
     }
     return originalSrc;
+  };
+
+  // Check WebP support
+  const supportsWebP = () => {
+    const elem = document.createElement('canvas');
+    return elem.toDataURL('image/webp').indexOf('data:image/webp') === 0;
   };
 
   return (
