@@ -95,7 +95,7 @@ export const ApplicationEditHistory = ({
                       </CardTitle>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <Clock className="w-3 h-3" />
-                        {new Date(item.created_at).toLocaleString('ru-RU')}
+                        {new Date(item.created_at).toLocaleString('ru-RU', { timeZone: 'Asia/Manila' })}
                       </div>
                     </div>
                     
@@ -174,7 +174,7 @@ export const ApplicationEditHistory = ({
                                   Admin Edited
                                   {item.application_data.admin_edited_at && (
                                     <span className="ml-1 font-normal">
-                                      at {new Date(item.application_data.admin_edited_at).toLocaleString('ru-RU')}
+                                      at {new Date(item.application_data.admin_edited_at).toLocaleString('ru-RU', { timeZone: 'Asia/Manila' })}
                                     </span>
                                   )}
                                 </span>

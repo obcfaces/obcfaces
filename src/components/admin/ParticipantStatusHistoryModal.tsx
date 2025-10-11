@@ -118,10 +118,11 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
   const formatDateTime = (dateStr: string) => {
     try {
       const date = new Date(dateStr);
-      const day = date.getDate();
-      const month = date.toLocaleString('en', { month: 'short' }).toLowerCase();
-      const hours = String(date.getHours()).padStart(2, '0');
-      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const manilaDate = new Date(date.toLocaleString('en-US', { timeZone: 'Asia/Manila' }));
+      const day = manilaDate.getDate();
+      const month = manilaDate.toLocaleString('en', { month: 'short', timeZone: 'Asia/Manila' }).toLowerCase();
+      const hours = String(manilaDate.getHours()).padStart(2, '0');
+      const minutes = String(manilaDate.getMinutes()).padStart(2, '0');
       return `${day} ${month} ${hours}:${minutes}`;
     } catch {
       return dateStr;
