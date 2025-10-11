@@ -1,7 +1,21 @@
 import { supabase } from '@/integrations/supabase/client';
 
-// List of all texts that need translation on the main page
+// List of all texts that need translation
 export const MAIN_PAGE_TEXTS = [
+  // ContestHeader
+  "Join & Win 5,000 PHP",
+  "All online — no need to travel",
+  "Anyone can join — open to all!",
+  "Free entry with just 2 photos",
+  "Natural. Honest. Voted by People.",
+  "Weekly winner gets 5,000 PHP",
+  "Annual winner takes 100,000 PHP",
+  "Follow us on Facebook",
+  "Follow us on Instagram",
+  "Contest",
+  "How it works",
+  
+  // Index.tsx - How it works section
   "How It Works",
   "international — user-facing, legal-safe",
   "Join OBC — the international, fully online beauty contest.",
