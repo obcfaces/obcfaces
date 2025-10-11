@@ -191,8 +191,8 @@ const ApplicationCardWithHistory = ({
           {historyCount > 0 && (
             <div
               className="absolute bottom-0 left-8 z-20 bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold cursor-pointer hover:bg-primary/90 shadow-lg transition-all border-2 border-background"
-              onClick={() => setShowStatusHistoryModal(true)}
-              title={`${historyCount} version${historyCount > 1 ? 's' : ''} - click to view history`}
+              onClick={() => setIsHistoryExpanded(!isHistoryExpanded)}
+              title={`${historyCount} version${historyCount > 1 ? 's' : ''} - click to expand versions`}
             >
               {historyCount}
             </div>
