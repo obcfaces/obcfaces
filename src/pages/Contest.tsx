@@ -44,19 +44,20 @@ const ContestContent = () => {
         <div className="space-y-8">
           <NextWeekSection viewMode={viewMode} />
           
-          <ContestSection
-            title="THIS WEEK"
-            subtitle="Help us choose the winner"
-            description="Weekly contest is live now!"
-            isActive={true}
-            showWinner={false}
-            viewMode={viewMode}
-            weekOffset={0}
-          />
+          <section className="max-w-6xl mx-auto pt-2 mb-1 sm:mb-3 bg-background rounded-lg shadow-sm shadow-foreground/10">
+            <ContestSection
+              title="THIS WEEK"
+              subtitle="Choose the winner"
+              description="Weekly contest is live now!"
+              isActive={true}
+              noWrapTitle
+              viewMode={viewMode}
+              weekOffset={0}
+            />
+          </section>
           
           {/* Dynamically generate sections for all past weeks */}
           {pastWeekIntervals.map((item) => {
-            // Add +1 to weeksAgo because THIS WEEK takes the current week slot
             const adjustedWeeksAgo = item.weeksAgo + 1;
             const weekLabel = adjustedWeeksAgo === 1 ? '1 WEEK AGO' : `${adjustedWeeksAgo} WEEKS AGO`;
             
@@ -79,20 +80,17 @@ const ContestContent = () => {
                 
                 return `${startDay} ${startMonth} - ${endDay} ${endMonth} ${year}`;
               } catch (error) {
-                console.error('Error formatting interval:', error);
                 return interval;
               }
             };
-            
-            const formattedInterval = formatInterval(item.interval);
             
             return (
               <ContestSection
                 key={item.interval}
                 title={weekLabel}
-                subtitle={formattedInterval}
-                description={`See the winners from ${weekLabel.toLowerCase()}`}
-                isActive={false}
+                titleSuffix="(Closed)"
+                subtitle={formatInterval(item.interval)}
+                centerSubtitle
                 showWinner={true}
                 viewMode={viewMode}
                 weekOffset={-adjustedWeeksAgo}
