@@ -2,40 +2,58 @@ import React, { createContext, useContext, ReactNode } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { CONTEST_COUNTRIES } from '@/types/admin';
 import { getCountryCapitalTimezone } from '@/utils/weekIntervals';
+import { parseLocale } from '@/types/locale';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface PublicCountryContextType {
+  locale: string;
   countryCode: string;
   countryName: string;
   timezone: string;
   flag: string;
-  navigateToCountry: (code: string) => void;
+  languageCode: string;
+  navigateToLocale: (countryCode: string, languageCode?: string) => void;
+  navigateToCountry: (code: string) => void; // Deprecated, use navigateToLocale
 }
 
 const PublicCountryContext = createContext<PublicCountryContextType | undefined>(undefined);
 
 export const PublicCountryProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const { country } = useParams<{ country: string }>();
+  const { locale: localeParam } = useParams<{ locale: string }>();
   const navigate = useNavigate();
+  const { currentLanguage } = useLanguage();
   
-  // Default to PH if no country in URL
-  const countryCode = country?.toUpperCase() || 'PH';
+  // Parse locale from URL or use default
+  const parsedLocale = localeParam ? parseLocale(localeParam) : null;
+  const countryCode = parsedLocale?.countryCode || 'PH';
+  const languageCode = parsedLocale?.languageCode || currentLanguage.code;
+  const locale = `${languageCode}-${countryCode.toLowerCase()}`;
   
   // Find country config
   const countryConfig = CONTEST_COUNTRIES.find(c => c.code === countryCode) || CONTEST_COUNTRIES[0];
   
   const timezone = getCountryCapitalTimezone(countryCode);
 
+  const navigateToLocale = (newCountryCode: string, newLanguageCode?: string) => {
+    const lang = newLanguageCode || languageCode;
+    navigate(`/${lang}-${newCountryCode.toLowerCase()}`);
+  };
+
   const navigateToCountry = (code: string) => {
-    navigate(`/${code.toLowerCase()}`);
+    // Legacy support - use current language
+    navigateToLocale(code, languageCode);
   };
 
   return (
     <PublicCountryContext.Provider
       value={{
+        locale,
         countryCode,
         countryName: countryConfig.name,
         timezone,
         flag: countryConfig.flag,
+        languageCode,
+        navigateToLocale,
         navigateToCountry,
       }}
     >

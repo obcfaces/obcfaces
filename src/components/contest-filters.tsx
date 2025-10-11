@@ -1,9 +1,9 @@
 import React, { useMemo } from "react";
-import { Country } from 'country-state-city';
-import SearchableSelect, { type Option } from "@/components/ui/searchable-select";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import SearchableSelect, { type Option } from "@/components/ui/searchable-select";
 import HeightFilterDropdown from "@/components/ui/height-filter-dropdown";
 import WeightFilterDropdown from "@/components/ui/weight-filter-dropdown";
+import LocaleCountryFilter from "@/components/locale-country-filter";
 import { AlignJustify, Grid2X2 } from "lucide-react";
 
 type Gender = "male" | "female";
@@ -54,25 +54,6 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
   weight,
   onWeightChange,
 }) => {
-  const countryOptions: Option[] = useMemo(() => {
-    const allCountries = Country.getAllCountries().map(country => ({
-      value: country.isoCode,
-      label: country.isoCode === 'PH' ? country.name : `${country.name} soon`,
-      disabled: country.isoCode !== 'PH'
-    }));
-    
-    // Sort alphabetically but put Philippines first
-    const philippines = allCountries.find(c => c.value === 'PH');
-    const otherCountries = allCountries.filter(c => c.value !== 'PH').sort((a, b) => a.label.localeCompare(b.label));
-    
-    return [
-      // Active countries
-      ...(philippines ? [philippines] : []),
-      { value: "__divider__", label: "", disabled: true, divider: true },
-      // All other countries with "soon" label
-      ...otherCountries
-    ];
-  }, []);
 
   const genderOptions: Option[] = useMemo(() => {
     const av = genderAvailability ?? { male: false, female: true };
@@ -93,17 +74,8 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
     <div className="space-y-4 w-full">
       {/* First row - Main filters */}
       <div className="flex flex-row flex-nowrap items-center gap-2 w-full">
-        {/* Country filter */}
-        <div className="w-36 shrink-0">
-          <SearchableSelect
-            value={country}
-            onValueChange={onCountryChange}
-            options={countryOptions}
-            placeholder="Select country"
-            ariaLabel="Country filter"
-            highlightSelected
-          />
-        </div>
+        {/* Country filter with locale support */}
+        <LocaleCountryFilter onCountryChange={onCountryChange} />
 
         {/* Gender filter */}
         <div className="w-24 shrink-0">
