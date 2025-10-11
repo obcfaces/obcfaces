@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Database, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Database, Loader2, CheckCircle, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { backupManager } from '@/utils/backup';
 
 export const BackupTrigger = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [lastBackup, setLastBackup] = useState<string | null>(null);
+  const [showNameInput, setShowNameInput] = useState(false);
+  const [backupName, setBackupName] = useState('');
 
   const createBackup = async () => {
     setIsCreating(true);
@@ -29,9 +32,14 @@ export const BackupTrigger = () => {
         retentionDays: 30
       });
 
-      setLastBackup(new Date().toLocaleString('en-US'));
+      const timestamp = new Date().toLocaleString('en-US');
+      const displayName = backupName.trim() || `Backup ${timestamp}`;
+      setLastBackup(displayName);
+      setBackupName('');
+      setShowNameInput(false);
+      
       toast.success('Backup created successfully', {
-        description: `ID: ${backupId}`
+        description: `${displayName} (ID: ${backupId})`
       });
     } catch (error) {
       console.error('Backup failed:', error);
@@ -44,36 +52,67 @@ export const BackupTrigger = () => {
   };
 
   return (
-    <div className="flex items-center gap-4 p-4 border border-border rounded-lg bg-card">
-      <div className="flex-1">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
-          <Database className="h-5 w-5" />
-          Database Backup
-        </h3>
-        {lastBackup && (
-          <p className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
-            <CheckCircle className="h-4 w-4 text-green-500" />
-            Last backup: {lastBackup}
-          </p>
-        )}
-      </div>
-      <Button 
-        onClick={createBackup}
-        disabled={isCreating}
-        size="lg"
-      >
-        {isCreating ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Creating...
-          </>
-        ) : (
-          <>
-            <Database className="mr-2 h-4 w-4" />
-            Create Backup
-          </>
-        )}
-      </Button>
+    <div className="flex items-center gap-3">
+      {showNameInput ? (
+        <>
+          <Input
+            value={backupName}
+            onChange={(e) => setBackupName(e.target.value)}
+            placeholder="Backup name (optional)"
+            className="w-64"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') createBackup();
+              if (e.key === 'Escape') {
+                setShowNameInput(false);
+                setBackupName('');
+              }
+            }}
+          />
+          <Button 
+            onClick={createBackup}
+            disabled={isCreating}
+            size="sm"
+          >
+            {isCreating ? (
+              <>
+                <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                Creating...
+              </>
+            ) : (
+              <>
+                <Database className="mr-1 h-3 w-3" />
+                Create
+              </>
+            )}
+          </Button>
+          <Button
+            onClick={() => {
+              setShowNameInput(false);
+              setBackupName('');
+            }}
+            variant="ghost"
+            size="sm"
+          >
+            <X className="h-3 w-3" />
+          </Button>
+        </>
+      ) : (
+        <Button 
+          onClick={() => setShowNameInput(true)}
+          size="sm"
+          variant="outline"
+        >
+          <Database className="mr-1 h-3 w-3" />
+          Backup
+        </Button>
+      )}
+      
+      {lastBackup && !showNameInput && (
+        <p className="text-xs text-muted-foreground flex items-center gap-1">
+          <CheckCircle className="h-3 w-3 text-green-500" />
+          {lastBackup}
+        </p>
+      )}
     </div>
   );
 };
