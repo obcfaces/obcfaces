@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { ContestHeader } from "@/components/contest-header";
 import { ContestWeeksRenderer } from "@/components/ContestWeeksRenderer";
 import ContestFilters from "@/components/contest-filters";
@@ -8,27 +9,37 @@ import type { Category } from "@/components/contest-filters";
 import { useAdminStatus } from "@/hooks/useAdminStatus";
 
 const Index = () => {
-  const [country, setCountry] = useState<string>("PH");
-  const [gender, setGender] = useState<'male' | 'female'>("female");
-  const [viewMode, setViewMode] = useState<'compact' | 'full'>("compact");
-  const [activeSection, setActiveSection] = useState("Contest");
-  
+  const [searchParams, setSearchParams] = useSearchParams();
   const { isAdmin } = useAdminStatus();
   
-  // Инициализация category из localStorage или "" по умолчанию
+  // Initialize state from URL params or defaults
+  const [country, setCountry] = useState<string>(() => searchParams.get("country") || "PH");
+  const [gender, setGender] = useState<'male' | 'female'>(() => {
+    const param = searchParams.get("gender");
+    return (param === "male" || param === "female") ? param : "female";
+  });
+  const [viewMode, setViewMode] = useState<'compact' | 'full'>(() => {
+    const param = searchParams.get("view");
+    return (param === "full" || param === "compact") ? param : "compact";
+  });
+  const [activeSection, setActiveSection] = useState("Contest");
   const [category, setCategory] = useState<"" | Category>(() => {
-    try {
-      const saved = localStorage.getItem('contest-category-filter');
-      return saved !== null ? (saved as "" | Category) : "";
-    } catch {
-      return "";
-    }
+    return (searchParams.get("category") as "" | Category) || "";
   });
 
-  // Сохранение category в localStorage при изменении
+  // Sync filters to URL
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (country !== "PH") params.set("country", country);
+    if (gender !== "female") params.set("gender", gender);
+    if (viewMode !== "compact") params.set("view", viewMode);
+    if (category) params.set("category", category);
+    
+    setSearchParams(params, { replace: true });
+  }, [country, gender, viewMode, category, setSearchParams]);
+
   const handleCategoryChange = (newCategory: "" | Category) => {
     setCategory(newCategory);
-    localStorage.setItem('contest-category-filter', newCategory);
   };
   
   console.log('Index component rendering, viewMode:', viewMode);
