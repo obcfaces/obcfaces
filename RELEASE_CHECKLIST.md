@@ -45,11 +45,23 @@ Use this checklist before deploying to production to ensure code quality, securi
   - [ ] SSL/TLS set to "Full (strict)"
   - [ ] Bot Fight Mode enabled
   - [ ] AI Crawl Control set to "Block"
-  - [ ] Rate limiting configured
+  - [ ] Rate limiting configured (see `docs/PRODUCTION_SECURITY.md`)
+  - [ ] Security headers configured (HSTS, CSP, X-Frame-Options, etc.)
+
+- [ ] **Cookie Security**:
+  - [ ] Session cookies: `Secure; HttpOnly; SameSite=Lax`
+  - [ ] Auth tokens: `Secure; HttpOnly; SameSite=Strict`
+  - [ ] OAuth cookies: `Secure; SameSite=None` (if applicable)
 
 - [ ] **RLS Policies**: All database tables have proper Row Level Security
 - [ ] **Input Validation**: User inputs properly sanitized
 - [ ] **CORS**: Configured correctly for production domain
+
+- [ ] **Healthcheck Endpoint**: Deployed and accessible
+  ```bash
+  curl https://obcface.com/healthcheck
+  # Should return: { "ok": true, ... }
+  ```
 
 ### 🎨 UI/UX
 
@@ -129,7 +141,12 @@ Via GitHub (if using CI/CD):
 
 ### 3. Post-Deploy Verification
 
-- [ ] **Health Check**: Visit production URL, verify app loads
+- [ ] **Health Check**: Visit healthcheck endpoint
+  ```bash
+  curl https://obcface.com/healthcheck
+  # Should return: { "ok": true, "status": "healthy", ... }
+  ```
+
 - [ ] **Smoke Test**: Quick manual test of critical flows:
   - [ ] Homepage loads
   - [ ] Contest page loads with participants
@@ -137,6 +154,11 @@ Via GitHub (if using CI/CD):
   - [ ] Login/registration works
   - [ ] Admin panel accessible (if admin)
   - [ ] Locale switching works
+
+- [ ] **Security Headers**: Verify headers present
+  ```bash
+  curl -I https://obcface.com | grep -i "strict-transport\|x-content-type\|x-frame"
+  ```
 
 - [ ] **Monitor Logs**: Check for spike in errors
   - [ ] Sentry (frontend errors)
@@ -148,6 +170,16 @@ Via GitHub (if using CI/CD):
   - [ ] INP <200ms
   - [ ] No major CLS issues
 
+- [ ] **Save Rollback Reference**: Document successful deployment
+  ```
+  # Example: Save in GitHub release notes or Slack
+  ✅ v1.2.3 deployed successfully
+  - Version ID: abc123 (Lovable)
+  - Commit: def456 (GitHub)  
+  - Rollback to: abc122 / def455
+  - Timestamp: 2025-01-11 14:30 UTC
+  ```
+
 ### 4. Rollback Plan
 
 **If issues detected**:
@@ -155,10 +187,54 @@ Via GitHub (if using CI/CD):
 1. **Assess Impact**: Critical vs. minor issue
 2. **Quick Fix**: If simple, push hotfix
 3. **Rollback**: If complex, revert to previous version
-   - Lovable: Use version history to restore
-   - GitHub: `git revert` and push
+
+**Lovable Rollback** (fastest - ~2 minutes):
+1. Navigate to Project → Versions
+2. Find last known good version (look for ✅ green checkmark)
+3. Click "Restore" button
+4. Confirm rollback
+5. Monitor application for 10 minutes
+
+**GitHub Rollback** (~5 minutes):
+```bash
+# Find last good commit
+git log --oneline --all
+
+# Option 1: Revert (creates new commit)
+git revert <bad-commit-hash>
+git push origin main
+
+# Option 2: Reset (destructive - use with caution)
+git reset --hard <good-commit-hash>
+git push --force origin main
+```
+
+**Database Rollback** (if migration caused issues):
+```bash
+# Via Supabase Dashboard
+# Go to: Database → Migrations → Click "Revert" on problematic migration
+
+# Or via CLI (if using external Supabase)
+supabase db reset
+supabase db push
+```
+
 4. **Notify Users**: Status banner or announcement
-5. **Post-Mortem**: Document issue and prevention
+5. **Post-Mortem**: Document issue and prevention measures
+
+**Store Rollback Reference**: After each successful deployment, save commit hash/version ID:
+- In GitHub release notes
+- In deployment log
+- In team Slack channel
+
+Example:
+```
+✅ Deployment v1.2.3 successful
+- Version ID: abc123 (Lovable)
+- Commit: def456 (GitHub)
+- Timestamp: 2025-01-11 14:30 UTC
+- Rollback: Use version abc122 or commit def455
+```
 
 ---
 
