@@ -27,6 +27,7 @@ const Terms = lazy(() => import("./pages/Terms"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
 const ResetPassword = lazy(() => import("./features/auth/pages/ResetPasswordPage"));
+const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 const TestTransition = lazy(() => import("./pages/TestTransition"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -131,6 +132,7 @@ const App = () => {
                     <Route path="/cookie-policy" element={<CookiePolicy />} />
                     <Route path="/likes" element={<Likes />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
+                    <Route path="/verify" element={<VerifyEmail />} />
                     <Route path="/test-transition" element={<TestTransition />} />
                     
                     {/* Locale-based contest routes */}
