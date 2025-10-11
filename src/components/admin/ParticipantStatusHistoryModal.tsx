@@ -146,7 +146,8 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
           setParticipantData(participant);
           
           // ALWAYS add initial pending status when card was created
-          console.log('Adding initial pending with created_at:', participant.created_at);
+          console.log('✅ Participant data:', participant);
+          console.log('✅ Adding initial pending with created_at:', participant.created_at);
           entries.push({
             status: 'pending',
             changed_at: participant.created_at,
@@ -154,9 +155,12 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
             change_reason: 'Application created',
             week_interval: ''
           });
+          console.log('✅ Entries after adding initial:', entries);
+        } else {
+          console.log('❌ No participant found!');
         }
       } catch (error) {
-        console.error('Error loading participant data:', error);
+        console.error('❌ Error loading participant data:', error);
       }
       
       // Find entries that need email lookup
