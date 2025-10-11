@@ -6,6 +6,10 @@ on:
   push:
     branches: [main, develop]
 
+permissions:
+  contents: read
+  pull-requests: write
+
 env:
   NODE_VERSION: '20'
   PNPM_VERSION: '9'
