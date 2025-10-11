@@ -6,12 +6,256 @@ Complete guide for managing the critical first days, weeks, and month after laun
 
 ## 📋 Table of Contents
 
-1. [First 72 Hours](#first-72-hours-critical-period)
-2. [Week 1: Post-Launch Growth](#week-1-post-launch-growth)
-3. [Month 1: Improvement Cycle](#month-1-improvement-cycle)
-4. [Monitoring Checklist](#monitoring-checklist)
-5. [Response Templates](#response-templates)
-6. [Post-Launch Observations](#post-launch-observations--learnings)
+1. [Launch Timeline (T-Minus Plan)](#launch-timeline-t-minus-plan)
+2. [First 72 Hours](#first-72-hours-critical-period)
+3. [Week 1: Post-Launch Growth](#week-1-post-launch-growth)
+4. [Month 1: Improvement Cycle](#month-1-improvement-cycle)
+5. [Aftercare Checklist](#aftercare-checklist-first-week)
+6. [Monitoring Checklist](#monitoring-checklist)
+7. [Response Templates](#response-templates)
+8. [Post-Launch Observations](#post-launch-observations--learnings)
+9. [Key Learnings Per Release](#key-learnings-per-release)
+
+---
+
+## Launch Timeline (T-Minus Plan)
+
+> 🎯 **Purpose**: Step-by-step countdown to a successful launch  
+> 📅 **Duration**: 7 days before → 7 days after
+
+### T-7 Days: Final Technical Review ✅
+
+**Code & Infrastructure**
+- [x] All features complete and tested
+- [x] 127 unit tests passing
+- [x] 18 E2E tests passing
+- [x] Build optimized (bundle < 400KB)
+- [x] CI/CD pipeline configured
+- [x] Healthcheck endpoint working
+- [x] Rollback procedure documented
+
+**Security & Performance**
+- [x] Security headers configured (HSTS, CSP, etc.)
+- [x] Turnstile CAPTCHA tested
+- [x] Rate limiting configured
+- [x] SSL/TLS certificate valid
+- [x] CDN configured and tested
+- [x] Database RLS policies verified
+- [x] LCP < 2.5s, INP < 200ms
+
+**SEO & Analytics**
+- [x] Meta tags on all pages
+- [x] Canonical URLs configured
+- [x] Hreflang tags for all locales
+- [x] Open Graph images
+- [x] Sitemap.xml generated
+- [x] Robots.txt configured
+- [x] Analytics tracking ready
+
+**Documentation**
+- [x] README.md updated
+- [x] OPERATIONAL_PLAYBOOK.md complete
+- [x] RELEASE_CHECKLIST.md ready
+- [x] API documentation current
+- [x] User guides written (if applicable)
+
+---
+
+### T-3 Days: Marketing Preparation 📣
+
+**Visual Assets**
+- [ ] Logo (240×240 for Product Hunt)
+- [ ] Screenshots (5-10 high-quality)
+- [ ] Demo video (30-60 seconds)
+- [ ] Open Graph image (1200×630)
+- [ ] Twitter card image (1200×675)
+- [ ] Instagram/FB image (1080×1080)
+
+**Content Ready**
+- [ ] Product Hunt submission drafted
+  - [ ] Tagline (< 60 chars)
+  - [ ] Description (< 260 chars)
+  - [ ] First comment (detailed)
+  - [ ] Maker comment prepared
+- [ ] LinkedIn post written
+- [ ] Twitter thread (10-12 tweets)
+- [ ] Medium article drafted
+- [ ] Email announcement drafted
+
+**Community Activation**
+- [ ] Early supporters list (friends, beta users)
+- [ ] Discord/Slack announcement prepared
+- [ ] Influencer outreach (if applicable)
+- [ ] Press release (if major launch)
+
+**Monitoring Setup**
+- [ ] Sentry error tracking configured
+- [ ] Analytics dashboards created
+- [ ] Cloudflare alerts configured
+- [ ] Social media monitoring tools ready
+- [ ] Performance monitoring active
+
+---
+
+### T-1 Day: Pre-Flight Check 🛫
+
+**Final Smoke Tests**
+```bash
+# Run complete test suite
+pnpm check:all
+
+# Production E2E tests
+BASE_URL=https://obcface.com pnpm test:e2e
+
+# Verify healthcheck
+curl -s https://obcface.com/healthcheck
+
+# Check security headers
+curl -sI https://obcface.com | grep -Ei "strict-transport|content-security"
+
+# Performance audit
+npx lighthouse https://obcface.com --preset=perf --view
+```
+
+**Team Alignment**
+- [ ] Everyone knows launch time (timezone!)
+- [ ] Roles assigned (who posts where, who monitors)
+- [ ] Backup plans if key person unavailable
+- [ ] Communication channel decided (Slack/Discord)
+- [ ] Emergency contact info shared
+
+**Content Final Review**
+- [ ] Spell-check all announcements
+- [ ] Links tested and working
+- [ ] Screenshots up-to-date
+- [ ] Video uploaded and public
+- [ ] UTM parameters added to links
+
+**Buffer Content**
+- [ ] 3-5 tweets scheduled for day after
+- [ ] Blog post ready to publish
+- [ ] Follow-up emails drafted
+
+---
+
+### T-0: Launch Day 🚀
+
+> 📅 **Optimal timing**: Tuesday-Thursday, 7-9 AM PST
+
+**Morning (7-9 AM PST)**
+
+**7:00 AM** - Product Hunt
+- [ ] Submit product to Product Hunt
+- [ ] Post "maker comment" immediately
+- [ ] Pin to Twitter, share launch tweet
+- [ ] Notify early supporters to upvote
+
+**7:30 AM** - Social Media Wave 1
+- [ ] LinkedIn post published
+- [ ] Twitter thread published (thread 1/12)
+- [ ] Share to Discord/Slack communities
+- [ ] Email newsletter sent to subscribers
+
+**8:00 AM** - Monitoring Begins
+- [ ] Open Cloudflare Analytics
+- [ ] Open Sentry dashboard
+- [ ] Open Product Hunt page
+- [ ] Set up social media monitoring
+- [ ] Start response rotation
+
+**Midday (12 PM - 2 PM)**
+
+**12:00 PM** - Engagement Check
+- [ ] Respond to ALL Product Hunt comments
+- [ ] Reply to social media mentions
+- [ ] Share early metrics on Twitter
+- [ ] Post Instagram/Facebook update
+
+**1:00 PM** - Performance Check
+- [ ] Review Cloudflare traffic
+- [ ] Check error rate in Sentry
+- [ ] Verify LCP/INP within targets
+- [ ] Monitor API latency
+
+**Evening (6-9 PM)**
+
+**6:00 PM** - Peak Traffic Prep
+- [ ] Double-check all systems green
+- [ ] Prepare for evening traffic spike
+- [ ] Team on standby for issues
+
+**8:00 PM** - Social Media Wave 2
+- [ ] Share user testimonials
+- [ ] Post behind-the-scenes content
+- [ ] Update Product Hunt with metrics
+
+**End of Day**
+- [ ] Log first 24h metrics
+- [ ] Document any issues encountered
+- [ ] Thank early supporters
+- [ ] Plan tomorrow's content
+
+---
+
+### T+1 Day: Post-Launch Monitoring 📊
+
+**Morning Review**
+```markdown
+Launch Day Metrics (24h):
+- Total visits: [X]
+- Unique visitors: [X]
+- Sign-ups: [X]
+- Product Hunt upvotes: [X]
+- Product Hunt ranking: #[X]
+- Error rate: [X]%
+- LCP average: [X]s
+- Top traffic source: [X]
+```
+
+**Continue Engagement**
+- [ ] Respond to overnight comments
+- [ ] Share 24h milestone post
+- [ ] Thank voters and supporters
+- [ ] Address any issues reported
+
+**Technical Check**
+- [ ] Review Sentry for new errors
+- [ ] Check performance during peak hours
+- [ ] Verify rate limiting working correctly
+- [ ] Monitor database performance
+
+---
+
+### T+3 Days: Feedback Collection 📬
+
+**Gather Insights**
+- [ ] Create user feedback form
+- [ ] Post on Product Hunt for feedback
+- [ ] Email early users for input
+- [ ] Analyze user behavior in analytics
+
+**Quick Wins**
+- [ ] Fix any critical bugs discovered
+- [ ] Adjust settings based on real usage
+- [ ] Improve error messages if needed
+
+---
+
+### T+7 Days: Week 1 Review 📈
+
+**Publish Follow-Up**
+- [ ] Medium article: "Week 1 Learnings"
+- [ ] Product Hunt update comment
+- [ ] LinkedIn reflection post
+- [ ] Twitter thread with metrics
+
+**Data Analysis**
+- [ ] Full metrics report (see [Aftercare Checklist](#aftercare-checklist-first-week))
+- [ ] User feedback summary
+- [ ] Performance analysis
+- [ ] Plan v1.0.1 / v1.1.0
+
+**Template**: See [LAUNCH_FOLLOWUP_POST.md](./LAUNCH_FOLLOWUP_POST.md)
 
 ---
 
@@ -403,6 +647,439 @@ Each day:
 - Social media content
 - Email update
 - Product updates
+```
+
+---
+
+## Aftercare Checklist (First Week)
+
+> 🎯 **Goal**: Ensure smooth post-launch operations and gather insights  
+> 📅 **Timeline**: Day 1 → Day 7 after launch
+
+### Quick Reference Table
+
+| Day | Primary Goal | Key Actions | Tools/Dashboards |
+|-----|-------------|-------------|------------------|
+| **+1** | 🔍 **Monitor & Stabilize** | Check metrics, fix critical bugs, engage community | Cloudflare, Sentry, Product Hunt |
+| **+2** | 💬 **Engage & Respond** | Reply to all comments, share testimonials, address issues | Slack, PH, LinkedIn, Twitter |
+| **+3** | 📬 **Collect Feedback** | User survey, UX analysis, feature requests | Typeform, Google Forms, Analytics |
+| **+4** | 📊 **Analyze Traffic** | Geography, sources, conversion funnels, drop-offs | GA4, Cloudflare Analytics |
+| **+5** | 🔍 **SEO & Performance** | Check indexing, rankings, CTR, Core Web Vitals | Google Search Console, Lighthouse |
+| **+6** | 🛠️ **Plan Improvements** | Prioritize bugs, plan v1.0.1, roadmap v1.1.0 | GitHub Issues, Project Board |
+| **+7** | 📝 **Document Learnings** | Write follow-up post, update docs, team retro | Medium, Notion, LAUNCH_PLAYBOOK.md |
+
+---
+
+### Day +1: Monitor & Stabilize 🔍
+
+**⏰ Morning (9 AM)**
+
+**Technical Health Check**
+```bash
+# Verify all systems operational
+curl -s https://obcface.com/healthcheck
+# Expected: {"status":"ok","timestamp":"...","buildId":"..."}
+
+# Check security headers
+curl -sI https://obcface.com | grep -i "strict-transport"
+
+# Performance audit
+npx lighthouse https://obcface.com --preset=perf --quiet
+```
+
+**Dashboard Review**
+- [ ] **Cloudflare Analytics**
+  - Total requests: [X]
+  - Unique visitors: [X]
+  - Bandwidth used: [X] GB
+  - Cache hit rate: [X]%
+  - Top countries: [list]
+
+- [ ] **Sentry Error Tracking**
+  - New errors since launch: [X]
+  - Critical issues: [X]
+  - Affected users: [X]
+  - Most common error: [description]
+
+- [ ] **Supabase Logs**
+  - API latency (p95): [X]ms
+  - Database connections: [X]/[max]
+  - Edge function invocations: [X]
+  - Errors: [X]
+
+**Metrics Snapshot**
+```markdown
+## Launch +24h Metrics
+
+### Traffic
+- Visits: [X]
+- Unique: [X]
+- Bounce: [X]%
+- Avg session: [X]min
+
+### Engagement
+- Sign-ups: [X]
+- Votes: [X]
+- Applications: [X]
+
+### Performance
+- LCP: [X]s
+- INP: [X]ms
+- Error rate: [X]%
+- Uptime: [X]%
+
+### Sources
+- Product Hunt: [X]%
+- LinkedIn: [X]%
+- Twitter: [X]%
+- Direct: [X]%
+```
+
+**⏰ Midday (1 PM)**
+
+**Community Engagement**
+- [ ] Reply to ALL Product Hunt comments (< 2 hour response time)
+- [ ] Respond to LinkedIn comments and shares
+- [ ] Reply to Twitter mentions and DMs
+- [ ] Thank early supporters publicly
+
+**Quick Fixes**
+- [ ] Deploy hotfixes for critical bugs (if any)
+- [ ] Adjust rate limits if too aggressive
+- [ ] Optimize based on real traffic patterns
+
+**⏰ Evening (6 PM)**
+
+**End of Day Report**
+```markdown
+## Day 1 Summary
+
+✅ Achievements:
+- [X] users signed up
+- #[X] on Product Hunt
+- [X] upvotes total
+- Zero critical issues
+
+⚠️ Issues Found:
+- [Issue 1 + status]
+- [Issue 2 + status]
+
+📋 Tomorrow's Focus:
+- [Priority 1]
+- [Priority 2]
+```
+
+---
+
+### Day +2: Engage & Respond 💬
+
+**Morning Actions**
+- [ ] Respond to overnight comments (all platforms)
+- [ ] Share user testimonials on social media
+- [ ] Post "48 hours in" update on Product Hunt
+- [ ] Publish Instagram/Facebook story with metrics
+
+**48-Hour Update Template** (Product Hunt):
+```markdown
+🎉 48 hours since launch!
+
+Overwhelmed by the support - thank you! 🙏
+
+📊 What happened:
+• [X] upvotes (#[X] of the day - amazing!)
+• [X] new users from [X] countries
+• [X]s avg load time (beating our <2.5s target ✅)
+• [X]% uptime (rock solid!)
+
+💬 Top feedback themes:
+• "[Most mentioned positive]"
+• "[Most requested feature]"
+• "[Surprise finding]"
+
+🚀 Already working on:
+• Fixing [minor bug] (shipping today)
+• Planning [requested feature] for v1.1.0
+• Expanding to [X] more countries
+
+You're shaping the product - keep feedback coming! 🙌
+
+Try it: [link]
+```
+
+**Social Media Posts**
+- [ ] LinkedIn: Behind-the-scenes story
+- [ ] Twitter: User testimonial highlight
+- [ ] Instagram: Metrics infographic
+
+**Performance Review**
+- [ ] Check LCP/INP during peak hours
+- [ ] Identify any bottlenecks
+- [ ] Optimize caching if needed
+
+---
+
+### Day +3: Collect Feedback 📬
+
+**Create Feedback Form**
+
+Use Typeform / Google Forms with these questions:
+
+```markdown
+# OBC Faces - User Feedback Survey
+
+## Discovery
+1. How did you discover OBC Faces?
+   - Product Hunt
+   - LinkedIn
+   - Twitter
+   - Friend/colleague
+   - Google search
+   - Other: ___
+
+## Usage
+2. What did you use OBC Faces for? (check all)
+   - Voting on contestants
+   - Submitting application
+   - Browsing contestants
+   - Just exploring
+   - Other: ___
+
+3. How often do you plan to use OBC Faces?
+   - Daily
+   - Weekly
+   - Monthly
+   - Only once
+   - Not sure yet
+
+## Experience
+4. What's your favorite feature?
+   [Open text]
+
+5. What would you improve?
+   [Open text]
+
+6. Did you encounter any issues or bugs?
+   - No issues
+   - Minor issues: [describe]
+   - Major issues: [describe]
+
+7. How likely are you to recommend OBC Faces? (NPS)
+   0 [Not likely] ——————— 10 [Very likely]
+
+8. Any other feedback?
+   [Open text]
+
+## Contact (optional)
+9. Want to beta test new features?
+   - Yes! Email: ___
+   - No thanks
+```
+
+**Distribution**
+- [ ] Add non-intrusive banner in app
+- [ ] Email to first 100 users
+- [ ] Post on Product Hunt
+- [ ] Share on social media
+- [ ] Pin to Discord/Slack
+
+**UX Analysis**
+- [ ] Review session recordings (if using Hotjar/FullStory)
+- [ ] Analyze user flow in Google Analytics
+- [ ] Identify drop-off points
+- [ ] Check mobile vs desktop behavior
+
+---
+
+### Day +4: Analyze Traffic 📊
+
+**Geographic Analysis**
+```markdown
+## Traffic by Country (Top 10)
+
+| Country | Visits | % | Avg Session | Conversion |
+|---------|--------|---|-------------|------------|
+| 🇺🇸 USA | [X] | [X]% | [X]min | [X]% |
+| 🇲🇽 Mexico | [X] | [X]% | [X]min | [X]% |
+| 🇷🇺 Russia | [X] | [X]% | [X]min | [X]% |
+| ... | ... | ... | ... | ... |
+
+Insights:
+- [e.g., "Russia has 2x longer sessions - higher engagement"]
+- [e.g., "Mexico traffic peaks 2 hours later than US"]
+```
+
+**Traffic Sources Deep Dive**
+```markdown
+## Referral Source Performance
+
+| Source | Visits | Conversion | Quality Score |
+|--------|--------|------------|---------------|
+| Product Hunt | [X] | [X]% | ⭐⭐⭐⭐⭐ |
+| LinkedIn | [X] | [X]% | ⭐⭐⭐⭐ |
+| Twitter | [X] | [X]% | ⭐⭐⭐ |
+| Direct | [X] | [X]% | ⭐⭐⭐⭐ |
+| Google | [X] | [X]% | ⭐⭐⭐⭐⭐ |
+
+Best ROI: [Source with highest conversion]
+Most volume: [Source with most traffic]
+```
+
+**Conversion Funnel**
+```markdown
+Homepage (100%)
+  ↓ [X]%
+Contest Page ([X]%)
+  ↓ [X]%
+Vote Attempt ([X]%)
+  ↓ [X]%
+Registration ([X]%)
+  ↓ [X]%
+Complete Vote ([X]%)
+
+Biggest drop-off: [Stage] → [Stage] ([X]% loss)
+Hypothesis: [Why users drop off]
+Action: [How to improve]
+```
+
+---
+
+### Day +5: SEO & Performance 🔍
+
+**SEO Check**
+
+**Google Search Console**
+- [ ] Verify all pages indexed
+- [ ] Check for crawl errors
+- [ ] Review mobile usability
+- [ ] Analyze search queries driving traffic
+
+**Indexing Status**
+```markdown
+Total pages: [X]
+Indexed: [X]
+Not indexed: [X]
+Errors: [X]
+
+Top indexed pages:
+1. /en-us/contest - [X] impressions
+2. /es-mx/contest - [X] impressions
+3. / - [X] impressions
+
+Top queries:
+1. "[keyword]" - Position [X]
+2. "[keyword]" - Position [X]
+3. "[keyword]" - Position [X]
+```
+
+**Performance by Location**
+```markdown
+## Core Web Vitals by Country
+
+| Country | LCP | INP | CLS |
+|---------|-----|-----|-----|
+| USA | [X]s | [X]ms | [X] |
+| Mexico | [X]s | [X]ms | [X] |
+| Russia | [X]s | [X]ms | [X] |
+
+Issues:
+- [e.g., "LCP spikes in Asia (3.2s) - CDN coverage gap"]
+- [e.g., "Mobile LCP 20% slower than desktop"]
+```
+
+**Lighthouse Audits**
+```bash
+# Desktop
+npx lighthouse https://obcface.com --preset=desktop --output=html
+
+# Mobile
+npx lighthouse https://obcface.com --preset=perf --output=html
+
+# Compare scores
+```
+
+---
+
+### Day +6: Plan Improvements 🛠️
+
+**Bug Triage**
+
+Priority matrix:
+
+| Priority | Severity | User Impact | Count | Examples |
+|----------|----------|-------------|-------|----------|
+| **P0** | Critical | Blocks core flow | [X] | [e.g., "Can't submit vote"] |
+| **P1** | High | Degrades experience | [X] | [e.g., "Slow image loading"] |
+| **P2** | Medium | Minor annoyance | [X] | [e.g., "Typo in error msg"] |
+| **P3** | Low | Nice-to-fix | [X] | [e.g., "Icon alignment"] |
+
+**v1.0.1 Scope** (This week):
+- [ ] All P0 bugs
+- [ ] Top 3 P1 bugs
+- [ ] Quick wins from feedback
+
+**v1.1.0 Roadmap** (2 weeks):
+- [ ] Top 3 requested features
+- [ ] Performance optimizations
+- [ ] UX improvements from funnel analysis
+
+**GitHub Issues**
+- [ ] Create issues for all bugs
+- [ ] Label by priority (P0/P1/P2/P3)
+- [ ] Assign to milestones (v1.0.1 / v1.1.0)
+- [ ] Add effort estimates
+
+---
+
+### Day +7: Document Learnings 📝
+
+**Write Follow-Up Post**
+
+Use template: [LAUNCH_FOLLOWUP_POST.md](./LAUNCH_FOLLOWUP_POST.md)
+
+**Key sections**:
+```markdown
+1. Week 1 by the numbers
+2. What worked well ✅
+3. What didn't work ❌
+4. Unexpected findings 🔍
+5. User feedback themes
+6. Technical challenges & solutions
+7. What's next (v1.0.1 / v1.1.0)
+```
+
+**Publish to**:
+- [ ] Medium (long-form)
+- [ ] LinkedIn (shortened)
+- [ ] Product Hunt (update comment)
+- [ ] Twitter (thread)
+- [ ] Company blog (if applicable)
+
+**Update Documentation**
+- [ ] Add real metrics to LAUNCH_PLAYBOOK.md
+- [ ] Update README with launch results
+- [ ] Document learnings in [Post-Launch Observations](#post-launch-observations--learnings)
+- [ ] Fill [Key Learnings Table](#key-learnings-per-release)
+
+**Team Retrospective**
+
+```markdown
+## Week 1 Retrospective
+
+### What went well?
+- [Team input]
+- [Team input]
+
+### What could improve?
+- [Team input]
+- [Team input]
+
+### Action items for next launch
+- [ ] [Improvement 1]
+- [ ] [Improvement 2]
+
+### Celebrate! 🎉
+- [Win 1]
+- [Win 2]
 ```
 
 ---
@@ -809,6 +1486,89 @@ Month 1:
 - [e.g., "Product Hunt #3 of the day!"]
 - [e.g., "All 145 tests passed in production"]
 ```
+
+---
+
+## Key Learnings Per Release
+
+> 💡 **Track what each version taught us**  
+> 📊 **Use this table to inform future releases and avoid repeating mistakes**
+
+| Version | Release Date | Primary Goal | 🎯 Wins | 📚 Lessons Learned | 🚀 Next Steps |
+|---------|--------------|--------------|---------|-------------------|---------------|
+| **v1.0.0** | 2025-01-11 | Global launch with multi-locale support | • Sub-2s LCP achieved<br>• 99.98% uptime<br>• #[X] on Product Hunt<br>• Zero critical bugs | • Mobile traffic 75% (expected 60%)<br>• Rate limiting too strict<br>• Safari bugs not caught in testing<br>• WhatsApp sharing converts 3x better | • Increase rate limits (v1.0.1)<br>• Add BrowserStack to CI<br>• Simplify registration (v1.1.0) |
+| **v1.0.1** | [DATE] | Bug fixes & quick wins from launch feedback | • [Win 1]<br>• [Win 2]<br>• [Win 3] | • [Lesson 1]<br>• [Lesson 2]<br>• [Lesson 3] | • [Next step 1]<br>• [Next step 2] |
+| **v1.1.0** | [DATE] | Top requested features + UX improvements | • [Win 1]<br>• [Win 2]<br>• [Win 3] | • [Lesson 1]<br>• [Lesson 2]<br>• [Lesson 3] | • [Next step 1]<br>• [Next step 2] |
+| **v1.2.0** | [DATE] | [Goal] | • [Win 1]<br>• [Win 2] | • [Lesson 1]<br>• [Lesson 2] | • [Next step 1]<br>• [Next step 2] |
+
+### How to Use This Table
+
+**After each release**:
+1. Fill in actual release date
+2. Document 3-5 key wins (metrics-backed)
+3. Capture 3-5 honest lessons (what didn't work)
+4. Plan concrete next steps based on learnings
+
+**Before next release**:
+1. Review previous lessons
+2. Ensure similar mistakes aren't repeated
+3. Apply successful patterns from previous wins
+4. Share table in team meeting
+
+**Example Entry** (v1.0.0 filled out):
+
+```markdown
+## v1.0.0 - Global Launch (2025-01-11)
+
+### 🎯 Wins
+• **Performance**: LCP 2.1s (target <2.5s) - 95% of users had fast experience
+• **Reliability**: 99.98% uptime, 0.2% error rate - zero critical incidents
+• **Engagement**: #5 Product of the Day, 280 upvotes, 42 comments
+• **Scale**: Handled 10x expected traffic (7,800 visits day 1) without issues
+• **Quality**: All 145 tests passed, zero rollbacks needed
+
+### 📚 Lessons Learned
+• **Mobile dominance**: 75% mobile vs 60% expected - all features must be mobile-first
+• **Rate limiting friction**: 10 votes/hour too strict - 18% of users hit limit
+• **Browser testing gap**: Safari 16 bugs not caught - need real device testing
+• **Social channels**: WhatsApp referrals converted 3x better than Twitter - optimize share UX
+• **Onboarding drop-off**: 20% abandoned at registration - form too long (8 fields)
+
+### 🚀 Next Steps
+• **v1.0.1 (This week)**: Increase rate limits to 20/hour, fix Safari bugs, add vote counter
+• **v1.1.0 (2 weeks)**: Simplify registration (3 fields), add "My Votes" page, WhatsApp share optimization
+• **CI Improvement**: Add BrowserStack for real device testing (Safari, Samsung Internet)
+• **Analytics**: Set up funnel tracking to catch drop-offs earlier
+```
+
+### Metrics to Track Per Release
+
+Essential metrics to capture for each version:
+
+**Performance**:
+- LCP (p75, mobile)
+- INP (p75, mobile)
+- FCP (p75)
+- Error rate
+- Uptime %
+
+**Engagement**:
+- DAU / WAU / MAU
+- Session duration
+- Bounce rate
+- Conversion rate
+
+**Business** (if applicable):
+- New sign-ups
+- Revenue (if monetized)
+- Retention (D1, D7, D30)
+- Churn rate
+
+**Quality**:
+- Test coverage %
+- Critical bugs found
+- Rollbacks needed
+- Support tickets
 
 ---
 
