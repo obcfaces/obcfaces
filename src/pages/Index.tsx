@@ -1,36 +1,11 @@
 import { useState } from "react";
 import { ContestHeader } from "@/components/contest-header";
-import { ContestSection } from "@/components/contest-section";
-import { NextWeekSection } from "@/components/next-week-section";
+import { ContestWeeksRenderer } from "@/components/ContestWeeksRenderer";
 import ContestFilters from "@/components/contest-filters";
 import { EditableContent } from "@/components/editable-content";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import type { Category } from "@/components/contest-filters";
 import { useAdminStatus } from "@/hooks/useAdminStatus";
-import { usePastWeekIntervals } from "@/hooks/usePastWeekIntervals";
-
-// Helper function to get week range dates (Monday-Sunday) - правильные для 2025
-const getWeekRange = (weeksOffset: number = 0) => {
-  // Правильные интервалы для 2025 года
-  switch (weeksOffset) {
-    case 0:
-      return "29 Sep - 05 Oct 2025";
-    case -1:
-      return "22 Sep - 28 Sep 2025";
-    case -2:
-      return "15 Sep - 21 Sep 2025";
-    case -3:
-      return "08 Sep - 14 Sep 2025";
-    case -4:
-      return "01 Sep - 07 Sep 2025";
-    case 1:
-      return "06 Oct - 12 Oct 2025";
-    case 2:
-      return "13 Oct - 19 Oct 2025";
-    default:
-      return "29 Sep - 05 Oct 2025";
-  }
-};
 
 const Index = () => {
   const [country, setCountry] = useState<string>("PH");
@@ -38,9 +13,7 @@ const Index = () => {
   const [viewMode, setViewMode] = useState<'compact' | 'full'>("compact");
   const [activeSection, setActiveSection] = useState("Contest");
   
-  // Use optimized hooks
   const { isAdmin } = useAdminStatus();
-  const { intervals: pastWeekIntervals } = usePastWeekIntervals("PH", "Asia/Manila");
   
   // Инициализация category из localStorage или "" по умолчанию
   const [category, setCategory] = useState<"" | Category>(() => {
@@ -84,63 +57,11 @@ const Index = () => {
           </div>
           
           
-          <NextWeekSection viewMode={viewMode} />
-          
-          <section className="max-w-6xl mx-auto pt-2 mb-1 sm:mb-3 bg-background rounded-lg shadow-sm shadow-foreground/10">
-          <ContestSection
-            title="THIS WEEK"
-            subtitle={getWeekRange(0)}
-            description="Choose the winner"
-            isActive={true}
-            noWrapTitle
+          <ContestWeeksRenderer 
             viewMode={viewMode}
-            weekOffset={0}
+            countryCode="PH"
+            timezone="Asia/Manila"
           />
-          </section>
-
-
-          {/* Dynamically generate sections for all past weeks */}
-          {pastWeekIntervals.map((item) => {
-            const adjustedWeeksAgo = item.weeksAgo + 1;
-            const weekLabel = adjustedWeeksAgo === 1 ? '1 WEEK AGO' : `${adjustedWeeksAgo} WEEKS AGO`;
-            
-            const formatInterval = (interval: string): string => {
-              try {
-                const parts = interval.split('-');
-                if (parts.length !== 2) return interval;
-                
-                const startParts = parts[0].split('/');
-                const endParts = parts[1].split('/');
-                
-                if (startParts.length !== 2 || endParts.length !== 3) return interval;
-                
-                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                const startDay = startParts[0];
-                const startMonth = months[parseInt(startParts[1]) - 1];
-                const endDay = endParts[0];
-                const endMonth = months[parseInt(endParts[1]) - 1];
-                const year = `20${endParts[2]}`;
-                
-                return `${startDay} ${startMonth} - ${endDay} ${endMonth} ${year}`;
-              } catch (error) {
-                return interval;
-              }
-            };
-            
-            return (
-              <ContestSection
-                key={item.interval}
-                title={weekLabel}
-                titleSuffix="(Closed)"
-                subtitle={formatInterval(item.interval)}
-                centerSubtitle
-                showWinner={true}
-                viewMode={viewMode}
-                weekOffset={-adjustedWeeksAgo}
-                weekInterval={item.interval}
-              />
-            );
-          })}
 
 
         </>
