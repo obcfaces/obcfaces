@@ -98,8 +98,8 @@ export const TurnstileWidget = ({
 
   if (loadError) {
     return (
-      <div className="text-sm text-destructive text-center py-2">
-        Security verification temporarily unavailable
+      <div className="text-xs text-muted-foreground text-center py-2 italic">
+        Security verification temporarily unavailable (signup still allowed for testing)
       </div>
     );
   }
