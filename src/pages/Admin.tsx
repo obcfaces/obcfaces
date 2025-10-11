@@ -193,10 +193,15 @@ interface WeeklyContestParticipant {
 
 
 const AdminContent = () => {
+  console.log('[HOOKS DEBUG] AdminContent render started');
   // ALL HOOKS AT THE TOP IN CONSISTENT ORDER - NEVER CHANGE THIS ORDER
+  console.log('[HOOKS DEBUG] 1. Calling useNavigate');
   const navigate = useNavigate();
+  console.log('[HOOKS DEBUG] 2. Calling useToast');
   const { toast } = useToast();
+  console.log('[HOOKS DEBUG] 3. Calling useAdminCountry');
   const { selectedCountry, setSelectedCountry, timezone } = useAdminCountry();
+  console.log('[HOOKS DEBUG] 4. Starting useState calls');
   
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -342,9 +347,12 @@ const AdminContent = () => {
   const [expandedIPs, setExpandedIPs] = useState<Set<string>>(new Set());
   const [regPaginationPage, setRegPaginationPage] = useState(1);
   const regItemsPerPage = 20;
-  const fetchedStatsRef = useRef<Set<string>>(new Set());
   const [expandedMaybeFingerprints, setExpandedMaybeFingerprints] = useState<Set<string>>(new Set());
   const [expandedFingerprints, setExpandedFingerprints] = useState<Set<string>>(new Set());
+  console.log('[HOOKS DEBUG] All useState calls completed');
+  console.log('[HOOKS DEBUG] 5. Starting useRef call');
+  const fetchedStatsRef = useRef<Set<string>>(new Set());
+  console.log('[HOOKS DEBUG] All basic hooks completed, moving to useEffect/useCallback/useMemo');
   
   console.log('Admin component rendering, adminStatusFilter:', adminStatusFilter);
 
