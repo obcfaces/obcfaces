@@ -153,8 +153,9 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
           console.log('✅ Participant data:', participant);
           console.log('✅ created_at UTC:', participant.created_at);
           console.log('✅ created_at Manila:', manilaCreatedStr);
+          console.log('✅ submitted_at UTC:', participant.submitted_at);
           
-          // Add initial pending status with Manila time
+          // Add initial created_at status with Manila time
           entries.push({
             status: 'created_at',
             changed_at: manilaCreatedStr,
@@ -162,6 +163,41 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
             change_reason: 'Application created',
             week_interval: ''
           });
+          
+          // Check if submitted_at is significantly different from created_at
+          // If yes, add a "resubmitted" entry (for old data before trigger was created)
+          if (participant.submitted_at && participant.created_at) {
+            const createdTime = new Date(participant.created_at).getTime();
+            const submittedTime = new Date(participant.submitted_at).getTime();
+            const diffMinutes = Math.abs(submittedTime - createdTime) / 1000 / 60;
+            
+            // If difference is more than 5 minutes, it's a resubmission
+            if (diffMinutes > 5) {
+              // Check if resubmit entry already exists in status_history
+              const hasResubmitEntry = entries.some(e => 
+                e.change_reason?.toLowerCase().includes('resubmit') || 
+                e.change_reason?.toLowerCase().includes('re-submit')
+              );
+              
+              if (!hasResubmitEntry) {
+                // Convert submitted_at to Manila timezone
+                const submittedDate = new Date(participant.submitted_at);
+                const manilaSubmittedDate = new Date(submittedDate.toLocaleString('en-US', { timeZone: 'Asia/Manila' }));
+                const manilaSubmittedStr = manilaSubmittedDate.toISOString().slice(0, 19).replace('T', ' ');
+                
+                console.log('📝 Adding resubmit entry for submitted_at:', manilaSubmittedStr);
+                
+                entries.push({
+                  status: 'pending (re-submitted)',
+                  changed_at: manilaSubmittedStr,
+                  changed_by_email: 'user',
+                  change_reason: 'User re-submitted application',
+                  week_interval: ''
+                });
+              }
+            }
+          }
+          
           console.log('✅ Entries after adding initial:', entries);
         } else {
           console.log('❌ No participant found!');
