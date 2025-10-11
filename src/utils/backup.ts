@@ -13,6 +13,7 @@ interface BackupMetadata {
   totalRecords: number;
   size: number;
   checksum: string;
+  name?: string;
 }
 
 export class BackupManager {
@@ -26,7 +27,7 @@ export class BackupManager {
   }
 
   // Create backup of critical data
-  async createBackup(config: BackupConfig): Promise<BackupMetadata> {
+  async createBackup(config: BackupConfig, name?: string): Promise<BackupMetadata> {
     const { supabase } = await import('@/integrations/supabase/client');
     const backupId = crypto.randomUUID();
     const timestamp = Date.now();
@@ -67,7 +68,8 @@ export class BackupManager {
         tables: config.tables,
         totalRecords,
         size: dataString.length,
-        checksum
+        checksum,
+        name: name || undefined
       };
 
       // Store backup using IndexedDB
