@@ -193,11 +193,7 @@ interface WeeklyContestParticipant {
 
 
 const AdminContent = () => {
-  // ALL HOOKS MUST BE AT THE TOP - BEFORE ANY CONDITIONAL RETURNS
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const { selectedCountry, setSelectedCountry, timezone } = useAdminCountry();
-  
+  // Initialize ALL hooks first - they must always be called in the same order
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -345,6 +341,11 @@ const AdminContent = () => {
   const fetchedStatsRef = useRef<Set<string>>(new Set());
   const [expandedMaybeFingerprints, setExpandedMaybeFingerprints] = useState<Set<string>>(new Set());
   const [expandedFingerprints, setExpandedFingerprints] = useState<Set<string>>(new Set());
+  
+  // NOW initialize routing/navigation hooks AFTER all state
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { selectedCountry, setSelectedCountry, timezone } = useAdminCountry();
   
   console.log('Admin component rendering, adminStatusFilter:', adminStatusFilter);
 
