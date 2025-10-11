@@ -13,12 +13,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import LoginModalContent from "@/components/login-modal-content";
 import { LogOut, Eye, EyeOff, UserIcon, MapPin, Pencil, Lock, MessageCircle, AlertCircle } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
-import PostCard from "@/components/profile/PostCard";
-import LikedItem from "@/components/profile/LikedItem";
-import { PhotoModal } from "@/components/photo-modal";
-import { ProfilePhotoModal } from "@/components/profile-photo-modal";
+import PostCard from "../components/PostCard";
+import LikedItem from "../components/LikedItem";
+import { PhotoModal } from "../components/PhotoModal";
+import { ProfilePhotoModal } from "../components/ProfilePhotoModal";
 import { ContestParticipationModal } from "@/features/contest/components/ContestParticipationModal";
-import CreatePostModal from "@/components/create-post-modal";
+import CreatePostModal from "../components/CreatePostModal";
 import { REJECTION_REASONS, RejectReasonModal, RejectionReasonType } from "@/components/reject-reason-modal";
 import { AuthProtectedModal } from "@/components/auth-protected-modal";
 import c1 from "@/assets/contestant-1.jpg";

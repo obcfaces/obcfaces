@@ -11,7 +11,7 @@ import jasminPaymentProof from "@/assets/jasmin-payment-proof.png";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { StarRating } from "@/components/ui/star-rating";
-import { PhotoModal } from "@/components/photo-modal";
+import { PhotoModal } from "@/features/profile/components/PhotoModal";
 import { MiniStars } from "@/components/mini-stars";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";

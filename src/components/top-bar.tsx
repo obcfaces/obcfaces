@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { MessageCircle, Heart } from "lucide-react";
-import AuthNav from "@/components/auth-nav";
+import { AuthNav } from "@/components/auth-nav";
 import GlobalSearch from "@/components/global-search";
 import LanguageSelector from "@/components/language-selector";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";

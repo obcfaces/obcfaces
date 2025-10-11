@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
-import LikedItem from "@/components/profile/LikedItem";
+import LikedItem from "../components/LikedItem";
 import SearchableSelect from "@/components/ui/searchable-select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Heart, AlignJustify, Grid2X2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useUnreadLikes } from "@/hooks/useUnreadLikes";
+import { useUnreadLikes } from "../hooks/useUnreadLikes";
 
 // Interface for liked item data
 interface LikedItemData {
