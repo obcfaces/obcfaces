@@ -71,6 +71,7 @@ const App = () => {
                 }>
                   <Routes>
                     <Route path="/" element={<Index />} />
+                    {/* Redirect /contest to /ph */}
                     <Route path="/contest" element={<Contest />} />
                     {/* Country-specific contest routes */}
                     <Route path="/:country" element={<Contest />} />
