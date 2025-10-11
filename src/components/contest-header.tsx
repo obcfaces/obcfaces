@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Camera, Upload, Facebook, Instagram } from "lucide-react";
+import { Camera, Upload, Facebook, Instagram, Globe } from "lucide-react";
 import { AuthProtectedModal } from "@/components/auth-protected-modal";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CONTEST_COUNTRIES } from "@/types/admin";
+import { usePublicCountry } from "@/contexts/PublicCountryContext";
 
 interface ContestHeaderProps {
   activeSection: string;
@@ -10,6 +13,8 @@ interface ContestHeaderProps {
 }
 
 export function ContestHeader({ activeSection, onSectionChange }: ContestHeaderProps) {
+  const { countryCode, navigateToCountry, flag, countryName } = usePublicCountry();
+  
   const navItems = [
     { name: "Contest", href: "#" },
     { name: "How it works", href: "#" }
@@ -18,9 +23,35 @@ export function ContestHeader({ activeSection, onSectionChange }: ContestHeaderP
   return (
     <div className="bg-contest-light-bg">
       <div className="max-w-6xl mx-auto px-6 py-4">
-        {/* Title and button in one line */}
-        <div className="flex items-center justify-between w-full">
-          <h1 className="text-2xl font-bold text-contest-text">OBC faces</h1>
+        {/* Title, Country Selector and button in one line */}
+        <div className="flex items-center justify-between w-full gap-4">
+          <div className="flex items-center gap-4">
+            <h1 className="text-2xl font-bold text-contest-text">OBC faces</h1>
+            
+            {/* Country Selector */}
+            <Select value={countryCode} onValueChange={navigateToCountry}>
+              <SelectTrigger className="w-[200px] bg-background border-contest-border">
+                <Globe className="h-4 w-4 mr-2" />
+                <SelectValue>
+                  <span className="flex items-center gap-2">
+                    <span>{flag}</span>
+                    <span>{countryName}</span>
+                  </span>
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {CONTEST_COUNTRIES.map((country) => (
+                  <SelectItem key={country.code} value={country.code}>
+                    <span className="flex items-center gap-2">
+                      <span>{country.flag}</span>
+                      <span>{country.name}</span>
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
           <AuthProtectedModal>
             <Button 
               className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 whitespace-nowrap"

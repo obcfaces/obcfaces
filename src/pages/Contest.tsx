@@ -4,7 +4,7 @@ import { ContestSection } from "@/components/contest-section";
 import { ContestHeader } from "@/components/contest-header";
 import { NextWeekSection } from "@/components/next-week-section";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { PublicCountryProvider, usePublicCountry } from "@/contexts/PublicCountryContext";
 import { getCountryCapitalTimezone } from "@/utils/weekIntervals";
 
@@ -17,7 +17,15 @@ const ContestContent = () => {
   const [loading, setLoading] = useState(true);
   const [pastWeekIntervals, setPastWeekIntervals] = useState<Array<{interval: string, weeksAgo: number}>>([]);
   const navigate = useNavigate();
+  const { country } = useParams<{ country: string }>();
   const { countryCode, timezone } = usePublicCountry();
+  
+  // Redirect /contest to /ph
+  useEffect(() => {
+    if (!country || country === 'contest') {
+      navigate('/ph', { replace: true });
+    }
+  }, [country, navigate]);
   
   // Helper function to get current Monday in country's timezone
   const getCurrentMonday = () => {
