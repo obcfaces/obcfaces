@@ -1,19 +1,49 @@
+import { supabase } from '@/integrations/supabase/client';
+
 interface TranslationService {
   translateText(text: string, targetLanguage: string): Promise<string>;
+  reportMissing(key: string, defaultText: string, targetLang: string): Promise<void>;
 }
 
 class AutoTranslationService implements TranslationService {
   private cache = new Map<string, Map<string, string>>();
 
   async translateText(text: string, targetLanguage: string): Promise<string> {
+    // English is the base language, no translation needed
+    if (targetLanguage === 'en') {
+      return text;
+    }
+
     // Check cache first
     if (this.cache.has(text) && this.cache.get(text)?.has(targetLanguage)) {
       return this.cache.get(text)!.get(targetLanguage)!;
     }
 
     try {
-      // Use browser's built-in translation or a translation API
+      // Try to get translation from database
+      const { data, error } = await supabase
+        .from('i18n_values')
+        .select('text')
+        .eq('key', text)
+        .eq('lang', targetLanguage)
+        .single();
+
+      if (!error && data) {
+        // Cache the result
+        if (!this.cache.has(text)) {
+          this.cache.set(text, new Map());
+        }
+        this.cache.get(text)!.set(targetLanguage, data.text);
+        return data.text;
+      }
+
+      // If not in database, try hardcoded translations
       const translated = await this.performTranslation(text, targetLanguage);
+      
+      // If no translation found, report as missing
+      if (translated === text) {
+        await this.reportMissing(text, text, targetLanguage);
+      }
       
       // Cache the result
       if (!this.cache.has(text)) {
@@ -25,6 +55,23 @@ class AutoTranslationService implements TranslationService {
     } catch (error) {
       console.error('Translation failed:', error);
       return text; // Fallback to original text
+    }
+  }
+
+  async reportMissing(key: string, defaultText: string, targetLang: string): Promise<void> {
+    try {
+      await supabase
+        .from('i18n_missing')
+        .upsert({
+          key,
+          default_text: defaultText,
+          target_lang: targetLang,
+        }, {
+          onConflict: 'key,target_lang',
+          ignoreDuplicates: false,
+        });
+    } catch (error) {
+      console.error('Failed to report missing translation:', error);
     }
   }
 
