@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AdminPhotoModal } from '@/components/admin-photo-modal';
+import { AdminPhotoModal } from '@/features/admin/components/AdminPhotoModal';
 
 interface NextWeekVotersModalProps {
   isOpen: boolean;

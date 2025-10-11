@@ -1,4 +1,4 @@
-import { REJECTION_REASONS } from '@/components/reject-reason-modal';
+import { REJECTION_REASONS } from '../components/RejectReasonModal';
 
 /**
  * Admin Helper Functions

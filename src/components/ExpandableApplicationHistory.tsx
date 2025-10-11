@@ -4,7 +4,7 @@ import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Edit, Check, Minus, X, Trash2, RotateCcw, Copy } from 'lucide-react';
-import { AdminPhotoModal } from './admin-photo-modal';
+import { AdminPhotoModal } from '@/features/admin/components/AdminPhotoModal';
 
 interface Application {
   id: string;

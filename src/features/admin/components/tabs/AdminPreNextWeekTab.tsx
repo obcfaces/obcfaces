@@ -6,7 +6,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Edit, Info } from 'lucide-react';
 import { WeeklyContestParticipant } from '@/types/admin';
-import { LoadingSpinner } from '@/components/admin/LoadingSpinner';
+import { LoadingSpinner } from '../LoadingSpinner';
 import { useAdminCountry } from '@/contexts/AdminCountryContext';
 import { formatDateInCountry } from '@/utils/weekIntervals';
 

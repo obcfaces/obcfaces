@@ -16,7 +16,7 @@ import { ReferralBanner } from "@/components/referral-banner";
 import { useDeviceFingerprint } from "@/hooks/useDeviceFingerprint";
 
 // Lazy load heavy pages that aren't needed initially
-const Admin = lazy(() => import("./pages/Admin"));
+const Admin = lazy(() => import("./features/admin/pages/AdminPage"));
 const Contest = lazy(() => import("./features/contest/pages/ContestPage"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Messages = lazy(() => import("./pages/Messages"));

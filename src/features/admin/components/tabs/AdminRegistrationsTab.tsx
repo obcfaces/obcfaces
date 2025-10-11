@@ -11,7 +11,7 @@ import { ChevronDown, Star, Heart, Copy, Facebook } from 'lucide-react';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { UAParser } from 'ua-parser-js';
 import { useToast } from '@/hooks/use-toast';
-import { LoadingSpinner } from '@/components/admin/LoadingSpinner';
+import { LoadingSpinner } from '../LoadingSpinner';
 
 interface AdminRegistrationsTabProps {
   profiles: ProfileData[];

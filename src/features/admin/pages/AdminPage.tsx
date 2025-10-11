@@ -36,19 +36,19 @@ import { ContestParticipationModal } from '@/features/contest/components/Contest
 import { ApplicationEditHistory } from '@/components/ApplicationEditHistory';
 import { ExpandableApplicationHistory } from '@/components/ExpandableApplicationHistory';
 
-import { WinnerContentManager } from '@/components/admin/WinnerContentManager';
-import { ParticipantStatusHistory } from '@/components/admin/ParticipantStatusHistory';
-import { ParticipantStatusHistoryModal } from '@/components/admin/ParticipantStatusHistoryModal';
+import { WinnerContentManager } from '../components/WinnerContentManager';
+import { ParticipantStatusHistory } from '../components/ParticipantStatusHistory';
+import { ParticipantStatusHistoryModal } from '../components/ParticipantStatusHistoryModal';
 import { isEmailDomainWhitelisted } from '@/utils/email-whitelist';
-import { AdminNewApplicationsTab } from '@/components/admin/tabs/AdminNewApplicationsTab';
-import { AdminPreNextWeekTab } from '@/components/admin/tabs/AdminPreNextWeekTab';
-import { AdminNextWeekTab } from '@/components/admin/tabs/AdminNextWeekTab';
-import { AdminWeeklyTab } from '@/components/admin/tabs/AdminWeeklyTab';
-import { AdminPastWeekTab } from '@/components/admin/tabs/AdminPastWeekTab';
-import { AdminAllParticipantsTab } from '@/components/admin/tabs/AdminAllParticipantsTab';
-import { AdminRegistrationsTab } from '@/components/admin/tabs/AdminRegistrationsTab';
-import { AdminStatisticsTab } from '@/components/admin/tabs/AdminStatisticsTab';
-import { BackupTrigger } from '@/components/admin/BackupTrigger';
+import { AdminNewApplicationsTab } from '../components/tabs/AdminNewApplicationsTab';
+import { AdminPreNextWeekTab } from '../components/tabs/AdminPreNextWeekTab';
+import { AdminNextWeekTab } from '../components/tabs/AdminNextWeekTab';
+import { AdminWeeklyTab } from '../components/tabs/AdminWeeklyTab';
+import { AdminPastWeekTab } from '../components/tabs/AdminPastWeekTab';
+import { AdminAllParticipantsTab } from '../components/tabs/AdminAllParticipantsTab';
+import { AdminRegistrationsTab } from '../components/tabs/AdminRegistrationsTab';
+import { AdminStatisticsTab } from '../components/tabs/AdminStatisticsTab';
+import { BackupTrigger } from '../components/BackupTrigger';
 import { AdminCountryProvider, useAdminCountry } from '@/contexts/AdminCountryContext';
 import { CONTEST_COUNTRIES } from '@/types/admin';
 import { 
