@@ -1539,16 +1539,23 @@ const Admin = () => {
 
   const fetchDailyApplicationStats = async () => {
     try {
-      // Get current date in Philippines timezone
-      const nowInManila = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" }));
+      // Get current UTC time and convert to Manila time (UTC+8)
+      const now = new Date();
+      const manilaOffset = 8 * 60; // Manila is UTC+8 (in minutes)
+      const localOffset = now.getTimezoneOffset(); // Local offset from UTC (in minutes)
+      const manilaTime = new Date(now.getTime() + (manilaOffset + localOffset) * 60000);
       
-      // Calculate Monday of current week
-      const dayOfWeek = nowInManila.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      console.log('Current Manila time:', manilaTime.toISOString(), 'Day:', manilaTime.getDay());
+      
+      // Calculate Monday of current week in Manila
+      const dayOfWeek = manilaTime.getDay(); // 0 = Sunday, 1 = Monday, etc.
       const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
       
-      const monday = new Date(nowInManila);
-      monday.setDate(nowInManila.getDate() + mondayOffset);
+      const monday = new Date(manilaTime);
+      monday.setDate(manilaTime.getDate() + mondayOffset);
       monday.setHours(0, 0, 0, 0);
+      
+      console.log('Monday of current week:', monday.toISOString());
       
       const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
       const stats = [];
