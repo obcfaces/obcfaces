@@ -3064,44 +3064,59 @@ const AdminContent = () => {
             <h1 className="text-3xl font-bold mb-2">Admin Panel</h1>
           </div>
 
-          <div className="mb-6">
-            <BackupTrigger />
-          </div>
-
-          {/* Global Country Filter */}
+          {/* Compact Backup & Country Filter Row */}
           <Card className="mb-6 bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
-            <CardContent className="pt-6">
-              <div className="flex flex-col md:flex-row md:items-center gap-4">
-                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                  <Globe className="w-4 h-4" />
-                  <span>Contest Country:</span>
+            <CardContent className="pt-4 pb-4">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                {/* Left: Backup */}
+                <BackupTrigger />
+                
+                {/* Right: Country Filter */}
+                <div className="flex items-center gap-3">
+                  <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+                    <SelectTrigger className="w-[220px] bg-background">
+                      <SelectValue>
+                        {CONTEST_COUNTRIES.find(c => c.code === selectedCountry) && (
+                          <span className="flex items-center gap-2">
+                            <span className="text-xl">{CONTEST_COUNTRIES.find(c => c.code === selectedCountry)!.flag}</span>
+                            <span>{CONTEST_COUNTRIES.find(c => c.code === selectedCountry)!.name}</span>
+                          </span>
+                        )}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CONTEST_COUNTRIES.map((country) => (
+                        <SelectItem key={country.code} value={country.code}>
+                          <span className="flex items-center gap-2">
+                            <span className="text-xl">{country.flag}</span>
+                            <span>{country.name}</span>
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-                <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-                  <SelectTrigger className="w-full md:w-[280px] bg-background">
-                    <SelectValue>
-                      {CONTEST_COUNTRIES.find(c => c.code === selectedCountry) && (
-                        <span className="flex items-center gap-2">
-                          <span className="text-xl">{CONTEST_COUNTRIES.find(c => c.code === selectedCountry)!.flag}</span>
-                          <span>{CONTEST_COUNTRIES.find(c => c.code === selectedCountry)!.name}</span>
-                        </span>
-                      )}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CONTEST_COUNTRIES.map(country => (
-                      <SelectItem key={country.code} value={country.code}>
-                        <span className="flex items-center gap-2">
-                          <span className="text-xl">{country.flag}</span>
-                          <span>{country.name}</span>
-                          <span className="text-xs text-muted-foreground ml-auto">({country.capital})</span>
-                        </span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Badge variant="secondary" className="w-fit">
-                  {timezone}
-                </Badge>
+              </div>
+              
+              {/* Timezone Badge & Current Time */}
+              <div className="mt-3 pt-3 border-t border-border/40 flex items-center justify-between text-xs text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="font-mono">
+                    {timezone}
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span>Current time:</span>
+                  <span className="font-mono font-semibold text-foreground">
+                    {new Date().toLocaleString('en-US', { 
+                      timeZone: timezone,
+                      hour12: false, 
+                      hour: '2-digit', 
+                      minute: '2-digit',
+                      second: '2-digit'
+                    }).split(', ')[1]}
+                  </span>
+                </div>
               </div>
             </CardContent>
           </Card>
