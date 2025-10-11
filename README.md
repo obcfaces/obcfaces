@@ -1,9 +1,25 @@
-# OBC Faces - Beauty Contest Platform
+<div align="center">
 
-A multi-locale beauty contest platform with real-time voting, admin management, and performance optimizations.
+# 🌟 OBC Faces
+
+**Multi-Locale Beauty Contest Platform**
+
+*Real-time voting • Admin management • Performance optimized*
 
 [![CI](https://github.com/your-repo/obc-faces/actions/workflows/ci.yml/badge.svg)](https://github.com/your-repo/obc-faces/actions/workflows/ci.yml)
+[![Production Smoke](https://github.com/your-repo/obc-faces/actions/workflows/prod-smoke.yml/badge.svg)](https://github.com/your-repo/obc-faces/actions/workflows/prod-smoke.yml)
 [![codecov](https://codecov.io/gh/your-repo/obc-faces/branch/main/graph/badge.svg)](https://codecov.io/gh/your-repo/obc-faces)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.5+-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-18.3-61dafb?logo=react&logoColor=white)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-5+-646cff?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38bdf8?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Supabase](https://img.shields.io/badge/Supabase-Backend-3ecf8e?logo=supabase&logoColor=white)](https://supabase.com/)
+[![Playwright](https://img.shields.io/badge/E2E-Playwright-2ead33?logo=playwright&logoColor=white)](https://playwright.dev/)
+[![Vitest](https://img.shields.io/badge/Unit-Vitest-6e9f18?logo=vitest&logoColor=white)](https://vitest.dev/)
+
+[🚀 Live Demo](https://obcface.com) • [📚 Documentation](./docs/OPERATIONAL_PLAYBOOK.md) • [🧪 Testing Guide](./TESTING_GUIDE.md)
+
+</div>
 
 ---
 

@@ -1,0 +1,183 @@
+name: Production Smoke Tests
+
+on:
+  schedule:
+    # Every Monday at 8:00 UTC
+    - cron: '0 8 * * 1'
+  workflow_dispatch: # Allow manual trigger
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '9'
+
+jobs:
+  prod-smoke:
+    name: Production Smoke Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      BASE_URL: https://obcface.com
+      DEFAULT_LOCALE: en-ph
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(pnpm list @playwright/test --depth=0 | grep @playwright/test | sed 's/.*@//')" >> $GITHUB_OUTPUT
+      
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+      
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps chromium
+      
+      - name: Install Playwright system dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium
+      
+      - name: Run production smoke tests
+        run: pnpm exec playwright test --project=chromium
+        continue-on-error: true
+        id: smoke-tests
+      
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: prod-smoke-report-${{ github.run_number }}
+          path: playwright-report/
+          retention-days: 90
+      
+      - name: Upload traces on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: prod-smoke-traces-${{ github.run_number }}
+          path: test-results/
+          retention-days: 30
+      
+      - name: Create issue on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = '🚨 Production Smoke Tests Failed';
+            const body = `
+            ## Production Smoke Tests Failed
+            
+            **Run**: [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            **Time**: ${{ github.event.repository.updated_at }}
+            **Base URL**: ${{ env.BASE_URL }}
+            
+            ### Action Required
+            
+            1. Review [Playwright Report](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            2. Check production logs (Sentry, Supabase, Cloudflare)
+            3. Verify recent deployments
+            4. Fix issues or create incident ticket
+            
+            ### Common Issues
+            
+            - Routing redirects broken
+            - SEO tags missing or incorrect
+            - Turnstile configuration issues
+            - Performance regression
+            - Database connectivity
+            
+            See [Production Smoke Tests Guide](./docs/PRODUCTION_SMOKE_TESTS.md) for debugging steps.
+            `;
+            
+            // Check if issue already exists
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'prod-smoke-failure',
+            });
+            
+            if (issues.data.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: ['prod-smoke-failure', 'priority-high'],
+              });
+            }
+      
+      - name: Post to Slack on failure
+        if: failure() && secrets.SLACK_WEBHOOK_URL != ''
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "🚨 Production smoke tests failed!",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "🚨 Production Smoke Tests Failed"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Base URL:*\n${{ env.BASE_URL }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Run:*\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|#${{ github.run_number }}>"
+                    }
+                  ]
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "View <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Playwright Report> for details."
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Production Smoke Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Status**: ${{ steps.smoke-tests.outcome == 'success' && '✅ Passed' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Base URL**: ${{ env.BASE_URL }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Run**: [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Test Coverage" >> $GITHUB_STEP_SUMMARY
+          echo "- Routing & redirects" >> $GITHUB_STEP_SUMMARY
+          echo "- SEO (canonical, hreflang)" >> $GITHUB_STEP_SUMMARY
+          echo "- Performance (load times)" >> $GITHUB_STEP_SUMMARY
+          echo "- Security (Turnstile)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.smoke-tests.outcome }}" != "success" ]; then
+            echo "⚠️ See [troubleshooting guide](./docs/PRODUCTION_SMOKE_TESTS.md) for debugging steps." >> $GITHUB_STEP_SUMMARY
+          fi
