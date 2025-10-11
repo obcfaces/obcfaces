@@ -1539,15 +1539,22 @@ const Admin = () => {
 
   const fetchDailyApplicationStats = async () => {
     try {
-      // Get the last 7 days
       const today = new Date();
       const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
       const stats = [];
 
+      // Calculate current week (Monday to Sunday)
+      const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+      const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay; // If Sunday, go back 6 days, otherwise go to Monday
+      
+      const monday = new Date(today);
+      monday.setDate(today.getDate() + mondayOffset);
+      monday.setHours(0, 0, 0, 0);
+
       // Calculate stats for each day of the current week (Mon-Sun)
       for (let i = 0; i < 7; i++) {
-        const date = new Date(today);
-        date.setDate(today.getDate() - today.getDay() + (i === 0 ? 0 : i)); // Start from Monday
+        const date = new Date(monday);
+        date.setDate(monday.getDate() + i);
         const dayStart = new Date(date.setHours(0, 0, 0, 0));
         const dayEnd = new Date(date.setHours(23, 59, 59, 999));
         
@@ -1593,13 +1600,9 @@ const Admin = () => {
         });
       }
 
-      // Ensure proper ordering: Monday to Sunday
-      const dayOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-      const sortedData = stats.sort((a, b) => {
-        return dayOrder.indexOf(a.day_name) - dayOrder.indexOf(b.day_name);
-      });
+      // Stats are already in correct order (Mon-Sun) from the loop
+      setDailyApplicationStats(stats);
 
-      setDailyApplicationStats(sortedData);
     } catch (error) {
       console.error('Error in fetchDailyApplicationStats:', error);
     }
@@ -3414,8 +3417,8 @@ const Admin = () => {
                             <div 
                               className={`text-[10px] font-semibold cursor-pointer px-1 rounded ${
                                 isSelectedApproved 
-                                  ? 'bg-blue-600 text-white' 
-                                  : 'text-blue-600 dark:text-blue-400 hover:bg-blue-100'
+                                  ? 'bg-green-600 text-white' 
+                                  : 'text-green-600 dark:text-green-400 hover:bg-green-100'
                               }`}
                               onClick={() => setSelectedNewAppDay(
                                 isSelectedApproved ? null : { date: stat.day_date || '', filter: 'approved' }
