@@ -66,7 +66,8 @@ export const ParticipantStatusHistory: React.FC<ParticipantStatusHistoryProps> =
       return date.toLocaleDateString('ru-RU', { 
         day: '2-digit', 
         month: '2-digit',
-        year: '2-digit'
+        year: '2-digit',
+        timeZone: 'Asia/Manila'
       }).replace(/\./g, '/');
     } catch {
       return dateStr;
@@ -76,11 +77,13 @@ export const ParticipantStatusHistory: React.FC<ParticipantStatusHistoryProps> =
   const formatDateTime = (dateStr: string) => {
     try {
       const date = new Date(dateStr);
-      const day = date.getDate();
-      const month = date.toLocaleDateString('ru-RU', { month: 'short' });
-      const time = date.toLocaleTimeString('ru-RU', { 
+      const manilaDate = new Date(date.toLocaleString('en-US', { timeZone: 'Asia/Manila' }));
+      const day = manilaDate.getDate();
+      const month = manilaDate.toLocaleDateString('ru-RU', { month: 'short', timeZone: 'Asia/Manila' });
+      const time = manilaDate.toLocaleTimeString('ru-RU', { 
         hour: '2-digit', 
-        minute: '2-digit' 
+        minute: '2-digit',
+        timeZone: 'Asia/Manila'
       });
       return `${day} ${month}. ${time}`;
     } catch {

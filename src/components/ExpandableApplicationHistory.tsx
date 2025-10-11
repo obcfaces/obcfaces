@@ -225,10 +225,12 @@ export const ExpandableApplicationHistory: React.FC<ExpandableApplicationHistory
                     {submittedDate.toLocaleDateString('en-GB', { 
                       day: '2-digit', 
                       month: '2-digit', 
-                      year: 'numeric' 
+                      year: 'numeric',
+                      timeZone: 'Asia/Manila'
                     })} {submittedDate.toLocaleTimeString('en-GB', { 
                       hour: '2-digit', 
-                      minute: '2-digit' 
+                      minute: '2-digit',
+                      timeZone: 'Asia/Manila'
                     })}
                   </div>
                   
