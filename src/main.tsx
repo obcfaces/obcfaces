@@ -1,7 +1,24 @@
 import { createRoot } from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import * as Sentry from "@sentry/react"
 import App from './App.tsx'
 import './index.css'
+
+// Initialize Sentry for error tracking
+Sentry.init({
+  dsn: "https://16eaf8ee6e0c5ba24bda9f31528f9d91@o4510169786220544.ingest.de.sentry.io/4510169792381008",
+  integrations: [
+    Sentry.browserTracingIntegration(),
+    Sentry.replayIntegration({
+      maskAllText: false,
+      blockAllMedia: false,
+    }),
+  ],
+  tracesSampleRate: 1.0,
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1.0,
+  environment: import.meta.env.MODE,
+})
 
 // Register Service Worker for PWA support
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
@@ -34,6 +51,8 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById("root")!).render(
   <QueryClientProvider client={queryClient}>
-    <App />
+    <Sentry.ErrorBoundary fallback={<div>An error has occurred</div>}>
+      <App />
+    </Sentry.ErrorBoundary>
   </QueryClientProvider>
 );
