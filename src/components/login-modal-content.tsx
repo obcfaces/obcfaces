@@ -14,6 +14,8 @@ import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, Link } from "react-router-dom";
 import { getCitiesForLocation } from '@/lib/location-utils';
+import { TurnstileWidget } from "@/components/TurnstileWidget";
+import { verifyTurnstile } from "@/utils/turnstile";
 
 interface LoginModalContentProps {
   onClose?: () => void;
@@ -54,6 +56,7 @@ const LoginModalContent = ({ onClose, defaultMode = "login", onAuthSuccess }: Lo
   const [forgotEmailSent, setForgotEmailSent] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [formStartTime, setFormStartTime] = useState<number | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -169,6 +172,21 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
         toast({ description: "Login successful" });
         onAuthSuccess?.(); // Call auth success callback
       } else {
+        // Verify Turnstile token before signup
+        if (!turnstileToken) {
+          setAuthError("Please complete the security verification");
+          setLoading(false);
+          return;
+        }
+
+        const verification = await verifyTurnstile(turnstileToken, 'signup');
+        if (!verification.success) {
+          setAuthError("Security verification failed. Please try again");
+          setTurnstileToken(null);
+          setLoading(false);
+          return;
+        }
+
         // Calculate form fill time
         const formFillTime = formStartTime ? Math.floor((Date.now() - formStartTime) / 1000) : null;
         
@@ -544,12 +562,22 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
                 </div>
               </div>
             </div>
+
+            {/* Turnstile Widget для регистрации */}
+            <TurnstileWidget 
+              onSuccess={(token) => setTurnstileToken(token)}
+              onError={() => setTurnstileToken(null)}
+              action="signup"
+            />
           </>
         )}
         <div className="flex items-center justify-between">
           {getSwitchText()}
           <div className="flex flex-col space-y-2 items-end">
-            <Button type="submit" disabled={loading || forgotEmailSent}>
+            <Button 
+              type="submit" 
+              disabled={loading || forgotEmailSent || (mode === "signup" && !turnstileToken)}
+            >
               {loading ? "Please wait…" : 
                forgotEmailSent ? "Email sent" :
                mode === "login" ? "Sign in" : 
