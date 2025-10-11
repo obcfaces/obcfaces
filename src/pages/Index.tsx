@@ -5,8 +5,12 @@ import { ContestHeader, ContestWeeksRenderer, ContestFiltersComponent as Contest
 import { EditableContent } from "@/components/editable-content";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useLanguage, languages } from "@/contexts/LanguageContext";
+import { useTranslation } from "@/hooks/useTranslation";
 import type { Category } from "@/features/contest/components/ContestFilters";
 import { useAdminStatus } from "@/hooks/useAdminStatus";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { seedMissingTranslations, triggerAutoTranslate } from "@/utils/seedTranslations";
 
 const Index = () => {
   const [searchParams] = useSearchParams();
@@ -14,6 +18,7 @@ const Index = () => {
   const { locale } = useParams<{ locale: string }>();
   const { isAdmin } = useAdminStatus();
   const { currentLanguage, setLanguage } = useLanguage();
+  const { t } = useTranslation();
   
   // Parse locale from URL (e.g., "en-ph" -> lang: "en", country: "PH")
   const [urlLang, urlCountry] = (locale || "en-ph").split("-");
@@ -30,6 +35,8 @@ const Index = () => {
     const param = searchParams.get("view");
     return (param === "full" || param === "compact") ? param : "compact";
   });
+  
+  const [isTranslating, setIsTranslating] = useState(false);
   const [activeSection, setActiveSection] = useState("Contest");
   const [category, setCategory] = useState<"" | Category>(() => {
     return (searchParams.get("category") as "" | Category) || "";
@@ -67,6 +74,28 @@ const Index = () => {
   const handleCategoryChange = (newCategory: "" | Category) => {
     setCategory(newCategory);
   };
+  
+  // Admin function to seed and translate
+  const handleSeedAndTranslate = async () => {
+    setIsTranslating(true);
+    try {
+      toast.info('Seeding missing translations...');
+      await seedMissingTranslations('es');
+      
+      toast.info('Starting auto-translate...');
+      const result = await triggerAutoTranslate();
+      
+      toast.success(`✅ Translated ${result.translations_processed || 0} texts`);
+      
+      // Reload page to see translations
+      setTimeout(() => window.location.reload(), 1000);
+    } catch (error) {
+      console.error('Translation error:', error);
+      toast.error('Translation failed');
+    } finally {
+      setIsTranslating(false);
+    }
+  };
 
   
   console.log('Index component rendering, viewMode:', viewMode);
@@ -86,6 +115,25 @@ const Index = () => {
       {/* Content area that changes based on active section */}
       {activeSection === "Contest" && (
         <>
+          {/* Admin translation button */}
+          {isAdmin && (
+            <div className="max-w-6xl mx-auto px-6 pt-6">
+              <div className="bg-muted p-4 rounded-lg flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold">Translate Page to Spanish</p>
+                  <p className="text-xs text-muted-foreground">Seeds missing translations and runs auto-translate</p>
+                </div>
+                <Button 
+                  onClick={handleSeedAndTranslate}
+                  disabled={isTranslating}
+                  size="sm"
+                >
+                  {isTranslating ? 'Translating...' : '🌐 Translate Now'}
+                </Button>
+              </div>
+            </div>
+          )}
+          
           <div className="max-w-6xl mx-auto px-6 pt-6 pb-6 rounded-lg shadow-lg shadow-foreground/15">
             <ContestFilters
               country={country}
@@ -117,12 +165,12 @@ const Index = () => {
         <div className="max-w-6xl mx-auto px-0 sm:px-6 py-6 text-foreground">
           <div className="text-center mb-8">
             <h1 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 bg-clip-text text-transparent mb-3">
-              How It Works
+              {t("How It Works")}
             </h1>
-            <p className="text-lg text-muted-foreground font-medium mb-4">(international — user-facing, legal-safe)</p>
+            <p className="text-lg text-muted-foreground font-medium mb-4">({t("international — user-facing, legal-safe")})</p>
             <div className="p-4 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl border border-purple-200 dark:border-purple-800">
               <p className="text-xl md:text-2xl font-bold text-center bg-gradient-to-r from-purple-700 to-pink-600 bg-clip-text text-transparent">
-                Join OBC — the international, fully online beauty contest.
+                {t("Join OBC — the international, fully online beauty contest.")}
               </p>
             </div>
           </div>
@@ -134,16 +182,16 @@ const Index = () => {
               <div className="bg-background p-4 sm:p-6 rounded-none sm:rounded-xl border-0 sm:border border-border shadow-md">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="flex items-center justify-center w-10 h-10 bg-primary text-primary-foreground rounded-full text-lg font-bold">1</div>
-                  <h3 className="text-lg font-bold text-foreground">📸 Enter Anytime</h3>
+                  <h3 className="text-lg font-bold text-foreground">📸 {t("Enter Anytime")}</h3>
                 </div>
                 <div className="text-sm whitespace-pre-line text-foreground text-justify ml-13">
-                  Upload two photos:
-                  • 1 full-body photo (natural look — no filters, no heavy editing)
-                  • 1 close-up face photo (no makeup)
-                  By submitting, you confirm you are 18 years or older, you own the photos (or have permission), and you accept our{" "}
-                  <a href="/terms" className="text-primary hover:underline font-semibold">Terms</a>
-                  {" and "}
-                  <a href="/privacy" className="text-primary hover:underline font-semibold">Privacy Policy</a>.
+                  {t("Upload two photos:")}{"\n"}
+                  {t("• 1 full-body photo (natural look — no filters, no heavy editing)")}{"\n"}
+                  {t("• 1 close-up face photo (no makeup)")}{"\n"}
+                  {t("By submitting, you confirm you are 18 years or older, you own the photos (or have permission), and you accept our")}{" "}
+                  <a href="/terms" className="text-primary hover:underline font-semibold">{t("Terms")}</a>
+                  {" "}{t("and")}{" "}
+                  <a href="/privacy" className="text-primary hover:underline font-semibold">{t("Privacy Policy")}</a>.
                 </div>
               </div>
 
@@ -151,7 +199,7 @@ const Index = () => {
               <div className="bg-background p-4 sm:p-6 rounded-none sm:rounded-xl border-0 sm:border border-border shadow-md">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="flex items-center justify-center w-10 h-10 bg-primary text-primary-foreground rounded-full text-lg font-bold">2</div>
-                  <h3 className="text-lg font-bold text-foreground">🔍 Selection & Posting</h3>
+                  <h3 className="text-lg font-bold text-foreground">🔍 {t("Selection & Posting")}</h3>
                 </div>
                 <div className="ml-13">
                   <EditableContent 
@@ -167,7 +215,7 @@ const Index = () => {
               <div className="bg-background p-4 sm:p-6 rounded-none sm:rounded-xl border-0 sm:border border-border shadow-md">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="flex items-center justify-center w-10 h-10 bg-primary text-primary-foreground rounded-full text-lg font-bold">3</div>
-                  <h3 className="text-lg font-bold text-foreground">⭐ Global Voting</h3>
+                  <h3 className="text-lg font-bold text-foreground">⭐ {t("Global Voting")}</h3>
                 </div>
                 <div className="ml-13">
                   <EditableContent 
@@ -183,7 +231,7 @@ const Index = () => {
               <div className="bg-background p-4 sm:p-6 rounded-none sm:rounded-xl border-0 sm:border border-border shadow-md">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="flex items-center justify-center w-10 h-10 bg-primary text-primary-foreground rounded-full text-lg font-bold">4</div>
-                  <h3 className="text-lg font-bold text-foreground">🏆 Prizes & Verification</h3>
+                  <h3 className="text-lg font-bold text-foreground">🏆 {t("Prizes & Verification")}</h3>
                 </div>
                 <div className="ml-13">
                   <EditableContent 
@@ -199,7 +247,7 @@ const Index = () => {
               <div className="bg-background p-4 sm:p-6 rounded-none sm:rounded-xl border-0 sm:border border-border shadow-md">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="flex items-center justify-center w-10 h-10 bg-primary text-primary-foreground rounded-full text-lg font-bold">5</div>
-                  <h3 className="text-lg font-bold text-foreground">🛡️ Rules & Safety</h3>
+                  <h3 className="text-lg font-bold text-foreground">🛡️ {t("Rules & Safety")}</h3>
                 </div>
                 <div className="ml-13">
                   <EditableContent 
@@ -219,7 +267,7 @@ const Index = () => {
             <div className="bg-background p-4 sm:p-6 rounded-none sm:rounded-xl border-0 sm:border border-border shadow-md text-center mt-6">
               <div className="flex items-center justify-center gap-3 mb-4">
                 <span className="text-3xl">💬</span>
-                <h3 className="text-lg font-bold text-foreground">Questions or disputes?</h3>
+                <h3 className="text-lg font-bold text-foreground">{t("Questions or disputes?")}</h3>
               </div>
               <div className="text-sm text-foreground text-justify">
                 <EditableContent 
@@ -229,9 +277,9 @@ const Index = () => {
                   isAdmin={isAdmin}
                 />
                 {" "}
-                <a href="/terms" className="text-primary hover:underline font-semibold">Terms</a>
-                {" and "}
-                <a href="/privacy" className="text-primary hover:underline font-semibold">Privacy Policy</a>.
+                <a href="/terms" className="text-primary hover:underline font-semibold">{t("Terms")}</a>
+                {" "}{t("and")}{" "}
+                <a href="/privacy" className="text-primary hover:underline font-semibold">{t("Privacy Policy")}</a>.
               </div>
             </div>
 
