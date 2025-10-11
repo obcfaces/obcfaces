@@ -92,6 +92,36 @@ export type Database = {
         }
         Relationships: []
       }
+      blocked_ips: {
+        Row: {
+          blocked_at: string | null
+          blocked_until: string | null
+          created_by: string | null
+          id: string
+          ip_address: unknown
+          permanent: boolean | null
+          reason: string
+        }
+        Insert: {
+          blocked_at?: string | null
+          blocked_until?: string | null
+          created_by?: string | null
+          id?: string
+          ip_address: unknown
+          permanent?: boolean | null
+          reason: string
+        }
+        Update: {
+          blocked_at?: string | null
+          blocked_until?: string | null
+          created_by?: string | null
+          id?: string
+          ip_address?: unknown
+          permanent?: boolean | null
+          reason?: string
+        }
+        Relationships: []
+      }
       contest_application_history: {
         Row: {
           application_data: Json | null
@@ -794,6 +824,36 @@ export type Database = {
         }
         Relationships: []
       }
+      rate_limit_log: {
+        Row: {
+          created_at: string | null
+          endpoint: string
+          id: string
+          ip_address: unknown
+          request_count: number | null
+          user_id: string | null
+          window_start: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          endpoint: string
+          id?: string
+          ip_address: unknown
+          request_count?: number | null
+          user_id?: string | null
+          window_start?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          endpoint?: string
+          id?: string
+          ip_address?: unknown
+          request_count?: number | null
+          user_id?: string | null
+          window_start?: string | null
+        }
+        Relationships: []
+      }
       security_audit_log: {
         Row: {
           accessed_at: string
@@ -844,6 +904,72 @@ export type Database = {
           content_type?: string
           created_at?: string
           id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      suspicious_activity_log: {
+        Row: {
+          activity_type: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          ip_address: unknown | null
+          severity: string
+          user_id: string | null
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          severity: string
+          user_id?: string | null
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          severity?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_2fa_settings: {
+        Row: {
+          backup_codes: string[] | null
+          created_at: string | null
+          enabled: boolean | null
+          id: string
+          last_used_at: string | null
+          method: string | null
+          secret: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          backup_codes?: string[] | null
+          created_at?: string | null
+          enabled?: boolean | null
+          id?: string
+          last_used_at?: string | null
+          method?: string | null
+          secret?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          backup_codes?: string[] | null
+          created_at?: string | null
+          enabled?: boolean | null
+          id?: string
+          last_used_at?: string | null
+          method?: string | null
+          secret?: string | null
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []
@@ -1335,6 +1461,16 @@ export type Database = {
         Args: { conversation_id_param: string; user_id_param: string }
         Returns: boolean
       }
+      check_rate_limit: {
+        Args: {
+          check_endpoint: string
+          check_ip: unknown
+          check_user_id: string
+          max_requests: number
+          window_minutes: number
+        }
+        Returns: boolean
+      }
       check_user_has_voted_for_participant: {
         Args: { target_participant_id: string }
         Returns: boolean
@@ -1356,6 +1492,10 @@ export type Database = {
         Returns: boolean
       }
       cleanup_duplicate_conversations_safe: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      cleanup_rate_limit_logs: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
@@ -2076,9 +2216,27 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: boolean
       }
+      is_ip_blocked: {
+        Args: { check_ip: unknown }
+        Returns: boolean
+      }
       is_suspicious_email_domain: {
         Args: { email: string }
         Returns: boolean
+      }
+      log_rate_limit_attempt: {
+        Args: { log_endpoint: string; log_ip: unknown; log_user_id: string }
+        Returns: undefined
+      }
+      log_suspicious_activity: {
+        Args: {
+          activity_details: Json
+          activity_ip: unknown
+          activity_severity: string
+          activity_type: string
+          activity_user_id: string
+        }
+        Returns: undefined
       }
       mark_conversation_as_read: {
         Args: { conversation_id_param: string; user_id_param: string }
