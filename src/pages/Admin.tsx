@@ -193,6 +193,11 @@ interface WeeklyContestParticipant {
 
 
 const AdminContent = () => {
+  // ALL HOOKS MUST BE AT THE TOP - BEFORE ANY CONDITIONAL RETURNS
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { selectedCountry, setSelectedCountry, timezone } = useAdminCountry();
+  
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -229,8 +234,6 @@ const AdminContent = () => {
   const [showDeletedAll, setShowDeletedAll] = useState(false);
   const [deleteConfirmParticipant, setDeleteConfirmParticipant] = useState<{ id: string; name: string } | null>(null);
   const [filteredWeeklyParticipants, setFilteredWeeklyParticipants] = useState<any[]>([]);
-  
-  const { selectedCountry, setSelectedCountry, timezone } = useAdminCountry();
   const [selectedUserApplications, setSelectedUserApplications] = useState<string | null>(null);
   const [editingApplicationId, setEditingApplicationId] = useState<string | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -343,9 +346,6 @@ const AdminContent = () => {
   const [expandedMaybeFingerprints, setExpandedMaybeFingerprints] = useState<Set<string>>(new Set());
   const [expandedFingerprints, setExpandedFingerprints] = useState<Set<string>>(new Set());
   
-  const navigate = useNavigate();
-  const { toast } = useToast();
-
   console.log('Admin component rendering, adminStatusFilter:', adminStatusFilter);
 
   // Centralized function to update participant status with history
