@@ -44,14 +44,11 @@ export function AdminNewApplicationsTab({
   onRestore,
   loading = false,
 }: AdminNewApplicationsTabProps) {
+  // ALL HOOKS MUST COME BEFORE ANY CONDITIONAL RETURNS
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [expandedHistory, setExpandedHistory] = useState<Set<string>>(new Set());
   const { selectedCountry } = useAdminCountry();
   
-  if (loading) {
-    return <LoadingSpinner message="Loading applications..." />;
-  }
-
   // Filter by selected country
   const filteredApplications = useMemo(() => {
     return applications.filter(app => {
@@ -68,6 +65,11 @@ export function AdminNewApplicationsTab({
   }, [deletedApplications, selectedCountry]);
 
   const displayApplications = showDeleted ? filteredDeletedApplications : filteredApplications;
+
+  // NOW we can have conditional returns after all hooks
+  if (loading) {
+    return <LoadingSpinner message="Loading applications..." />;
+  }
 
   const getStatusBackgroundColor = (status: string) => {
     switch (status) {
