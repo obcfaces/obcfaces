@@ -3401,8 +3401,19 @@ const Admin = () => {
                 loading={tabLoading['new-applications']}
                 applications={selectedNewAppDay ? contestApplications.filter(app => {
                   if (!app.submitted_at) return false;
-                  const appDate = new Date(app.submitted_at).toISOString().split('T')[0];
-                  const filterDate = new Date(selectedNewAppDay.date).toISOString().split('T')[0];
+                  
+                  // Parse dates in Manila timezone for comparison
+                  const appDateStr = new Date(app.submitted_at).toLocaleString('en-US', { 
+                    timeZone: 'Asia/Manila',
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                  }).split(',')[0];
+                  const [appMonth, appDay, appYear] = appDateStr.split('/');
+                  const appDate = `${appYear}-${appMonth.padStart(2, '0')}-${appDay.padStart(2, '0')}`;
+                  
+                  const filterDate = selectedNewAppDay.date;
+                  
                   if (appDate !== filterDate) return false;
                   
                   // Apply additional filter based on status
