@@ -1,21 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Table, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import { VirtualizedList } from '@/components/performance/VirtualizedList';
 
-interface Participant {
-  id: string;
-  user_id: string;
-  admin_status: string;
-  week_interval: string | null;
-  created_at: string;
-  deleted_at: string | null;
-  is_active: boolean;
-  application_data: any;
-}
 
 const getStatusBadgeVariant = (status: string) => {
   switch (status) {
@@ -38,30 +29,21 @@ const getStatusBadgeVariant = (status: string) => {
 };
 
 export const AllParticipantsTable = () => {
-  const [participants, setParticipants] = useState<Participant[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchParticipants();
-  }, []);
-
-  const fetchParticipants = async () => {
-    try {
-      // Add pagination limit for better performance
+  const { data: participants = [], isLoading: loading } = useQuery({
+    queryKey: ['all-participants'],
+    queryFn: async () => {
       const { data, error } = await supabase
         .from('weekly_contest_participants')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(1000); // Limit to 1000 most recent
+        .limit(1000);
 
       if (error) throw error;
-      setParticipants(data || []);
-    } catch (error) {
-      console.error('Error fetching participants:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+      return data || [];
+    },
+    staleTime: 30000, // 30 секунд
+    gcTime: 300000, // 5 минут
+  });
 
   if (loading) {
     return (
@@ -98,11 +80,12 @@ export const AllParticipantsTable = () => {
             itemHeight={53}
             containerHeight={550}
             renderItem={(participant) => {
-              const firstName = participant.application_data?.first_name || '';
-              const lastName = participant.application_data?.last_name || '';
+              const appData = participant.application_data as any;
+              const firstName = appData?.first_name || '';
+              const lastName = appData?.last_name || '';
               const fullName = `${firstName} ${lastName}`.trim() || 'Без имени';
-              const city = participant.application_data?.city || '';
-              const country = participant.application_data?.country || '';
+              const city = appData?.city || '';
+              const country = appData?.country || '';
               const location = [city, country].filter(Boolean).join(', ') || 'Не указано';
 
               return (

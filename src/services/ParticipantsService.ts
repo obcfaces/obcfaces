@@ -7,14 +7,39 @@ export interface ParticipantFilters {
   gender?: string;
   isActive?: boolean;
   showDeleted?: boolean;
+  limit?: number;
+  orderBy?: { column: string; ascending: boolean };
 }
 
 export class ParticipantsService {
   /**
+   * Получить всех участников с лимитом для админ-таблицы
+   */
+  static async getAllParticipants(filters: ParticipantFilters = {}) {
+    const { limit = 1000, orderBy = { column: 'created_at', ascending: false } } = filters;
+
+    let query = supabase
+      .from('weekly_contest_participants')
+      .select('*')
+      .order(orderBy.column, { ascending: orderBy.ascending })
+      .limit(limit);
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+    return data || [];
+  }
+
+  /**
    * Получить участников конкурса с фильтрами
    */
   static async getParticipants(filters: ParticipantFilters = {}) {
-    const { weekOffset = 0, status, country, gender, isActive, showDeleted } = filters;
+    const { weekOffset = 0, status, country, gender, isActive, showDeleted, limit, orderBy } = filters;
+
+    // Если есть limit, используем прямой запрос
+    if (limit) {
+      return this.getAllParticipants(filters);
+    }
 
     let query = supabase
       .rpc('get_weekly_contest_participants_admin', { weeks_offset: weekOffset });
