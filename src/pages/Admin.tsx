@@ -231,30 +231,6 @@ const AdminContent = () => {
   const [filteredWeeklyParticipants, setFilteredWeeklyParticipants] = useState<any[]>([]);
   
   const { selectedCountry, setSelectedCountry, timezone } = useAdminCountry();
-  
-  // Memoized current time display
-  const currentTime = React.useMemo(() => {
-    const now = new Date();
-    const parts = new Intl.DateTimeFormat('en-US', {
-      timeZone: timezone,
-      hour12: false,
-      hour: '2-digit',
-      minute: '2-digit',
-      day: '2-digit',
-      month: 'short',
-      year: '2-digit',
-      weekday: 'short'
-    }).formatToParts(now);
-    
-    const time = `${parts.find(p => p.type === 'hour')?.value}:${parts.find(p => p.type === 'minute')?.value}`;
-    const day = parts.find(p => p.type === 'day')?.value;
-    const month = parts.find(p => p.type === 'month')?.value?.toLowerCase();
-    const year = parts.find(p => p.type === 'year')?.value;
-    const weekday = parts.find(p => p.type === 'weekday')?.value?.toLowerCase();
-    
-    return `${time} ${day} ${month} ${year} (${weekday})`;
-  }, [timezone]);
-  
   const [selectedUserApplications, setSelectedUserApplications] = useState<string | null>(null);
   const [editingApplicationId, setEditingApplicationId] = useState<string | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -3075,6 +3051,29 @@ const AdminContent = () => {
     return null;
   }
 
+  // Calculate current time display here to avoid hooks issues
+  const getCurrentTimeDisplay = () => {
+    const now = new Date();
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: timezone,
+      hour12: false,
+      hour: '2-digit',
+      minute: '2-digit',
+      day: '2-digit',
+      month: 'short',
+      year: '2-digit',
+      weekday: 'short'
+    }).formatToParts(now);
+    
+    const time = `${parts.find(p => p.type === 'hour')?.value}:${parts.find(p => p.type === 'minute')?.value}`;
+    const day = parts.find(p => p.type === 'day')?.value;
+    const month = parts.find(p => p.type === 'month')?.value?.toLowerCase();
+    const year = parts.find(p => p.type === 'year')?.value;
+    const weekday = parts.find(p => p.type === 'weekday')?.value?.toLowerCase();
+    
+    return `${time} ${day} ${month} ${year} (${weekday})`;
+  };
+
   return (
     <>
       <Helmet>
@@ -3118,7 +3117,7 @@ const AdminContent = () => {
                 {timezone}
               </Badge>
               <span className="text-xs text-muted-foreground font-mono">
-                {currentTime}
+                {getCurrentTimeDisplay()}
               </span>
             </div>
           </div>
