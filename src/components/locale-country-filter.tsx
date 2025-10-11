@@ -1,14 +1,39 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useContext } from "react";
 import SearchableSelect, { type Option } from "@/components/ui/searchable-select";
 import { ALL_COUNTRIES } from "@/data/locale-config";
-import { usePublicCountry } from "@/contexts/PublicCountryContext";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useNavigate } from "react-router-dom";
 
 interface LocaleCountryFilterProps {
+  value?: string;
   onCountryChange?: (countryCode: string) => void;
 }
 
-const LocaleCountryFilter: React.FC<LocaleCountryFilterProps> = ({ onCountryChange }) => {
-  const { countryCode, navigateToLocale, languageCode } = usePublicCountry();
+const LocaleCountryFilter: React.FC<LocaleCountryFilterProps> = ({ 
+  value, 
+  onCountryChange 
+}) => {
+  const { currentLanguage } = useLanguage();
+  const navigate = useNavigate();
+
+  // Try to get context from PublicCountryProvider if available
+  let contextCountryCode: string | undefined;
+  let contextLanguageCode: string | undefined;
+  let contextNavigateToLocale: ((countryCode: string, languageCode?: string) => void) | undefined;
+
+  try {
+    // Dynamically import the context hook
+    const { usePublicCountry } = require('@/contexts/PublicCountryContext');
+    const context = usePublicCountry();
+    contextCountryCode = context.countryCode;
+    contextLanguageCode = context.languageCode;
+    contextNavigateToLocale = context.navigateToLocale;
+  } catch (e) {
+    // Context not available, use props
+  }
+
+  const countryCode = value || contextCountryCode || 'PH';
+  const languageCode = contextLanguageCode || currentLanguage.code;
 
   const countryOptions: Option[] = useMemo(() => {
     const allCountries = ALL_COUNTRIES.map(country => ({
@@ -34,8 +59,13 @@ const LocaleCountryFilter: React.FC<LocaleCountryFilterProps> = ({ onCountryChan
   }, []);
 
   const handleCountryChange = (newCountryCode: string) => {
-    // Update URL with new locale
-    navigateToLocale(newCountryCode, languageCode);
+    // If context navigator is available, use it
+    if (contextNavigateToLocale) {
+      contextNavigateToLocale(newCountryCode, languageCode);
+    } else {
+      // Otherwise, use regular navigate with locale format
+      navigate(`/${languageCode}-${newCountryCode.toLowerCase()}`);
+    }
     
     // Call external handler if provided
     if (onCountryChange) {

@@ -75,7 +75,7 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
       {/* First row - Main filters */}
       <div className="flex flex-row flex-nowrap items-center gap-2 w-full">
         {/* Country filter with locale support */}
-        <LocaleCountryFilter onCountryChange={onCountryChange} />
+        <LocaleCountryFilter value={country} onCountryChange={onCountryChange} />
 
         {/* Gender filter */}
         <div className="w-24 shrink-0">
