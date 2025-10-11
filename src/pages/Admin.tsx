@@ -2371,6 +2371,32 @@ const Admin = () => {
     })) as any;
 
     console.log('Fetched contest applications:', processedData?.length, 'applications');
+    
+    // Debug: Check applications for Saturday 11/10
+    const saturdayApps = processedData.filter((app: any) => {
+      if (!app.submitted_at) return false;
+      const appDateStr = new Date(app.submitted_at).toLocaleString('en-US', { 
+        timeZone: 'Asia/Manila',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).split(',')[0];
+      const [appMonth, appDay, appYear] = appDateStr.split('/');
+      const appDate = `${appYear}-${appMonth.padStart(2, '0')}-${appDay.padStart(2, '0')}`;
+      return appDate === '2025-10-11';
+    });
+    
+    if (saturdayApps.length > 0) {
+      console.log(`🔍 Found ${saturdayApps.length} applications for Saturday 11/10:`, 
+        saturdayApps.map(a => ({
+          name: `${a.application_data?.first_name} ${a.application_data?.last_name}`,
+          submitted_at: a.submitted_at,
+          admin_status: a.admin_status,
+          deleted_at: a.deleted_at
+        }))
+      );
+    }
+    
     setContestApplications(processedData);
   };
 
