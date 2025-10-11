@@ -3414,14 +3414,31 @@ const Admin = () => {
                   
                   const filterDate = selectedNewAppDay.date;
                   
+                  // Check date match
                   if (appDate !== filterDate) return false;
+                  
+                  // Log for debugging
+                  console.log('🔍 Filtering app:', {
+                    name: `${app.application_data?.first_name} ${app.application_data?.last_name}`,
+                    submitted_at: app.submitted_at,
+                    appDate,
+                    filterDate,
+                    admin_status: app.admin_status,
+                    filter: selectedNewAppDay.filter
+                  });
                   
                   // Apply additional filter based on status
                   if (selectedNewAppDay.filter === 'approved') {
-                    return ['pre next week', 'next week', 'next week on site', 'this week', 'past'].includes(app.admin_status || '');
+                    const isApproved = ['pre next week', 'next week', 'next week on site', 'this week', 'past'].includes(app.admin_status || '');
+                    console.log('  ✓ Approved check:', isApproved);
+                    return isApproved;
                   } else if (selectedNewAppDay.filter === 'rejected') {
-                    return app.admin_status === 'rejected';
+                    const isRejected = app.admin_status === 'rejected';
+                    console.log('  ✓ Rejected check:', isRejected);
+                    return isRejected;
                   }
+                  
+                  console.log('  ✓ All filter - showing');
                   return true; // 'all' filter
                 }) : contestApplications}
                 deletedApplications={deletedApplications}
