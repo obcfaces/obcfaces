@@ -97,19 +97,13 @@ export const TurnstileWidget = ({
   }, [isLoaded, action, theme, size, onSuccess, onError]);
 
   if (loadError) {
-    return (
-      <div className="text-xs text-muted-foreground text-center py-2 italic">
-        Security verification temporarily unavailable (signup still allowed for testing)
-      </div>
-    );
+    // Silently fail - don't show error message to users
+    return null;
   }
 
   if (!isLoaded) {
-    return (
-      <div className="text-sm text-muted-foreground text-center py-2">
-        Loading security verification...
-      </div>
-    );
+    // Show nothing while loading
+    return null;
   }
 
   return (
