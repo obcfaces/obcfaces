@@ -131,6 +131,13 @@ export type Database = {
             foreignKeyName: "contest_application_history_application_id_fkey"
             columns: ["application_id"]
             isOneToOne: false
+            referencedRelation: "cached_participant_engagement"
+            referencedColumns: ["participant_id"]
+          },
+          {
+            foreignKeyName: "contest_application_history_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
             referencedRelation: "weekly_contest_participants"
             referencedColumns: ["id"]
           },
@@ -178,6 +185,7 @@ export type Database = {
       contestant_ratings: {
         Row: {
           contestant_name: string
+          contestant_user_id: string | null
           created_at: string
           id: string
           participant_id: string | null
@@ -188,6 +196,7 @@ export type Database = {
         }
         Insert: {
           contestant_name: string
+          contestant_user_id?: string | null
           created_at?: string
           id?: string
           participant_id?: string | null
@@ -198,6 +207,7 @@ export type Database = {
         }
         Update: {
           contestant_name?: string
+          contestant_user_id?: string | null
           created_at?: string
           id?: string
           participant_id?: string | null
@@ -207,6 +217,13 @@ export type Database = {
           week_interval?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "contestant_ratings_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "cached_participant_engagement"
+            referencedColumns: ["participant_id"]
+          },
           {
             foreignKeyName: "contestant_ratings_participant_id_fkey"
             columns: ["participant_id"]
@@ -374,6 +391,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "likes_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "cached_participant_engagement"
+            referencedColumns: ["participant_id"]
+          },
           {
             foreignKeyName: "likes_participant_id_fkey"
             columns: ["participant_id"]
@@ -549,6 +573,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "photo_comments_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "cached_participant_engagement"
+            referencedColumns: ["participant_id"]
+          },
           {
             foreignKeyName: "photo_comments_participant_id_fkey"
             columns: ["participant_id"]
@@ -1153,6 +1184,45 @@ export type Database = {
       }
     }
     Views: {
+      cached_participant_engagement: {
+        Row: {
+          avg_rating: number | null
+          participant_id: string | null
+          total_commenters: number | null
+          total_likes: number | null
+          total_raters: number | null
+          user_id: string | null
+          week_interval: string | null
+        }
+        Relationships: []
+      }
+      cached_voting_stats: {
+        Row: {
+          average_rating: number | null
+          contestant_user_id: string | null
+          last_vote_at: string | null
+          participant_id: string | null
+          total_voters: number | null
+          total_votes: number | null
+          week_interval: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contestant_ratings_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "cached_participant_engagement"
+            referencedColumns: ["participant_id"]
+          },
+          {
+            foreignKeyName: "contestant_ratings_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "weekly_contest_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contest_applications_backup: {
         Row: {
           application_data: Json | null
@@ -2015,6 +2085,10 @@ export type Database = {
         Returns: undefined
       }
       refresh_participant_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      refresh_voting_stats_cache: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
