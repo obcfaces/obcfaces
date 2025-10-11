@@ -323,6 +323,12 @@ interface ContestApplication {
   is_active: boolean;
   notes?: string;
   admin_status?: 'pending' | 'rejected' | 'pre next week' | 'this week' | 'next week' | 'next week on site' | 'past';
+  status_history?: {
+    [key: string]: {
+      changed_at?: string;
+      [key: string]: any;
+    };
+  };
 }
 
 interface WeeklyContest {
@@ -3414,32 +3420,52 @@ const Admin = () => {
                   
                   const filterDate = selectedNewAppDay.date;
                   
-                  // Check date match
+                  // Check if date matches
                   if (appDate !== filterDate) return false;
                   
-                  // Log for debugging
-                  console.log('🔍 Filtering app:', {
-                    name: `${app.application_data?.first_name} ${app.application_data?.last_name}`,
-                    submitted_at: app.submitted_at,
-                    appDate,
-                    filterDate,
-                    admin_status: app.admin_status,
-                    filter: selectedNewAppDay.filter
-                  });
-                  
-                  // Apply additional filter based on status
+                  // Apply filter based on type
                   if (selectedNewAppDay.filter === 'approved') {
-                    const isApproved = ['pre next week', 'next week', 'next week on site', 'this week', 'past'].includes(app.admin_status || '');
-                    console.log('  ✓ Approved check:', isApproved);
-                    return isApproved;
+                    // Show applications that were CHANGED TO approved status on this day
+                    // Check status_history for this status change on this day
+                    const statusHistory = app.status_history || {};
+                    const approvedStatuses = ['pre next week', 'next week', 'next week on site', 'this week', 'past'];
+                    
+                    return approvedStatuses.some(status => {
+                      const statusData = statusHistory[status];
+                      if (!statusData || !statusData.changed_at) return false;
+                      
+                      const changedAtStr = new Date(statusData.changed_at).toLocaleString('en-US', {
+                        timeZone: 'Asia/Manila',
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit'
+                      }).split(',')[0];
+                      const [cMonth, cDay, cYear] = changedAtStr.split('/');
+                      const changedDate = `${cYear}-${cMonth.padStart(2, '0')}-${cDay.padStart(2, '0')}`;
+                      
+                      return changedDate === filterDate;
+                    });
                   } else if (selectedNewAppDay.filter === 'rejected') {
-                    const isRejected = app.admin_status === 'rejected';
-                    console.log('  ✓ Rejected check:', isRejected);
-                    return isRejected;
+                    // Show applications that were CHANGED TO rejected status on this day
+                    const statusHistory = app.status_history || {};
+                    const rejectedData = statusHistory['rejected'];
+                    
+                    if (!rejectedData || !rejectedData.changed_at) return false;
+                    
+                    const changedAtStr = new Date(rejectedData.changed_at).toLocaleString('en-US', {
+                      timeZone: 'Asia/Manila',
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit'
+                    }).split(',')[0];
+                    const [cMonth, cDay, cYear] = changedAtStr.split('/');
+                    const changedDate = `${cYear}-${cMonth.padStart(2, '0')}-${cDay.padStart(2, '0')}`;
+                    
+                    return changedDate === filterDate;
                   }
                   
-                  console.log('  ✓ All filter - showing');
-                  return true; // 'all' filter
+                  // 'all' filter - show all applications SUBMITTED on this day
+                  return true;
                 }) : contestApplications}
                 deletedApplications={deletedApplications}
                 showDeleted={showDeletedApplications}
