@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CONTEST_COUNTRIES } from "@/types/admin";
 import { usePublicCountry } from "@/contexts/PublicCountryContext";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface ContestHeaderProps {
   activeSection: string;
@@ -13,6 +14,8 @@ interface ContestHeaderProps {
 }
 
 export function ContestHeader({ activeSection, onSectionChange }: ContestHeaderProps) {
+  const { t } = useTranslation();
+  
   // Try to get country context - it may not exist on all pages
   let countryCode = 'PH';
   let navigateToCountry: ((code: string) => void) | undefined;
@@ -30,8 +33,8 @@ export function ContestHeader({ activeSection, onSectionChange }: ContestHeaderP
   }
   
   const navItems = [
-    { name: "Contest", href: "#" },
-    { name: "How it works", href: "#" }
+    { key: "Contest", label: t("Contest"), href: "#" },
+    { key: "How it works", label: t("How it works"), href: "#" }
   ];
 
   return (
@@ -72,7 +75,7 @@ export function ContestHeader({ activeSection, onSectionChange }: ContestHeaderP
             <Button 
               className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 whitespace-nowrap"
             >
-              🏆 Join & Win 5,000 PHP
+              🏆 {t("Join & Win 5,000 PHP")}
             </Button>
           </AuthProtectedModal>
         </div>
@@ -81,27 +84,27 @@ export function ContestHeader({ activeSection, onSectionChange }: ContestHeaderP
         <div className="mt-6 space-y-1 text-sm text-contest-text">
           <div className="flex items-center gap-2">
             <span>🌐</span>
-            <span>All online — no need to travel</span>
+            <span>{t("All online — no need to travel")}</span>
           </div>
           <div className="flex items-center gap-2">
             <span>🌍</span>
-            <span>Anyone can join — open to all!</span>
+            <span>{t("Anyone can join — open to all!")}</span>
           </div>
           <div className="flex items-center gap-2">
             <span>📸</span>
-            <span>Free entry with just 2 photos</span>
+            <span>{t("Free entry with just 2 photos")}</span>
           </div>
           <div className="flex items-center gap-2">
             <span>⭐</span>
-            <span>Natural. Honest. Voted by People.</span>
+            <span>{t("Natural. Honest. Voted by People.")}</span>
           </div>
           <div className="flex items-center gap-2">
             <span>🏆</span>
-            <span>Weekly winner gets 5,000 PHP</span>
+            <span>{t("Weekly winner gets 5,000 PHP")}</span>
           </div>
           <div className="flex items-center gap-2">
             <span>💰</span>
-            <span>Annual winner takes 100,000 PHP</span>
+            <span>{t("Annual winner takes 100,000 PHP")}</span>
           </div>
         </div>
         
@@ -117,7 +120,7 @@ export function ContestHeader({ activeSection, onSectionChange }: ContestHeaderP
                 rel="noopener noreferrer"
                 className="text-blue-600 hover:text-blue-800 hover:underline transition-colors"
               >
-                Follow us on Facebook
+                {t("Follow us on Facebook")}
               </a>
             </div>
             <div className="flex items-center gap-2">
@@ -128,7 +131,7 @@ export function ContestHeader({ activeSection, onSectionChange }: ContestHeaderP
                 rel="noopener noreferrer"
                 className="text-pink-600 hover:text-pink-800 hover:underline transition-colors"
               >
-                Follow us on Instagram
+                {t("Follow us on Instagram")}
               </a>
             </div>
           </div>
@@ -138,15 +141,15 @@ export function ContestHeader({ activeSection, onSectionChange }: ContestHeaderP
         <nav className="flex items-center gap-6 text-sm -mb-6 mt-8">
           {navItems.map((item) => (
             <button
-              key={item.name}
-              onClick={() => onSectionChange(item.name)}
+              key={item.key}
+              onClick={() => onSectionChange(item.key)}
               className={`py-0 transition-colors ${
-                activeSection === item.name
+                activeSection === item.key
                   ? "text-contest-blue font-medium"
                   : "text-muted-foreground hover:text-contest-blue"
               }`}
             >
-              {item.name}
+              {item.label}
             </button>
           ))}
         </nav>
@@ -158,11 +161,11 @@ export function ContestHeader({ activeSection, onSectionChange }: ContestHeaderP
           <div className="flex items-center gap-6 text-sm">
             {navItems.map((item) => (
               <div
-                key={item.name}
+                key={item.key}
                 className="relative py-0"
               >
-                <span className="invisible">{item.name}</span>
-                {activeSection === item.name && (
+                <span className="invisible">{item.label}</span>
+                {activeSection === item.key && (
                   <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-contest-blue"></div>
                 )}
               </div>
