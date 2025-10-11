@@ -1539,24 +1539,20 @@ const Admin = () => {
 
   const fetchDailyApplicationStats = async () => {
     try {
-      const today = new Date();
+      // Use getStrictWeekInterval to get correct week in Philippines timezone
+      const { start: weekStart } = getStrictWeekInterval(new Date(), 'PH');
+      
       const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
       const stats = [];
 
-      // Calculate current week (Monday to Sunday)
-      const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-      const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay; // If Sunday, go back 6 days, otherwise go to Monday
-      
-      const monday = new Date(today);
-      monday.setDate(today.getDate() + mondayOffset);
-      monday.setHours(0, 0, 0, 0);
-
       // Calculate stats for each day of the current week (Mon-Sun)
       for (let i = 0; i < 7; i++) {
-        const date = new Date(monday);
-        date.setDate(monday.getDate() + i);
-        const dayStart = new Date(date.setHours(0, 0, 0, 0));
-        const dayEnd = new Date(date.setHours(23, 59, 59, 999));
+        const dayStart = new Date(weekStart);
+        dayStart.setDate(weekStart.getDate() + i);
+        dayStart.setHours(0, 0, 0, 0);
+        
+        const dayEnd = new Date(dayStart);
+        dayEnd.setHours(23, 59, 59, 999);
         
         const dayStartISO = dayStart.toISOString();
         const dayEndISO = dayEnd.toISOString();
