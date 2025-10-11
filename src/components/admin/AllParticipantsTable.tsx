@@ -3,8 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Loader2 } from 'lucide-react';
+import { VirtualizedList } from '@/components/performance/VirtualizedList';
 
 interface Participant {
   id: string;
@@ -47,10 +47,12 @@ export const AllParticipantsTable = () => {
 
   const fetchParticipants = async () => {
     try {
+      // Add pagination limit for better performance
       const { data, error } = await supabase
         .from('weekly_contest_participants')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(1000); // Limit to 1000 most recent
 
       if (error) throw error;
       setParticipants(data || []);
@@ -77,7 +79,7 @@ export const AllParticipantsTable = () => {
         <CardTitle>Все участницы ({participants.length})</CardTitle>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-[600px]">
+        <div className="h-[600px] overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>
@@ -90,52 +92,55 @@ export const AllParticipantsTable = () => {
                 <TableHead>Дата создания</TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
-              {participants.map((participant) => {
-                const firstName = participant.application_data?.first_name || '';
-                const lastName = participant.application_data?.last_name || '';
-                const fullName = `${firstName} ${lastName}`.trim() || 'Без имени';
-                const city = participant.application_data?.city || '';
-                const country = participant.application_data?.country || '';
-                const location = [city, country].filter(Boolean).join(', ') || 'Не указано';
-
-                return (
-                  <TableRow key={participant.id}>
-                    <TableCell className="font-medium">{fullName}</TableCell>
-                    <TableCell>{location}</TableCell>
-                    <TableCell>
-                      <Badge variant={getStatusBadgeVariant(participant.admin_status)}>
-                        {participant.admin_status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{participant.week_interval || '-'}</TableCell>
-                    <TableCell>
-                      <Badge variant={participant.is_active ? 'default' : 'outline'}>
-                        {participant.is_active ? 'Да' : 'Нет'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {participant.deleted_at ? (
-                        <Badge variant="destructive">Да</Badge>
-                      ) : (
-                        <Badge variant="outline">Нет</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {new Date(participant.created_at).toLocaleDateString('ru-RU', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
           </Table>
-        </ScrollArea>
+          <VirtualizedList
+            items={participants}
+            itemHeight={53}
+            containerHeight={550}
+            renderItem={(participant) => {
+              const firstName = participant.application_data?.first_name || '';
+              const lastName = participant.application_data?.last_name || '';
+              const fullName = `${firstName} ${lastName}`.trim() || 'Без имени';
+              const city = participant.application_data?.city || '';
+              const country = participant.application_data?.country || '';
+              const location = [city, country].filter(Boolean).join(', ') || 'Не указано';
+
+              return (
+                <div className="flex items-center border-b border-border px-4 py-2">
+                  <div className="flex-1 font-medium">{fullName}</div>
+                  <div className="flex-1">{location}</div>
+                  <div className="flex-1">
+                    <Badge variant={getStatusBadgeVariant(participant.admin_status)}>
+                      {participant.admin_status}
+                    </Badge>
+                  </div>
+                  <div className="flex-1">{participant.week_interval || '-'}</div>
+                  <div className="flex-1">
+                    <Badge variant={participant.is_active ? 'default' : 'outline'}>
+                      {participant.is_active ? 'Да' : 'Нет'}
+                    </Badge>
+                  </div>
+                  <div className="flex-1">
+                    {participant.deleted_at ? (
+                      <Badge variant="destructive">Да</Badge>
+                    ) : (
+                      <Badge variant="outline">Нет</Badge>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    {new Date(participant.created_at).toLocaleDateString('ru-RU', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </div>
+                </div>
+              );
+            }}
+          />
+        </div>
       </CardContent>
     </Card>
   );
