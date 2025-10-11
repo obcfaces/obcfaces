@@ -110,9 +110,8 @@ const Auth = () => {
     setLoading(true);
     try {
       if (mode === "signup") {
-        // Use the current site URL for redirect - works in all environments
-        const currentUrl = window.location.origin;
-        const redirectUrl = `${currentUrl}/account`;
+        // Always use production domain for email confirmation links
+        const redirectUrl = 'https://obcface.com/account';
         
         console.log('Signup redirect URL:', redirectUrl);
         
@@ -197,7 +196,7 @@ const Auth = () => {
     setLoading(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: 'https://obcface.com/reset-password',
       });
       
       if (error) throw error;
