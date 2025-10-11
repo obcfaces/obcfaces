@@ -13,7 +13,21 @@ interface ContestHeaderProps {
 }
 
 export function ContestHeader({ activeSection, onSectionChange }: ContestHeaderProps) {
-  const { countryCode, navigateToCountry, flag, countryName } = usePublicCountry();
+  // Try to get country context - it may not exist on all pages
+  let countryCode = 'PH';
+  let navigateToCountry: ((code: string) => void) | undefined;
+  let flag = '🇵🇭';
+  let countryName = 'Philippines';
+  
+  try {
+    const context = usePublicCountry();
+    countryCode = context.countryCode;
+    navigateToCountry = context.navigateToCountry;
+    flag = context.flag;
+    countryName = context.countryName;
+  } catch (e) {
+    // Context not available - using defaults
+  }
   
   const navItems = [
     { name: "Contest", href: "#" },
@@ -28,28 +42,30 @@ export function ContestHeader({ activeSection, onSectionChange }: ContestHeaderP
           <div className="flex items-center gap-4">
             <h1 className="text-2xl font-bold text-contest-text">OBC faces</h1>
             
-            {/* Country Selector */}
-            <Select value={countryCode} onValueChange={navigateToCountry}>
-              <SelectTrigger className="w-[200px] bg-background border-contest-border">
-                <Globe className="h-4 w-4 mr-2" />
-                <SelectValue>
-                  <span className="flex items-center gap-2">
-                    <span>{flag}</span>
-                    <span>{countryName}</span>
-                  </span>
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {CONTEST_COUNTRIES.map((country) => (
-                  <SelectItem key={country.code} value={country.code}>
+            {/* Country Selector - only show if navigation is available */}
+            {navigateToCountry && (
+              <Select value={countryCode} onValueChange={navigateToCountry}>
+                <SelectTrigger className="w-[200px] bg-background border-contest-border">
+                  <Globe className="h-4 w-4 mr-2" />
+                  <SelectValue>
                     <span className="flex items-center gap-2">
-                      <span>{country.flag}</span>
-                      <span>{country.name}</span>
+                      <span>{flag}</span>
+                      <span>{countryName}</span>
                     </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {CONTEST_COUNTRIES.map((country) => (
+                    <SelectItem key={country.code} value={country.code}>
+                      <span className="flex items-center gap-2">
+                        <span>{country.flag}</span>
+                        <span>{country.name}</span>
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
           
           <AuthProtectedModal>
