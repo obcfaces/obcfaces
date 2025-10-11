@@ -1,0 +1,15 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "🧪 Running pre-commit checks..."
+echo ""
+
+# Type check on staged files
+echo "📝 Type checking..."
+npx tsc --noEmit || {
+  echo "❌ Type check failed"
+  exit 1
+}
+
+echo ""
+echo "✅ Pre-commit checks passed!"

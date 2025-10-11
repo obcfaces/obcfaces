@@ -73,6 +73,13 @@ jobs:
           name: vitest-coverage
           path: coverage/
           retention-days: 30
+      
+      - name: Comment coverage summary
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: github.event_name == 'pull_request' && always()
+        with:
+          header: coverage
+          path: coverage/coverage-summary.json
 
   e2e:
     name: E2E Tests (${{ matrix.project }})
@@ -146,6 +153,28 @@ jobs:
           name: playwright-traces-${{ matrix.project }}
           path: test-results/
           retention-days: 30
+      
+      - name: Comment E2E results
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: github.event_name == 'pull_request' && always()
+        with:
+          header: e2e-${{ matrix.project }}
+          message: |
+            ## E2E Tests (${{ matrix.project }})
+            
+            **Status**: ${{ job.status == 'success' && '✅ Passed' || '❌ Failed' }}
+            
+            <details>
+            <summary>View Details</summary>
+            
+            - **Project**: ${{ matrix.project }}
+            - **Base URL**: ${{ env.BASE_URL }}
+            - **Run**: [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            
+            ${{ job.status == 'failure' && '📊 [View Playwright Report](../../actions/runs/${{ github.run_id }})' || '' }}
+            ${{ job.status == 'failure' && '🎥 [View Traces & Videos](../../actions/runs/${{ github.run_id }})' || '' }}
+            
+            </details>
 
   e2e-staging:
     name: E2E Tests (Staging)
