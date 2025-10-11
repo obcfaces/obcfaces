@@ -5,33 +5,36 @@ import { ContestHeader } from "@/components/contest-header";
 import { NextWeekSection } from "@/components/next-week-section";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { PublicCountryProvider, usePublicCountry } from "@/contexts/PublicCountryContext";
+import { getCountryCapitalTimezone } from "@/utils/weekIntervals";
 
 type ViewMode = 'compact' | 'full';
 
-const Contest = () => {
+const ContestContent = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('compact');
   const [activeSection, setActiveSection] = useState("Contest");
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [pastWeekIntervals, setPastWeekIntervals] = useState<Array<{interval: string, weeksAgo: number}>>([]);
   const navigate = useNavigate();
+  const { countryCode, timezone } = usePublicCountry();
   
-  // Helper function to get current Monday in Philippine time
+  // Helper function to get current Monday in country's timezone
   const getCurrentMonday = () => {
     const now = new Date();
-    // Get current date in Philippine timezone
-    const philippineTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Manila"}));
-    const currentDayOfWeek = philippineTime.getDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
+    // Get current date in country's timezone
+    const countryTime = new Date(now.toLocaleString("en-US", {timeZone: timezone}));
+    const currentDayOfWeek = countryTime.getDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
     
     // If today is Monday (1), daysToSubtract should be 0
     // If today is Sunday (0), daysToSubtract should be 6
     const daysToSubtract = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
     
-    const currentMonday = new Date(philippineTime);
-    currentMonday.setDate(philippineTime.getDate() - daysToSubtract);
+    const currentMonday = new Date(countryTime);
+    currentMonday.setDate(countryTime.getDate() - daysToSubtract);
     currentMonday.setHours(0, 0, 0, 0);
     
-    console.log('🗓️ Today:', philippineTime.toLocaleDateString('en-US'), 'Day:', currentDayOfWeek);
+    console.log('🗓️ Today:', countryTime.toLocaleDateString('en-US'), 'Day:', currentDayOfWeek);
     console.log('🗓️ Current Monday:', currentMonday.toLocaleDateString('en-US'));
     
     return currentMonday;
@@ -121,19 +124,11 @@ const Contest = () => {
           });
         });
         
-        // Принудительно добавляем 15/09-21/09/25 если его нет
-        if (!intervalsMap.has('15/09-21/09/25')) {
-          intervalsMap.set('15/09-21/09/25', {
-            interval: '15/09-21/09/25',
-            weeksAgo: 3 // будет отображаться как 4 WEEKS AGO (weeksAgo + 1)
-          });
-        }
-        
         // Конвертируем Map в массив и сортируем
         const intervalsWithWeeks = Array.from(intervalsMap.values())
           .sort((a, b) => a.weeksAgo - b.weeksAgo);
         
-        console.log('✅ Final intervals:', intervalsWithWeeks);
+        console.log('✅ Final intervals for', countryCode, ':', intervalsWithWeeks);
         
         setPastWeekIntervals(intervalsWithWeeks);
       } catch (error) {
@@ -143,7 +138,7 @@ const Contest = () => {
     
     checkAdminStatus();
     loadPastWeekIntervals();
-  }, []);
+  }, [countryCode, timezone]);
 
   if (loading) {
     return (
@@ -258,6 +253,14 @@ const Contest = () => {
         </div>
       </main>
     </>
+  );
+};
+
+const Contest = () => {
+  return (
+    <PublicCountryProvider>
+      <ContestContent />
+    </PublicCountryProvider>
   );
 };
 
