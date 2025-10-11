@@ -50,28 +50,35 @@ export const TurnstileWidget = ({
       // Remove existing widget if any
       if (widgetIdRef.current) {
         window.turnstile.remove(widgetIdRef.current);
+        widgetIdRef.current = null;
       }
 
-      // Render new widget
+      console.log('🔐 Rendering Turnstile widget with sitekey:', siteKey);
+
+      // Render new widget directly in the container
       widgetIdRef.current = window.turnstile.render(containerRef.current, {
         sitekey: siteKey,
         action,
         theme,
         size,
         callback: (token: string) => {
+          console.log('✅ Turnstile token received');
           onSuccess(token);
         },
         'error-callback': () => {
-          console.error('Turnstile error callback triggered');
+          console.error('❌ Turnstile error callback triggered');
+          setLoadError(true);
           onError?.();
         },
         'expired-callback': () => {
-          console.log('Turnstile token expired, resetting...');
+          console.log('⏰ Turnstile token expired, resetting...');
           if (widgetIdRef.current && window.turnstile) {
             window.turnstile.reset(widgetIdRef.current);
           }
         },
       });
+
+      console.log('✅ Turnstile widget rendered with ID:', widgetIdRef.current);
     } catch (error) {
       console.error('Failed to render Turnstile widget:', error);
       setLoadError(true);
@@ -80,22 +87,34 @@ export const TurnstileWidget = ({
 
     return () => {
       if (widgetIdRef.current && window.turnstile) {
-        window.turnstile.remove(widgetIdRef.current);
+        try {
+          window.turnstile.remove(widgetIdRef.current);
+        } catch (e) {
+          console.error('Error removing Turnstile widget:', e);
+        }
       }
     };
   }, [isLoaded, action, theme, size, onSuccess, onError]);
 
   if (loadError) {
     return (
+      <div className="text-sm text-destructive text-center py-2">
+        Security verification temporarily unavailable
+      </div>
+    );
+  }
+
+  if (!isLoaded) {
+    return (
       <div className="text-sm text-muted-foreground text-center py-2">
-        Security verification unavailable
+        Loading security verification...
       </div>
     );
   }
 
   return (
-    <div className="flex justify-center py-2">
-      <div ref={containerRef} id="turnstile-widget" />
+    <div className="flex justify-center py-3">
+      <div ref={containerRef} className="turnstile-widget-container" />
     </div>
   );
 };
