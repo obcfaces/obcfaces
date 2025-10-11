@@ -1,5 +1,6 @@
 import { Helmet } from "react-helmet-async";
-import { PRIORITY_LOCALES } from "@/data/locale-config";
+import { ALL_LOCALES, PRIORITY_LOCALES } from "@/data/locale-config";
+import { useMemo } from "react";
 
 interface SEOHeadProps {
   title: string;
@@ -19,10 +20,42 @@ export const SEOHead = ({
   const baseUrl = window.location.origin;
   
   // Ensure canonical includes locale if provided
-  const fullCanonicalPath = locale && !canonicalPath.startsWith(`/${locale}`)
-    ? `/${locale}${canonicalPath}`
-    : canonicalPath;
+  const fullCanonicalPath = useMemo(() => {
+    if (locale && !canonicalPath.startsWith(`/${locale}`)) {
+      return `/${locale}${canonicalPath}`;
+    }
+    return canonicalPath;
+  }, [locale, canonicalPath]);
+  
   const canonicalUrl = `${baseUrl}${fullCanonicalPath}`;
+
+  // Generate hreflang entries dynamically from config
+  const hreflangEntries = useMemo(() => {
+    if (!generateHreflang) return [];
+    
+    // Extract path without locale prefix
+    const pathWithoutLocale = canonicalPath.replace(/^\/[a-z]{2}-[a-z]{2}/, '');
+    
+    return PRIORITY_LOCALES.map(localeStr => {
+      const localeConfig = ALL_LOCALES.find(
+        l => `${l.languageCode}-${l.countryCode}`.toLowerCase() === localeStr.toLowerCase()
+      );
+      
+      if (!localeConfig) return null;
+      
+      return {
+        hreflang: `${localeConfig.languageCode}-${localeConfig.countryCode.toUpperCase()}`,
+        href: `${baseUrl}/${localeStr}${pathWithoutLocale}`,
+      };
+    }).filter(Boolean);
+  }, [generateHreflang, canonicalPath, baseUrl]);
+
+  // Convert locale to og:locale format (e.g., en-ph -> en_PH)
+  const ogLocale = useMemo(() => {
+    if (!locale) return 'en_PH';
+    const [lang, cc] = locale.split('-');
+    return `${lang}_${cc?.toUpperCase() || 'PH'}`;
+  }, [locale]);
 
   return (
     <Helmet>
@@ -33,17 +66,14 @@ export const SEOHead = ({
       <link rel="canonical" href={canonicalUrl} />
       
       {/* Hreflang tags for all priority locales */}
-      {generateHreflang && PRIORITY_LOCALES.map(loc => {
-        const path = canonicalPath.replace(/^\/[a-z]{2}-[a-z]{2}/, '');
-        return (
-          <link 
-            key={loc}
-            rel="alternate" 
-            hrefLang={loc} 
-            href={`${baseUrl}/${loc}${path}`}
-          />
-        );
-      })}
+      {hreflangEntries.map(entry => entry && (
+        <link 
+          key={entry.hreflang}
+          rel="alternate" 
+          hrefLang={entry.hreflang} 
+          href={entry.href}
+        />
+      ))}
       
       {/* x-default for international targeting */}
       <link 
@@ -57,7 +87,7 @@ export const SEOHead = ({
       <meta property="og:description" content={description} />
       <meta property="og:url" content={canonicalUrl} />
       <meta property="og:type" content="website" />
-      <meta property="og:locale" content={locale || 'en_PH'} />
+      <meta property="og:locale" content={ogLocale} />
       
       {/* Twitter Card tags */}
       <meta name="twitter:card" content="summary_large_image" />

@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useContestants, type Contestant } from './useContestants';
+import { useContestants } from './useContestants';
+import { parseAgeRange, parseHeightRange, parseWeightRange, getFilterParam } from '@/utils/urlFilters';
+import type { Contestant } from '../types';
 
 interface FilterParams {
   countryCode: string;
@@ -13,12 +15,12 @@ export const useContestantsWithFilters = ({ countryCode, weekOffset, enabled = t
   
   // Extract filter params from URL
   const urlFilters = useMemo(() => ({
-    gender: searchParams.get("gender") || undefined,
-    age: searchParams.get("age") || undefined,
-    maritalStatus: searchParams.get("marital") || undefined,
-    hasChildren: searchParams.get("children") || undefined,
-    heightRange: searchParams.get("height") || undefined,
-    weightRange: searchParams.get("weight") || undefined,
+    gender: getFilterParam(searchParams, "gender"),
+    age: getFilterParam(searchParams, "age"),
+    maritalStatus: getFilterParam(searchParams, "marital"),
+    hasChildren: getFilterParam(searchParams, "children"),
+    heightRange: getFilterParam(searchParams, "height"),
+    weightRange: getFilterParam(searchParams, "weight"),
   }), [searchParams]);
 
   // Fetch contestants
@@ -82,30 +84,3 @@ export const useContestantsWithFilters = ({ countryCode, weekOffset, enabled = t
     data: query.data ? { ...query.data, items: filteredContestants } : undefined,
   };
 };
-
-// Helper functions
-function parseAgeRange(range: string): [number, number] {
-  if (range === '18-25') return [18, 25];
-  if (range === '26-35') return [26, 35];
-  if (range === '36-45') return [36, 45];
-  if (range === '46+') return [46, 999];
-  return [0, 999];
-}
-
-function parseHeightRange(range: string): [number, number] {
-  // Format: "150-160 cm" or "5'0\"-5'5\""
-  const match = range.match(/(\d+)-(\d+)/);
-  if (match) {
-    return [parseInt(match[1]), parseInt(match[2])];
-  }
-  return [0, 999];
-}
-
-function parseWeightRange(range: string): [number, number] {
-  // Format: "50-60 kg" or "110-130 lbs"
-  const match = range.match(/(\d+)-(\d+)/);
-  if (match) {
-    return [parseInt(match[1]), parseInt(match[2])];
-  }
-  return [0, 999];
-}
