@@ -1539,80 +1539,16 @@ const Admin = () => {
 
   const fetchDailyApplicationStats = async () => {
     try {
-      // Get current UTC time and convert to Manila time (UTC+8)
-      const now = new Date();
-      const manilaOffset = 8 * 60; // Manila is UTC+8 (in minutes)
-      const localOffset = now.getTimezoneOffset(); // Local offset from UTC (in minutes)
-      const manilaTime = new Date(now.getTime() + (manilaOffset + localOffset) * 60000);
+      // Use the same RPC function as registration stats (with Manila timezone)
+      const { data, error } = await supabase.rpc('get_daily_application_stats');
       
-      console.log('Current Manila time:', manilaTime.toISOString(), 'Day:', manilaTime.getDay());
-      
-      // Calculate Monday of current week in Manila
-      const dayOfWeek = manilaTime.getDay(); // 0 = Sunday, 1 = Monday, etc.
-      const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-      
-      const monday = new Date(manilaTime);
-      monday.setDate(manilaTime.getDate() + mondayOffset);
-      monday.setHours(0, 0, 0, 0);
-      
-      console.log('Monday of current week:', monday.toISOString());
-      
-      const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-      const stats = [];
-
-      // Calculate stats for each day of the current week (Mon-Sun)
-      for (let i = 0; i < 7; i++) {
-        const dayStart = new Date(monday);
-        dayStart.setDate(monday.getDate() + i);
-        dayStart.setHours(0, 0, 0, 0);
-        
-        const dayEnd = new Date(dayStart);
-        dayEnd.setHours(23, 59, 59, 999);
-        
-        const dayStartISO = dayStart.toISOString();
-        const dayEndISO = dayEnd.toISOString();
-        const dayDate = dayStart.toISOString().split('T')[0];
-
-        // Count ALL new applications submitted on this day (any status, not deleted)
-        const { count: totalCount } = await supabase
-          .from('weekly_contest_participants')
-          .select('*', { count: 'exact', head: true })
-          .is('deleted_at', null)
-          .gte('submitted_at', dayStartISO)
-          .lte('submitted_at', dayEndISO);
-
-        // Count applications submitted on this day that NOW have approved status
-        const { count: approvedCount } = await supabase
-          .from('weekly_contest_participants')
-          .select('*', { count: 'exact', head: true })
-          .is('deleted_at', null)
-          .in('admin_status', ['pre next week', 'next week', 'next week on site', 'this week', 'past'])
-          .gte('submitted_at', dayStartISO)
-          .lte('submitted_at', dayEndISO);
-        
-        // Count applications submitted on this day that NOW have rejected status
-        const { count: rejectedCount } = await supabase
-          .from('weekly_contest_participants')
-          .select('*', { count: 'exact', head: true })
-          .is('deleted_at', null)
-          .eq('admin_status', 'rejected')
-          .gte('submitted_at', dayStartISO)
-          .lte('submitted_at', dayEndISO);
-
-        stats.push({
-          day_name: daysOfWeek[dayStart.getDay()],
-          day_date: dayDate,
-          total_applications: totalCount || 0,
-          approved_applications: 0, // Not used
-          status_changed_count: approvedCount || 0,
-          rejected_count: rejectedCount || 0,
-          day_of_week: dayStart.getDay(),
-          sort_order: i
-        });
+      if (error) {
+        console.error('Error fetching daily application stats:', error);
+        return;
       }
 
-      // Stats are already in correct order (Mon-Sun) from the loop
-      setDailyApplicationStats(stats);
+      console.log('📊 Daily application stats fetched:', data);
+      setDailyApplicationStats(data || []);
 
     } catch (error) {
       console.error('Error in fetchDailyApplicationStats:', error);
