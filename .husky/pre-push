@@ -1,0 +1,37 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "🧪 Running pre-push checks..."
+echo ""
+
+# Type check
+echo "📝 Type checking..."
+pnpm run type-check || npx tsc --noEmit || {
+  echo "❌ Type check failed"
+  exit 1
+}
+
+# Lint
+echo "🔍 Linting..."
+pnpm run lint || {
+  echo "❌ Lint failed"
+  exit 1
+}
+
+# Build
+echo "🏗️  Building..."
+pnpm build || {
+  echo "❌ Build failed"
+  exit 1
+}
+
+# Unit tests
+echo "🧪 Running unit tests..."
+pnpm test || {
+  echo "❌ Tests failed"
+  exit 1
+}
+
+echo ""
+echo "✅ All pre-push checks passed!"
+echo "🚀 Pushing to remote..."
