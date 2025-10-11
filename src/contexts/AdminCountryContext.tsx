@@ -56,7 +56,15 @@ export const AdminCountryProvider: React.FC<{ children: ReactNode }> = ({ childr
 export const useAdminCountry = () => {
   const context = useContext(AdminCountryContext);
   if (context === undefined) {
-    throw new Error('useAdminCountry must be used within AdminCountryProvider');
+    // Return default values instead of throwing - prevents hook count mismatch
+    console.error('useAdminCountry must be used within AdminCountryProvider');
+    return {
+      selectedCountry: 'PH',
+      setSelectedCountry: () => {},
+      timezone: 'Asia/Manila',
+      getCurrentTime: () => new Date(),
+      getCurrentWeekInterval: () => ''
+    };
   }
   return context;
 };
