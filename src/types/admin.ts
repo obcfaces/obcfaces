@@ -5,6 +5,25 @@
 
 export type ParticipantStatus = 'pending' | 'rejected' | 'pre next week' | 'this week' | 'next week' | 'next week on site' | 'past';
 
+export interface ContestCountryConfig {
+  code: string;
+  name: string;
+  flag: string;
+  timezone: string;
+  capital: string;
+}
+
+export const CONTEST_COUNTRIES: ContestCountryConfig[] = [
+  { code: 'PH', name: 'Philippines', flag: '🇵🇭', timezone: 'Asia/Manila', capital: 'Manila' },
+  { code: 'US', name: 'United States', flag: '🇺🇸', timezone: 'America/New_York', capital: 'New York' },
+  { code: 'RU', name: 'Russia', flag: '🇷🇺', timezone: 'Europe/Moscow', capital: 'Moscow' },
+  { code: 'GB', name: 'United Kingdom', flag: '🇬🇧', timezone: 'Europe/London', capital: 'London' },
+  { code: 'DE', name: 'Germany', flag: '🇩🇪', timezone: 'Europe/Berlin', capital: 'Berlin' },
+  { code: 'FR', name: 'France', flag: '🇫🇷', timezone: 'Europe/Paris', capital: 'Paris' },
+  { code: 'ES', name: 'Spain', flag: '🇪🇸', timezone: 'Europe/Madrid', capital: 'Madrid' },
+  { code: 'IT', name: 'Italy', flag: '🇮🇹', timezone: 'Europe/Rome', capital: 'Rome' },
+];
+
 export interface UserRole {
   user_id: string;
   role: string;

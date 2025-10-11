@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 
 interface FilterState {
-  countryFilter: string;
   genderFilter: string;
   adminStatusFilter: string;
   registrationsStatusFilter: string;
@@ -10,16 +9,11 @@ interface FilterState {
 
 export const useAdminFilters = () => {
   const [filters, setFilters] = useState<FilterState>({
-    countryFilter: 'all',
     genderFilter: 'all',
     adminStatusFilter: 'all',
     registrationsStatusFilter: 'all',
     allSectionStatusFilter: 'all'
   });
-
-  const setCountryFilter = (value: string) => {
-    setFilters(prev => ({ ...prev, countryFilter: value }));
-  };
 
   const setGenderFilter = (value: string) => {
     setFilters(prev => ({ ...prev, genderFilter: value }));
@@ -39,7 +33,6 @@ export const useAdminFilters = () => {
 
   const resetFilters = () => {
     setFilters({
-      countryFilter: 'all',
       genderFilter: 'all',
       adminStatusFilter: 'all',
       registrationsStatusFilter: 'all',
@@ -49,7 +42,6 @@ export const useAdminFilters = () => {
 
   return {
     ...filters,
-    setCountryFilter,
     setGenderFilter,
     setAdminStatusFilter,
     setRegistrationsStatusFilter,

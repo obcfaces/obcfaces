@@ -8,6 +8,8 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { supabase } from '@/integrations/supabase/client';
+import { useAdminCountry } from '@/contexts/AdminCountryContext';
+import { convertToCountryTime, formatDateInCountry } from '@/utils/weekIntervals';
 
 interface StatusHistoryEntry {
   status: string;
@@ -36,6 +38,7 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
   const [enrichedEntries, setEnrichedEntries] = useState<StatusHistoryEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [participantData, setParticipantData] = useState<any>(null);
+  const { selectedCountry } = useAdminCountry();
 
   const parseStatusHistory = (history: any): StatusHistoryEntry[] => {
     if (!history) return [];
@@ -145,20 +148,19 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
         if (participant) {
           setParticipantData(participant);
           
-          // Convert created_at from UTC to Manila timezone
-          const createdDate = new Date(participant.created_at);
-          const manilaCreatedDate = new Date(createdDate.toLocaleString('en-US', { timeZone: 'Asia/Manila' }));
-          const manilaCreatedStr = manilaCreatedDate.toISOString().slice(0, 19).replace('T', ' ');
+          // Convert created_at from UTC to selected country timezone
+          const countryCreatedDate = convertToCountryTime(participant.created_at, selectedCountry);
+          const countryCreatedStr = countryCreatedDate.toISOString().slice(0, 19).replace('T', ' ');
           
           console.log('✅ Participant data:', participant);
           console.log('✅ created_at UTC:', participant.created_at);
-          console.log('✅ created_at Manila:', manilaCreatedStr);
+          console.log(`✅ created_at ${selectedCountry}:`, countryCreatedStr);
           console.log('✅ submitted_at UTC:', participant.submitted_at);
           
-          // Add initial created_at status with Manila time
+          // Add initial created_at status with country time
           entries.push({
             status: 'created_at',
-            changed_at: manilaCreatedStr,
+            changed_at: countryCreatedStr,
             changed_by_email: 'user',
             change_reason: 'Application created',
             week_interval: ''
@@ -180,16 +182,15 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
               );
               
               if (!hasResubmitEntry) {
-                // Convert submitted_at to Manila timezone
-                const submittedDate = new Date(participant.submitted_at);
-                const manilaSubmittedDate = new Date(submittedDate.toLocaleString('en-US', { timeZone: 'Asia/Manila' }));
-                const manilaSubmittedStr = manilaSubmittedDate.toISOString().slice(0, 19).replace('T', ' ');
+                // Convert submitted_at to selected country timezone
+                const countrySubmittedDate = convertToCountryTime(participant.submitted_at, selectedCountry);
+                const countrySubmittedStr = countrySubmittedDate.toISOString().slice(0, 19).replace('T', ' ');
                 
-                console.log('📝 Adding resubmit entry for submitted_at:', manilaSubmittedStr);
+                console.log('📝 Adding resubmit entry for submitted_at:', countrySubmittedStr);
                 
                 entries.push({
                   status: 'pending (re-submitted)',
-                  changed_at: manilaSubmittedStr,
+                  changed_at: countrySubmittedStr,
                   changed_by_email: 'user',
                   change_reason: 'User re-submitted application',
                   week_interval: ''
@@ -245,20 +246,17 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
 
   const formatDateTime = (dateStr: string) => {
     try {
-      const date = new Date(dateStr);
-      // If time looks like it's already in Manila timezone (from status_history), don't convert
-      // Otherwise convert from UTC to Manila
-      const isAlreadyManila = dateStr.includes(' ') && !dateStr.includes('T') && !dateStr.includes('Z');
+      // If time looks like it's already formatted (from status_history), use formatDateInCountry directly
+      const isAlreadyFormatted = dateStr.includes(' ') && !dateStr.includes('T') && !dateStr.includes('Z');
       
-      const displayDate = isAlreadyManila 
-        ? date 
-        : new Date(date.toLocaleString('en-US', { timeZone: 'Asia/Manila' }));
-      
-      const day = displayDate.getDate();
-      const month = displayDate.toLocaleString('en', { month: 'short', timeZone: 'Asia/Manila' }).toLowerCase();
-      const hours = String(displayDate.getHours()).padStart(2, '0');
-      const minutes = String(displayDate.getMinutes()).padStart(2, '0');
-      return `${day} ${month} ${hours}:${minutes}`;
+      if (isAlreadyFormatted) {
+        // Already in correct format, just parse and format
+        const date = new Date(dateStr);
+        return formatDateInCountry(date, selectedCountry);
+      } else {
+        // Convert from UTC to selected country timezone
+        return formatDateInCountry(dateStr, selectedCountry);
+      }
     } catch {
       return dateStr;
     }
