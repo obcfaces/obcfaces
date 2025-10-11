@@ -83,7 +83,8 @@ const Index = () => {
 
   // Test translation key
   useEffect(() => {
-    const translation = t('growth.test_key');
+    const testText = 'Welcome to the beauty contest!';
+    const translation = t(testText);
     setTestTranslation(translation);
     console.log('Test translation:', translation);
   }, [t]);
