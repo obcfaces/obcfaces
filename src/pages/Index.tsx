@@ -42,19 +42,29 @@ const Index = () => {
     return (searchParams.get("category") as "" | Category) || "";
   });
 
-  // Sync URL locale with language context on mount
+  // Sync URL locale with language context ONCE on mount
   useEffect(() => {
     const matchingLang = languages.find(lang => lang.code === urlLang);
     if (matchingLang && matchingLang.code !== currentLanguage.code) {
       setLanguage(matchingLang);
     }
-  }, [urlLang, setLanguage]);
+    
+    // Also update country from URL
+    if (urlCountry && urlCountry.toUpperCase() !== country) {
+      setCountry(urlCountry.toUpperCase());
+    }
+  }, []); // Empty deps - only run once on mount
 
-  // Update URL when filters change
+  // Update URL when filters change (but NOT when locale param changes)
   useEffect(() => {
     const currentLang = currentLanguage.code;
     const currentCountry = country.toLowerCase();
     const newLocale = `${currentLang}-${currentCountry}`;
+    
+    // Don't navigate if we're already on the correct locale
+    if (locale === newLocale) {
+      return;
+    }
     
     // Build query params
     const params = new URLSearchParams();
@@ -65,11 +75,8 @@ const Index = () => {
     const query = params.toString() ? `?${params.toString()}` : '';
     const newPath = `/${newLocale}${query}`;
     
-    // Only navigate if locale actually changed
-    if (`/${locale}` !== `/${newLocale}`) {
-      navigate(newPath, { replace: true });
-    }
-  }, [country, currentLanguage.code, gender, viewMode, category, navigate, locale]);
+    navigate(newPath, { replace: true });
+  }, [country, currentLanguage.code, gender, viewMode, category, navigate]); // Removed 'locale' from deps!
 
   const handleCategoryChange = (newCategory: "" | Category) => {
     setCategory(newCategory);
