@@ -33,6 +33,7 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
 }) => {
   const [enrichedEntries, setEnrichedEntries] = useState<StatusHistoryEntry[]>([]);
   const [loading, setLoading] = useState(false);
+  const [participantData, setParticipantData] = useState<any>(null);
 
   const parseStatusHistory = (history: any): StatusHistoryEntry[] => {
     if (!history) return [];
@@ -78,13 +79,51 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
     return [];
   };
 
-  // Load admin emails for entries that don't have them
+  // Load participant data and admin emails
   useEffect(() => {
-    const loadAdminEmails = async () => {
+    const loadData = async () => {
       if (!isOpen) return;
       
       setLoading(true);
-      const entries = parseStatusHistory(statusHistory);
+      
+      // Parse status history from prop
+      let entries = parseStatusHistory(statusHistory);
+      
+      // Get participant data to check for initial pending status
+      try {
+        const [firstName, ...lastNameParts] = participantName.split(' ');
+        const lastName = lastNameParts.join(' ');
+        
+        const { data: participant } = await supabase
+          .from('weekly_contest_participants')
+          .select('created_at, submitted_at, admin_status')
+          .ilike('application_data->>first_name', firstName)
+          .ilike('application_data->>last_name', lastName)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+        
+        if (participant) {
+          setParticipantData(participant);
+          
+          // Add initial pending status if not in history
+          const hasPendingEntry = entries.some(e => 
+            e.status === 'pending' || e.status === 'pending (re-submitted)'
+          );
+          
+          if (!hasPendingEntry && participant.submitted_at) {
+            entries.push({
+              status: 'pending',
+              changed_at: participant.submitted_at,
+              changed_by_email: 'user',
+              change_reason: 'Application submitted',
+              week_interval: ''
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error loading participant data:', error);
+      }
       
       // Find entries that need email lookup
       const entriesNeedingEmail = entries.filter(e => e.changed_by && !e.changed_by_email);
@@ -120,8 +159,8 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
       setLoading(false);
     };
     
-    loadAdminEmails();
-  }, [isOpen, statusHistory]);
+    loadData();
+  }, [isOpen, statusHistory, participantName]);
 
   const formatDateTime = (dateStr: string) => {
     try {
