@@ -3619,10 +3619,14 @@ const AdminContent = () => {
             <TabsContent value="new-past">
               <AdminPastWeekTab
                 loading={tabLoading['new-past']}
-                participants={weeklyParticipants.filter(p => pastStatusFilter === 'all' || p.admin_status === pastStatusFilter)}
+                participants={weeklyParticipants}
                 weekFilters={getDynamicPastWeekFilters}
                 selectedWeekFilter={pastWeekFilter}
                 onWeekFilterChange={setPastWeekFilter}
+                pastWeekIntervalFilter={pastWeekIntervalFilter}
+                setPastWeekIntervalFilter={setPastWeekIntervalFilter}
+                pastStatusFilter={pastStatusFilter}
+                setPastStatusFilter={setPastStatusFilter}
                 onViewPhotos={openPhotoModal}
                 onEdit={(participant) => {
                   setEditingParticipantData({
