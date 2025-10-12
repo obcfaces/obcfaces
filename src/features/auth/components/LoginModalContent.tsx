@@ -634,16 +634,15 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
                   
                   console.log('🔐 Starting Google OAuth with PKCE...');
                   
-                  const { error } = await supabase.auth.signInWithOAuth({
-                    provider: 'google',
-                    options: {
-                      redirectTo: `${window.location.origin}/auth`, // Unified auth route
-                      queryParams: {
-                        access_type: 'offline',
-                        prompt: 'consent',
-                      }
-                    }
-                  });
+                  // Use centralized auth service
+                  const { startGoogleOAuth } = await import('@/features/auth/services/auth.service');
+                  const { error } = await startGoogleOAuth();
+                  
+                  if (error) {
+                    throw error;
+                  }
+                  
+                  console.log('✅ Redirecting to Google OAuth...');
                   
                   if (error) {
                     console.error('❌ OAuth initiation error:', error);
