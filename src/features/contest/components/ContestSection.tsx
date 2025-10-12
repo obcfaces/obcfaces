@@ -606,7 +606,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
                 {...contestant}
                 viewMode={viewMode}
                 onRate={(rating) => handleRate(contestant.rank, rating)}
-                isThisWeek={title === "THIS WEEK"}
+                isThisWeek={weekOffset === 0}
                 user={user}
                 weekOffset={weekOffset}
               />
