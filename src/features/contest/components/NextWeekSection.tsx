@@ -8,6 +8,7 @@ import LoginModalContent from "@/components/login-modal-content";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getNextWeekRange } from "@/utils/dateFormatting";
+import { WeeklyCutoverNotice } from "./WeeklyCutoverNotice";
 
 import contestant1Face from "@/assets/contestant-1-face.jpg";
 import contestant1Full from "@/assets/contestant-1-full.jpg";
@@ -471,20 +472,25 @@ export function NextWeekSection({ viewMode = 'full', countryCode = "PH" }: NextW
   const currentCandidate = filteredCandidates[currentIndex];
 
   return (
-    <section className="max-w-6xl mx-auto pt-6 pb-0 mb-2 mt-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg shadow-lg shadow-foreground/15 border border-blue-200 dark:border-blue-800">
-      <div className="mb-6 px-6">
-        <div className="mb-4 text-center">
-          <p className="text-xs sm:text-sm text-blue-600 dark:text-blue-400 italic mb-1">
-            {getNextWeekRange(currentLanguage.code)}
-          </p>
-          <h2 className="text-2xl sm:text-3xl font-bold text-blue-800 dark:text-blue-200 mb-1">
-            {t("NEXT WEEK")}
-          </h2>
-          <p className="text-sm sm:text-base font-normal text-blue-700 dark:text-blue-300">
-            {t("Choose next week's finalists")}
-          </p>
-        </div>
+    <>
+      <div className="max-w-6xl mx-auto px-4 mb-4">
+        <WeeklyCutoverNotice variant="compact" />
       </div>
+      
+      <section className="max-w-6xl mx-auto pt-6 pb-0 mb-2 mt-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg shadow-lg shadow-foreground/15 border border-blue-200 dark:border-blue-800">
+        <div className="mb-6 px-6">
+          <div className="mb-4 text-center">
+            <p className="text-xs sm:text-sm text-blue-600 dark:text-blue-400 italic mb-1">
+              {getNextWeekRange(currentLanguage.code)}
+            </p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-blue-800 dark:text-blue-200 mb-1">
+              {t("NEXT WEEK")}
+            </h2>
+            <p className="text-sm sm:text-base font-normal text-blue-700 dark:text-blue-300">
+              {t("Choose next week's finalists")}
+            </p>
+          </div>
+        </div>
 
       {!userInitialized || isLoading || !isVotesLoaded ? (
         <div className="text-center py-12">
@@ -558,11 +564,13 @@ export function NextWeekSection({ viewMode = 'full', countryCode = "PH" }: NextW
       )}
 
       {/* Login Modal */}
+      {/* Login Modal */}
       <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
         <DialogContent className="sm:max-w-lg">
           <LoginModalContent onClose={() => setShowLoginModal(false)} />
         </DialogContent>
       </Dialog>
-    </section>
+      </section>
+    </>
   );
 }
