@@ -55,8 +55,8 @@ export const ContestWeeksRenderer = ({
       <section className="max-w-6xl mx-auto pt-2 mb-1 sm:mb-3 bg-background rounded-lg shadow-sm shadow-foreground/10">
         <ContestSection
           title={t("THIS WEEK")}
-          subtitle={t("Choose the winner")}
-          description={t("Weekly contest is live now!")}
+          subtitle="29 Sep - 05 Oct 2025"
+          description={t("Choose the winner")}
           isActive={true}
           noWrapTitle
           viewMode={viewMode}
