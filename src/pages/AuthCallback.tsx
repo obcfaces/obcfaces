@@ -62,6 +62,47 @@ const AuthCallback = () => {
           console.warn('⚠️ Profile error:', profileErr);
         }
 
+        // CRITICAL: Log fingerprint and IP data for OAuth user
+        try {
+          const { getDeviceFingerprint } = await import('@/utils/fingerprint');
+          
+          // Get fingerprint data
+          const fingerprintData = await getDeviceFingerprint();
+          
+          // Get IP address
+          const ipResponse = await fetch('https://api.ipify.org?format=json');
+          const ipData = await ipResponse.json();
+          
+          // Determine login method
+          const loginMethod = user.app_metadata?.provider || 'oauth';
+          
+          console.log('📱 Saving OAuth user fingerprint:', { userId: user.id, loginMethod, ip: ipData.ip });
+          
+          // Get visitor ID from fingerprint
+          const { getCurrentFingerprint } = await import('@/utils/fingerprint');
+          const visitorId = await getCurrentFingerprint();
+          
+          // Call edge function to log everything
+          const { error: logError } = await supabase.functions.invoke('auth-login-tracker', {
+            body: {
+              userId: user.id,
+              loginMethod,
+              ipAddress: ipData.ip,
+              userAgent: navigator.userAgent,
+              fingerprintId: visitorId,
+              fingerprintData: fingerprintData
+            }
+          });
+          
+          if (logError) {
+            console.error('Error logging OAuth fingerprint:', logError);
+          } else {
+            console.log('✅ OAuth fingerprint logged successfully');
+          }
+        } catch (fpError) {
+          console.error('Error saving OAuth fingerprint:', fpError);
+        }
+
         if (!mounted) return;
 
         toast({
