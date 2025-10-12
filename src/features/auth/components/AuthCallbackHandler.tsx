@@ -79,69 +79,37 @@ const AuthCallbackHandler = () => {
           provider: data.session?.user?.app_metadata?.provider
         });
 
-        // CRITICAL: Create profile for OAuth users FIRST before any other operations
+        // Collect fingerprint data in background (non-blocking)
         if (data.session?.user) {
           const user = data.session.user;
           
-          try {
-            console.log('👤 Creating/updating profile for OAuth user...');
-            
-            // Create or update profile with OAuth data
-            const { error: profileError } = await supabase
-              .from('profiles')
-              .upsert({
-                id: user.id,
-                email: user.email,
-                display_name: user.user_metadata?.full_name || user.user_metadata?.name,
-                first_name: user.user_metadata?.full_name?.split(' ')[0] || user.user_metadata?.name,
-                last_name: user.user_metadata?.full_name?.split(' ').slice(1).join(' ') || '',
-                avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture,
-                email_verified: user.user_metadata?.email_verified || false,
-                provider_data: {
-                  provider: user.app_metadata?.provider,
-                  provider_id: user.user_metadata?.provider_id || user.user_metadata?.sub,
-                  full_metadata: user.user_metadata
+          // Don't await - let it run in background
+          (async () => {
+            try {
+              console.log('🔐 Collecting fingerprint data...');
+              
+              const fpId = await saveDeviceFingerprint(user.id);
+              const fullFingerprintData = await getDeviceFingerprint();
+              const ipResponse = await fetch('https://api.ipify.org?format=json');
+              const ipData = await ipResponse.json();
+              const loginMethod = user.app_metadata?.provider || 'email';
+              
+              await supabase.functions.invoke('auth-login-tracker', {
+                body: {
+                  userId: user.id,
+                  loginMethod,
+                  ipAddress: ipData.ip,
+                  userAgent: navigator.userAgent,
+                  fingerprintId: fpId,
+                  fingerprintData: fullFingerprintData
                 }
-              }, { 
-                onConflict: 'id',
-                ignoreDuplicates: false 
               });
-            
-            if (profileError) {
-              console.error('❌ Profile creation error:', profileError);
-            } else {
-              console.log('✅ Profile created/updated successfully');
+              
+              console.log('✅ Fingerprint logged');
+            } catch (fpError) {
+              console.error('❌ Fingerprint error (non-critical):', fpError);
             }
-          } catch (err) {
-            console.error('❌ Exception creating profile:', err);
-          }
-
-          // THEN collect fingerprint data (non-blocking)
-          try {
-            console.log('🔐 Collecting fingerprint data...');
-            
-            const fpId = await saveDeviceFingerprint(user.id);
-            const fullFingerprintData = await getDeviceFingerprint();
-            const ipResponse = await fetch('https://api.ipify.org?format=json');
-            const ipData = await ipResponse.json();
-            const loginMethod = user.app_metadata?.provider || 'email';
-            
-            // Call edge function to log full fingerprint data
-            await supabase.functions.invoke('auth-login-tracker', {
-              body: {
-                userId: user.id,
-                loginMethod,
-                ipAddress: ipData.ip,
-                userAgent: navigator.userAgent,
-                fingerprintId: fpId,
-                fingerprintData: fullFingerprintData
-              }
-            });
-            
-            console.log('✅ Fingerprint data logged');
-          } catch (fpError) {
-            console.error('❌ Error collecting fingerprint (non-critical):', fpError);
-          }
+          })();
         }
 
         // Clean URL from auth params but keep the path
