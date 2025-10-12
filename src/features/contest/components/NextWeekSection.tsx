@@ -453,16 +453,14 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
   return (
     <section className="max-w-6xl mx-auto pt-6 pb-0 mb-2 mt-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg shadow-lg shadow-foreground/15 border border-blue-200 dark:border-blue-800">
       <div className="mb-6 px-6">
-        <div className="mb-4">
-          <div className="flex flex-wrap items-baseline justify-between gap-2 mb-1">
-            <h2 className="text-2xl sm:text-3xl font-bold text-blue-800 dark:text-blue-200 max-w-[60%] break-words">
-              {t("NEXT WEEK")}
-            </h2>
-            <p className="text-xs sm:text-sm text-blue-600 dark:text-blue-400 italic max-w-[40%] break-words text-right">
-              {getNextWeekRange()}
-            </p>
-          </div>
-          <p className="text-sm sm:text-base font-normal text-blue-700 dark:text-blue-300 text-center mt-1">
+        <div className="mb-4 text-center">
+          <p className="text-xs sm:text-sm text-blue-600 dark:text-blue-400 italic mb-1">
+            {getNextWeekRange()}
+          </p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-blue-800 dark:text-blue-200 mb-1">
+            {t("NEXT WEEK")}
+          </h2>
+          <p className="text-sm sm:text-base font-normal text-blue-700 dark:text-blue-300">
             {t("Choose next week's finalists")}
           </p>
         </div>
