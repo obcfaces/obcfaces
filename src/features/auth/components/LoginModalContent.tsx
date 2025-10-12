@@ -625,12 +625,12 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
                   setLoading(true);
                   setAuthError("");
                   
-                  console.log('🔐 Starting Google OAuth...');
+                  console.log('🔐 Starting Google OAuth with PKCE...');
                   
                   const { error } = await supabase.auth.signInWithOAuth({
                     provider: 'google',
                     options: {
-                      redirectTo: `${window.location.origin}/`,
+                      redirectTo: `${window.location.origin}/auth/callback`, // CRITICAL: PKCE callback route
                       queryParams: {
                         access_type: 'offline',
                         prompt: 'consent',
@@ -639,9 +639,16 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
                   });
                   
                   if (error) {
+                    console.error('❌ OAuth initiation error:', error);
                     setAuthError(error.message);
+                    toast({
+                      title: "Authentication Error",
+                      description: error.message,
+                      variant: "destructive"
+                    });
                   }
                 } catch (error) {
+                  console.error('❌ Google sign-in exception:', error);
                   setAuthError('Google authentication failed');
                 } finally {
                   setLoading(false);

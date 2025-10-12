@@ -6,7 +6,6 @@ import { BrowserRouter, Routes, Route, useLocation, Navigate, useParams } from "
 import { HelmetProvider } from "react-helmet-async";
 import { lazy, Suspense } from "react";
 import Index from "./pages/Index";
-import AuthCallbackHandler from "@/features/auth/components/AuthCallbackHandler";
 import TopBar from "@/components/top-bar";
 import { Footer } from "@/components/footer";
 import { SocialWidgets } from "@/components/social-widgets";
@@ -23,6 +22,7 @@ const Messages = lazy(() => import("./features/messages/pages/MessagesPage"));
 const Likes = lazy(() => import("./features/profile/pages/LikesPage"));
 const Account = lazy(() => import("./features/profile/pages/AccountPage"));
 const Auth = lazy(() => import("./features/auth/pages/AuthPage"));
+const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const Terms = lazy(() => import("./pages/Terms"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
@@ -104,7 +104,6 @@ const App = () => {
             <Toaster />
             <Sonner />
             <BrowserRouter>
-              <AuthCallbackHandler />
               <ReferralBanner />
               <TopBar />
               <main className="w-full flex-1">
@@ -124,6 +123,7 @@ const App = () => {
                     <Route path="/contest" element={<LegacyContestRedirect />} />
                     
                     <Route path="/auth" element={<Auth />} />
+                    <Route path="/auth/callback" element={<AuthCallback />} />
                     <Route path="/account" element={<Account />} />
                     <Route path="/u/:id" element={<Profile />} />
                     <Route path="/messages" element={<Messages />} />
