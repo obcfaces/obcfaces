@@ -582,22 +582,21 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     <section className={`max-w-6xl mx-auto mb-2 rounded-lg shadow-lg shadow-foreground/15 ${title === "THIS WEEK" ? "bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800" : "bg-background"} pt-6 pb-0`}>
       <div className="mb-6 px-6">
         <div className="mb-4">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-1">
-            <div className={`inline-flex flex-col w-fit ${centerSubtitle ? "items-start sm:items-center" : "items-start sm:items-center"}`}>
-              <h2 className={`text-2xl sm:text-3xl font-bold ${title?.includes("THIS WEEK") ? "text-green-800 dark:text-green-200" : "text-contest-text"} ${noWrapTitle ? "max-w-[60%] sm:max-w-none sm:whitespace-nowrap break-words" : "max-w-[60%] sm:max-w-none break-words"}`}>{title}</h2>
-              <p className={`text-xs sm:text-sm ${title?.includes("THIS WEEK") ? "text-green-600 dark:text-green-400" : "text-muted-foreground/70"} italic -mt-0.5 sm:-mt-1 max-w-[60%] sm:max-w-none break-words`}>{subtitle}</p>
-            </div>
-            {titleSuffix && (
-              <span className="text-xl sm:text-2xl font-normal text-muted-foreground">{titleSuffix}</span>
-            )}
-            {isActive && description && (
-              <span className={`text-sm sm:text-base font-normal ${title?.includes("THIS WEEK") ? "text-green-700 dark:text-green-300" : "text-contest-text"} leading-tight`}>
-                {description}
-              </span>
-            )}
+          <div className="flex flex-wrap items-baseline justify-between gap-2 mb-1">
+            <h2 className={`text-2xl sm:text-3xl font-bold ${title?.includes("THIS WEEK") ? "text-green-800 dark:text-green-200" : "text-contest-text"} max-w-[60%] break-words`}>
+              {title}
+            </h2>
+            <p className={`text-xs sm:text-sm ${title?.includes("THIS WEEK") ? "text-green-600 dark:text-green-400" : "text-muted-foreground/70"} italic max-w-[40%] break-words text-right`}>
+              {subtitle}
+            </p>
           </div>
+          {isActive && description && (
+            <p className={`text-sm sm:text-base font-normal ${title?.includes("THIS WEEK") ? "text-green-700 dark:text-green-300" : "text-contest-text"} text-center mt-1`}>
+              {description}
+            </p>
+          )}
           {!isActive && description && (
-            <p className="text-muted-foreground">{description}</p>
+            <p className="text-muted-foreground text-center mt-1">{description}</p>
           )}
         </div>
       </div>
