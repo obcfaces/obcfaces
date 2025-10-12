@@ -56,18 +56,16 @@ export const ContestWeeksRenderer = ({
     <>
       <NextWeekSection viewMode={viewMode} countryCode={countryCode} />
       
-      <section className="max-w-6xl mx-auto pt-2 mb-1 sm:mb-3 bg-background rounded-lg shadow-sm shadow-foreground/10">
-        <ContestSection
-          title={t("THIS WEEK")}
-          subtitle={getWeekRange(0, currentLanguage.code)}
-          description={t("Choose the winner")}
-          isActive={true}
-          noWrapTitle
-          viewMode={viewMode}
-          weekOffset={0}
-          countryCode={countryCode}
-        />
-      </section>
+      <ContestSection
+        title={t("THIS WEEK")}
+        subtitle={getWeekRange(0, currentLanguage.code)}
+        description={t("Choose the winner")}
+        isActive={true}
+        noWrapTitle
+        viewMode={viewMode}
+        weekOffset={0}
+        countryCode={countryCode}
+      />
       
       {/* Past weeks - regular rendering to prevent overlapping */}
       <div className="space-y-4">
