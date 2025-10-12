@@ -202,149 +202,43 @@ export function AdminPastWeekTab({
         </div>
       </div>
 
-      {/* Admin Status Filter */}
-      <div className="mb-4">
-        <Label className="text-sm font-medium mb-2 block">Admin Status Filter:</Label>
-        <Select value={pastStatusFilter} onValueChange={setPastStatusFilter}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Select admin status" />
-          </SelectTrigger>
-          <SelectContent className="z-[9999] bg-popover border shadow-lg">
-            <SelectItem value="all">All</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="rejected">Rejected</SelectItem>
-            <SelectItem value="pre next week">Pre Next Week</SelectItem>
-            <SelectItem value="next week">Next Week</SelectItem>
-            <SelectItem value="next week on site">Next Week On Site</SelectItem>
-            <SelectItem value="this week">This Week</SelectItem>
-            <SelectItem value="past">Past</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Title */}
-      <div>
-        <h2 className="text-xl font-semibold">Past Week Participants</h2>
-        <p className="text-muted-foreground">Участники из прошлых недель с правильными статусами</p>
-      </div>
-
-      {/* Week Filter Buttons */}
-      <div className="mt-4 space-y-4">
-        {/* Desktop filters */}
-        <div className="hidden md:flex gap-2 flex-wrap">
-          {filterCounts
-            .filter((filter: any) => filter.id === 'all' || filter.count > 0)
-            .map((filter: any) => {
-              const match = filter.label.match(/^(.+?)\s*\((.+?)\)$/);
-              const weekLabel = match ? match[1] : filter.label;
-              const dateRange = match ? match[2] : null;
+      {/* Week Interval Filter Buttons - Get last 4 weeks */}
+      <div className="mt-4">
+        <div className="flex gap-2 flex-wrap">
+          {getAvailableWeekIntervals()
+            .slice(0, 4)
+            .map((interval) => {
+              const participantsInWeek = participants.filter(p => 
+                p.admin_status === 'past' && p.week_interval === interval.value
+              );
+              const count = participantsInWeek.length;
               
               return (
-                <div key={filter.id} className="flex items-center gap-1">
-                  <Button
-                    variant={selectedWeekFilter === filter.id ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => onWeekFilterChange(filter.id)}
-                    className="gap-2"
-                  >
-                    {weekLabel}
-                    <Badge variant="secondary" className="ml-1 px-1.5 py-0.5 text-xs">
-                      {filter.count}
-                    </Badge>
-                  </Button>
-                  {dateRange && (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{dateRange}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )}
-                </div>
-              );
-            })}
-          <Button
-            variant={showAllCards ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => {
-              setShowAllCards(!showAllCards);
-              setCurrentPage(1);
-            }}
-            className="ml-2"
-          >
-            К
-          </Button>
-        </div>
-
-        {/* Mobile filters */}
-        <div className="md:hidden grid grid-cols-2 gap-2">
-          {filterCounts
-            .filter((filter: any) => filter.id === 'all' || filter.count > 0)
-            .map((filter: any) => {
-              const match = filter.mobileLabel?.match(/^(.+?)\s*\((.+?)\)$/);
-              const weekLabel = match ? match[1] : (filter.mobileLabel || filter.label);
-              const dateRange = filter.weekInterval || (match ? match[2] : null);
-              
-              return (
-                <div key={filter.id} className="flex items-center gap-1">
-                  <Button
-                    variant={selectedWeekFilter === filter.id ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => onWeekFilterChange(filter.id)}
-                    className="text-xs flex-1 gap-1"
-                  >
-                    {weekLabel}
-                    <Badge variant="secondary" className="ml-1 px-1 py-0 text-xs">
-                      {filter.count}
-                    </Badge>
-                  </Button>
-                  {dateRange && (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Info className="h-4 w-4 text-muted-foreground cursor-help flex-shrink-0" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{dateRange}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )}
-                </div>
-              );
-            })}
-          <Button
-            variant={showAllCards ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => {
-              setShowAllCards(!showAllCards);
-              setCurrentPage(1);
-            }}
-            className="text-xs col-span-2"
-          >
-            К - Все карточки
-          </Button>
-        </div>
-
-        {/* Week Interval Filter */}
-        <div className="border-t pt-4">
-          <Label className="text-sm font-medium mb-2 block">Фильтр по интервалам недель:</Label>
-          <Select value={pastWeekIntervalFilter} onValueChange={setPastWeekIntervalFilter}>
-            <SelectTrigger className="w-full max-w-md">
-              <SelectValue placeholder="Выберите интервал недели" />
-            </SelectTrigger>
-            <SelectContent className="z-[9999] bg-popover border shadow-lg">
-              <SelectItem value="all">Все интервалы</SelectItem>
-              {getAvailableWeekIntervals().map((interval) => (
-                <SelectItem key={interval.value} value={interval.value}>
+                <Button
+                  key={interval.value}
+                  variant={pastWeekIntervalFilter === interval.value ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setPastWeekIntervalFilter(interval.value)}
+                  className="gap-2"
+                >
                   {interval.label}
-                </SelectItem>
-              ))}</SelectContent>
-          </Select>
+                  <Badge variant="secondary" className="ml-1 px-1.5 py-0.5 text-xs">
+                    {count}
+                  </Badge>
+                </Button>
+              );
+            })}
+          <Button
+            variant={pastWeekIntervalFilter === 'all' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setPastWeekIntervalFilter('all')}
+            className="gap-2"
+          >
+            All
+            <Badge variant="secondary" className="ml-1 px-1.5 py-0.5 text-xs">
+              {participants.filter(p => p.admin_status === 'past').length}
+            </Badge>
+          </Button>
         </div>
       </div>
 
