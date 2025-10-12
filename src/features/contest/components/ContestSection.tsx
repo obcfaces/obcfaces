@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { ContestantCard } from "./ContestCard";
 import { supabase } from "@/integrations/supabase/client";
 import { useContestParticipants } from "../hooks/useContestParticipants";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getWeekRange } from "@/utils/dateFormatting";
 
 import contestant1Face from "@/assets/contestant-1-face.jpg";
 import contestant1Full from "@/assets/contestant-1-full.jpg";
@@ -27,29 +29,6 @@ interface ContestSectionProps {
   weekInterval?: string; // Add weekInterval prop for dynamic past weeks
   countryCode?: string; // Add countryCode to filter participants by country
 }
-
-// Helper function to get week range dates (Monday-Sunday) - правильные для 2025
-const getWeekRange = (weeksOffset: number = 0) => {
-  // Правильные интервалы для 2025 года
-  switch (weeksOffset) {
-    case 0:
-      return "29 Sep - 05 Oct 2025";
-    case -1:
-      return "22 Sep - 28 Sep 2025";
-    case -2:
-      return "15 Sep - 21 Sep 2025";
-    case -3:
-      return "08 Sep - 14 Sep 2025";
-    case -4:
-      return "01 Sep - 07 Sep 2025";
-    case 1:
-      return "06 Oct - 12 Oct 2025";
-    case 2:
-      return "13 Oct - 19 Oct 2025";
-    default:
-      return "29 Sep - 05 Oct 2025";
-  }
-};
 
 export function ContestSection({ title, subtitle, description, isActive, showWinner, centerSubtitle, titleSuffix, noWrapTitle, viewMode: controlledViewMode, filters, weekOffset = 0, weekInterval, countryCode = "PH" }: ContestSectionProps) {
   const [localViewMode] = useState<'compact' | 'full'>('compact');

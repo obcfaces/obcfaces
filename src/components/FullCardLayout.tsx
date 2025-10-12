@@ -3,6 +3,9 @@ import { Link } from "react-router-dom";
 import { cn, getCountryDisplayName } from "@/lib/utils";
 import { VotingOverlay } from "@/features/contest/components/VotingOverlay";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useTranslation } from "@/hooks/useTranslation";
+import { formatAgeWeightHeight } from "@/utils/dateTranslations";
 
 interface WinnerContent {
   payment_proof_url?: string;
@@ -109,6 +112,12 @@ export function FullCardLayout({
   setUserRating,
   setIsEditing
 }: FullCardLayoutProps) {
+  const { t } = useTranslation();
+  const { currentLanguage } = useLanguage();
+  
+  const translatedCountry = getCountryDisplayName(country);
+  const ageWeightHeightText = formatAgeWeightHeight(age, weight, height, currentLanguage.code);
+  
   const hasWinnerContent = isWinner && winnerContent && (
     winnerContent.payment_proof_url || 
     winnerContent.testimonial_video_url || 
@@ -122,7 +131,7 @@ export function FullCardLayout({
         {/* Winner header */}
         {isWinner && (
           <div className="absolute top-0 left-0 w-[193px] sm:w-[225px] md:w-[257px] bg-blue-100 text-blue-700 pl-2 pr-2 py-1 text-xs font-semibold flex items-center justify-start z-20">
-            <span>🏆 WINNER   + 5000 PHP</span>
+            <span>{t('winner.title')}</span>
           </div>
         )}
       
@@ -242,9 +251,9 @@ export function FullCardLayout({
                     <div className="flex items-start justify-between">
                       <div className="min-w-0 flex-1 mr-2">
                          <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">{profileId ? (<Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">{name}</Link>) : name}</h3>
-                         <div className="text-xs sm:text-sm text-muted-foreground font-normal">{age} yo · {weight} kg · {height} cm</div>
+                         <div className="text-xs sm:text-sm text-muted-foreground font-normal">{ageWeightHeightText}</div>
                          <div className="text-sm sm:text-base text-contest-blue truncate">
-                           {getCountryDisplayName(country)} · {city}
+                           {translatedCountry} · {city}
                          </div>
                        </div>
                       

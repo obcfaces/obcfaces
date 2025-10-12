@@ -196,7 +196,7 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
                 <SelectValue placeholder="Age" />
               </SelectTrigger>
               <SelectContent className="bg-background border z-50">
-                <SelectItem value="">{t("All Ages")}</SelectItem>
+                <SelectItem value="">{t("filter.allAges")}</SelectItem>
                 <SelectItem value="18-25">18-25</SelectItem>
                 <SelectItem value="26-35">26-35</SelectItem>
                 <SelectItem value="36-45">36-45</SelectItem>
@@ -214,11 +214,11 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent className="bg-background border z-50">
-                <SelectItem value="">{t("All Status")}</SelectItem>
-                <SelectItem value="single">{t("Single")}</SelectItem>
-                <SelectItem value="married">{t("Married")}</SelectItem>
-                <SelectItem value="divorced">{t("Divorced")}</SelectItem>
-                <SelectItem value="widowed">{t("Widowed")}</SelectItem>
+                <SelectItem value="">{t("filter.allStatus")}</SelectItem>
+                <SelectItem value="single">{t("marital.single")}</SelectItem>
+                <SelectItem value="married">{t("marital.married")}</SelectItem>
+                <SelectItem value="divorced">{t("marital.divorced")}</SelectItem>
+                <SelectItem value="widowed">{t("marital.widowed")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -232,9 +232,9 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
                 <SelectValue placeholder="Children" />
               </SelectTrigger>
               <SelectContent className="bg-background border z-50">
-                <SelectItem value="">{t("All")}</SelectItem>
-                <SelectItem value="true">{t("Has Children")}</SelectItem>
-                <SelectItem value="false">{t("No Children")}</SelectItem>
+                <SelectItem value="">{t("filter.allStatus")}</SelectItem>
+                <SelectItem value="true">{t("filter.hasChildren")}</SelectItem>
+                <SelectItem value="false">{t("filter.noChildren")}</SelectItem>
               </SelectContent>
             </Select>
           </div>

@@ -6,6 +6,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { supabase } from "@/integrations/supabase/client";
 import LoginModalContent from "@/components/login-modal-content";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getNextWeekRange } from "@/utils/dateFormatting";
 
 import contestant1Face from "@/assets/contestant-1-face.jpg";
 import contestant1Full from "@/assets/contestant-1-full.jpg";
@@ -55,13 +57,9 @@ interface NextWeekSectionProps {
   countryCode?: string;
 }
 
-// Helper function to get next week range dates (Monday-Sunday) - правильные для 2025
-const getNextWeekRange = () => {
-  return "06 Oct - 12 Oct 2025"; // Следующая неделя после текущей (29/09-05/10/25)
-};
-
 export function NextWeekSection({ viewMode = 'full', countryCode = "PH" }: NextWeekSectionProps) {
   const { t } = useTranslation();
+  const { currentLanguage } = useLanguage();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [history, setHistory] = useState<number[]>([]);
   const [user, setUser] = useState<any>(null);
@@ -477,7 +475,7 @@ export function NextWeekSection({ viewMode = 'full', countryCode = "PH" }: NextW
       <div className="mb-6 px-6">
         <div className="mb-4 text-center">
           <p className="text-xs sm:text-sm text-blue-600 dark:text-blue-400 italic mb-1">
-            {getNextWeekRange()}
+            {getNextWeekRange(currentLanguage.code)}
           </p>
           <h2 className="text-2xl sm:text-3xl font-bold text-blue-800 dark:text-blue-200 mb-1">
             {t("NEXT WEEK")}
