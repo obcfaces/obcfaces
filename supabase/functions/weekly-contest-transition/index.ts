@@ -70,7 +70,7 @@ serve(async (req) => {
 
     // ========================================
     // TRANSITION 1: "this week" → "past"
-    // Keep their current week_interval
+    // Assign current week interval (when transition happens)
     // ========================================
     console.log('\n📊 TRANSITION 1: "this week" → "past"')
     
@@ -106,7 +106,7 @@ serve(async (req) => {
       console.log(`🏆 Winner determined: ${winnerName} (ID: ${winnerId})`)
     }
 
-    // Move "this week" to "past" with final_rank
+    // Move "this week" to "past" with current week interval
     for (const participant of thisWeekParticipants || []) {
       let statusHistory: any = {}
       try {
@@ -124,7 +124,8 @@ serve(async (req) => {
         change_reason: 'Automatic weekly transition',
         old_status: 'this week',
         new_status: 'past',
-        week_interval: participant.week_interval, // Keep their week interval
+        old_week_interval: participant.week_interval,
+        week_interval: currentWeekInterval, // Current week when transition happens
         timestamp: new Date().toISOString()
       }
 
@@ -137,8 +138,8 @@ serve(async (req) => {
         .update({
           admin_status: 'past',
           status_history: statusHistory,
-          final_rank: finalRank
-          // week_interval stays the same
+          final_rank: finalRank,
+          week_interval: currentWeekInterval // Assign current week
         })
         .eq('id', participant.id)
 
@@ -147,7 +148,7 @@ serve(async (req) => {
       } else {
         transitions.thisToPast++
         const rankInfo = isWinner ? ' 🏆 (WINNER, rank=1)' : ''
-        console.log(`✅ ${participantName}: "this week" → "past"${rankInfo}, week: ${participant.week_interval}`)
+        console.log(`✅ ${participantName}: "this week" → "past"${rankInfo}, week: ${currentWeekInterval}`)
       }
     }
 
@@ -187,7 +188,8 @@ serve(async (req) => {
         change_reason: 'Automatic weekly transition',
         old_status: 'next week on site',
         new_status: 'this week',
-        week_interval: currentWeekInterval,
+        old_week_interval: participant.status_history?.['next week on site']?.week_interval,
+        week_interval: currentWeekInterval, // Current week when transition happens
         timestamp: new Date().toISOString()
       }
 
@@ -246,7 +248,8 @@ serve(async (req) => {
         change_reason: 'Automatic weekly transition',
         old_status: 'pre next week',
         new_status: 'next week',
-        week_interval: nextWeekInterval,
+        old_week_interval: participant.status_history?.['pre next week']?.week_interval,
+        week_interval: nextWeekInterval, // Next week after transition
         timestamp: new Date().toISOString()
       }
 
