@@ -3,6 +3,7 @@ import SearchableSelect, { type Option } from "@/components/ui/searchable-select
 import { ALL_COUNTRIES } from "@/data/locale-config";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface LocaleCountryFilterProps {
   value?: string;
@@ -14,6 +15,7 @@ const LocaleCountryFilter: React.FC<LocaleCountryFilterProps> = ({
   onCountryChange 
 }) => {
   const { currentLanguage } = useLanguage();
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   // Try to get context from PublicCountryProvider if available
@@ -36,12 +38,19 @@ const LocaleCountryFilter: React.FC<LocaleCountryFilterProps> = ({
   const languageCode = contextLanguageCode || currentLanguage.code;
 
   const countryOptions: Option[] = useMemo(() => {
-    const allCountries = ALL_COUNTRIES.map(country => ({
-      value: country.code,
-      label: country.code === 'PH' ? country.name : `${country.name} soon`,
-      disabled: country.code !== 'PH',
-      flag: country.flag,
-    }));
+    const allCountries = ALL_COUNTRIES.map(country => {
+      // Translate country name
+      const translatedName = t(`country.${country.name}`) !== `country.${country.name}` 
+        ? t(`country.${country.name}`) 
+        : country.name;
+      
+      return {
+        value: country.code,
+        label: country.code === 'PH' ? translatedName : `${translatedName} soon`,
+        disabled: country.code !== 'PH',
+        flag: country.flag,
+      };
+    });
     
     // Sort alphabetically but put Philippines first
     const philippines = allCountries.find(c => c.value === 'PH');
@@ -56,7 +65,7 @@ const LocaleCountryFilter: React.FC<LocaleCountryFilterProps> = ({
       // All other countries with "soon" label
       ...otherCountries
     ];
-  }, []);
+  }, [t]);
 
   const handleCountryChange = (newCountryCode: string) => {
     // If context navigator is available, use it

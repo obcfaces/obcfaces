@@ -31,11 +31,16 @@ export const getWeekRange = (weeksOffset: number = 0, locale: string = 'en'): st
       dateRange = "29 Sep - 05 Oct 2025";
   }
   
-  // Translate month abbreviations based on locale
-  return translateDateRange(dateRange, locale);
+  // Extract language code from locale (e.g., 'es-ph' -> 'es', 'en' -> 'en')
+  const langCode = locale.includes('-') ? locale.split('-')[0] : locale;
+  
+  // Translate month abbreviations based on language code
+  return translateDateRange(dateRange, langCode);
 };
 
 export const getNextWeekRange = (locale: string = 'en'): string => {
   const dateRange = "06 Oct - 12 Oct 2025";
-  return translateDateRange(dateRange, locale);
+  // Extract language code from locale (e.g., 'es-ph' -> 'es')
+  const langCode = locale.includes('-') ? locale.split('-')[0] : locale;
+  return translateDateRange(dateRange, langCode);
 };
