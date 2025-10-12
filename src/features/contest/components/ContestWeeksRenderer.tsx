@@ -29,8 +29,7 @@ export const ContestWeeksRenderer = ({
   // Prepare past week items for virtualization
   const pastWeekItems = useMemo(() => {
     return pastWeekIntervals.map((item) => {
-      const adjustedWeeksAgo = item.weeksAgo + 1;
-      const weekLabel = adjustedWeeksAgo === 1 ? t('1 WEEK AGO') : t(`${adjustedWeeksAgo} WEEKS AGO`);
+      const weekLabel = item.weeksAgo === 1 ? t('1 WEEK AGO') : t(`${item.weeksAgo} WEEKS AGO`);
       
       return {
         id: item.interval,
@@ -43,7 +42,7 @@ export const ContestWeeksRenderer = ({
             centerSubtitle
             showWinner={true}
             viewMode={viewMode}
-            weekOffset={-adjustedWeeksAgo}
+            weekOffset={-item.weeksAgo}
             weekInterval={item.interval}
             countryCode={countryCode}
           />
