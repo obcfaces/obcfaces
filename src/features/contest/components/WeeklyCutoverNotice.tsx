@@ -25,13 +25,16 @@ export function WeeklyCutoverNotice({ variant = 'default' }: WeeklyCutoverNotice
       const days = Math.floor(diff / (1000 * 60 * 60 * 24));
       const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
       
       if (days > 0) {
-        setTimeUntilCutover(`${days}d ${hours}h ${minutes}m`);
+        setTimeUntilCutover(`${days}d ${hours}h ${minutes}m ${seconds}s`);
       } else if (hours > 0) {
-        setTimeUntilCutover(`${hours}h ${minutes}m`);
+        setTimeUntilCutover(`${hours}h ${minutes}m ${seconds}s`);
+      } else if (minutes > 0) {
+        setTimeUntilCutover(`${minutes}m ${seconds}s`);
       } else {
-        setTimeUntilCutover(`${minutes}m`);
+        setTimeUntilCutover(`${seconds}s`);
       }
       
       // Format local cutover time
@@ -47,7 +50,7 @@ export function WeeklyCutoverNotice({ variant = 'default' }: WeeklyCutoverNotice
     };
 
     calculateCutover();
-    const interval = setInterval(calculateCutover, 60000); // Update every minute
+    const interval = setInterval(calculateCutover, 1000); // Update every second
 
     return () => clearInterval(interval);
   }, []);
@@ -55,17 +58,16 @@ export function WeeklyCutoverNotice({ variant = 'default' }: WeeklyCutoverNotice
   if (variant === 'compact') {
     if (!timeUntilCutover) {
       return (
-        <div className="flex items-center justify-center gap-2 text-sm">
-          <span>⏰ Weekly contest ends in:</span>
+        <div className="flex items-center justify-center gap-1 text-sm italic text-black dark:text-white mb-2">
+          <span>🕐 Weekly contest ends in:</span>
           <Skeleton className="h-5 w-32" />
         </div>
       );
     }
     
     return (
-      <div className="flex items-center justify-center gap-2 text-sm text-foreground/80">
-        <span>⏰ Weekly contest ends in:</span>
-        <span className="font-medium text-foreground">{timeUntilCutover} (UTC)</span>
+      <div className="flex items-center justify-center gap-1 text-sm italic text-black dark:text-white mb-2">
+        <span>🕐 Weekly contest ends in: {timeUntilCutover} (UTC)</span>
       </div>
     );
   }
