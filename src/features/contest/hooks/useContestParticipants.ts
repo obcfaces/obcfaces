@@ -18,7 +18,8 @@ export const useContestParticipants = () => {
 
   const fetchParticipantsByStatus = useCallback(async (
     adminStatus: string | string[],
-    weekInterval?: string
+    weekInterval?: string,
+    countryCode?: string
   ) => {
     try {
       setLoading(true);
@@ -34,6 +35,24 @@ export const useContestParticipants = () => {
       
       if (weekInterval) {
         query = query.eq('week_interval', weekInterval);
+      }
+
+      // Filter by country if provided
+      if (countryCode) {
+        const countryCode_upper = countryCode.toUpperCase();
+        const countryNames: Record<string, string> = {
+          'PH': 'Philippines',
+          'KZ': 'Kazakhstan',
+          'RU': 'Russia',
+          'UA': 'Ukraine',
+        };
+        const countryName = countryNames[countryCode_upper];
+        
+        if (countryName) {
+          query = query.or(`application_data->>country.eq.${countryCode_upper},application_data->>country.eq.${countryName}`);
+        } else {
+          query = query.filter('application_data->>country', 'eq', countryCode);
+        }
       }
       
       const { data: participants, error } = await query.order('created_at', { ascending: false });

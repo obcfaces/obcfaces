@@ -52,6 +52,7 @@ const candidates: any[] = [
 
 interface NextWeekSectionProps {
   viewMode?: 'compact' | 'full';
+  countryCode?: string;
 }
 
 // Helper function to get next week range dates (Monday-Sunday) - правильные для 2025
@@ -59,7 +60,7 @@ const getNextWeekRange = () => {
   return "06 Oct - 12 Oct 2025"; // Следующая неделя после текущей (29/09-05/10/25)
 };
 
-export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
+export function NextWeekSection({ viewMode = 'full', countryCode = "PH" }: NextWeekSectionProps) {
   const { t } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [history, setHistory] = useState<number[]>([]);
@@ -129,14 +130,35 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
 
         console.log('Loading next week participants...');
         console.log('User ID:', user?.id);
+        console.log('Country Code:', countryCode);
 
         // Загружаем участников со статусом next week и next week on site
-        const { data: participants, error: fetchError } = await supabase
+        let query = supabase
           .from('weekly_contest_participants')
           .select('*')
           .in('admin_status', ['next week', 'next week on site'])
           .eq('is_active', true)
           .is('deleted_at', null);
+
+        // Filter by country
+        if (countryCode) {
+          const countryCode_upper = countryCode.toUpperCase();
+          const countryNames: Record<string, string> = {
+            'PH': 'Philippines',
+            'KZ': 'Kazakhstan',
+            'RU': 'Russia',
+            'UA': 'Ukraine',
+          };
+          const countryName = countryNames[countryCode_upper];
+          
+          if (countryName) {
+            query = query.or(`application_data->>country.eq.${countryCode_upper},application_data->>country.eq.${countryName}`);
+          } else {
+            query = query.filter('application_data->>country', 'eq', countryCode);
+          }
+        }
+
+        const { data: participants, error: fetchError } = await query;
 
         let data = participants;
 

@@ -25,6 +25,7 @@ interface ContestSectionProps {
   filters?: React.ReactNode;
   weekOffset?: number;
   weekInterval?: string; // Add weekInterval prop for dynamic past weeks
+  countryCode?: string; // Add countryCode to filter participants by country
 }
 
 // Helper function to get week range dates (Monday-Sunday) - правильные для 2025
@@ -50,7 +51,7 @@ const getWeekRange = (weeksOffset: number = 0) => {
   }
 };
 
-export function ContestSection({ title, subtitle, description, isActive, showWinner, centerSubtitle, titleSuffix, noWrapTitle, viewMode: controlledViewMode, filters, weekOffset = 0, weekInterval }: ContestSectionProps) {
+export function ContestSection({ title, subtitle, description, isActive, showWinner, centerSubtitle, titleSuffix, noWrapTitle, viewMode: controlledViewMode, filters, weekOffset = 0, weekInterval, countryCode = "PH" }: ContestSectionProps) {
   const [localViewMode] = useState<'compact' | 'full'>('compact');
   const viewMode = controlledViewMode ?? localViewMode;
   const [ratings, setRatings] = useState<Record<number, number>>({
@@ -96,19 +97,19 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   // Load participants for NEXT WEEK section - FOR ALL USERS
   const loadNextWeekParticipants = async () => {
     console.log('Loading NEXT WEEK participants for all users...');
-    return await fetchParticipantsByStatus(['next week', 'next week on site']);
+    return await fetchParticipantsByStatus(['next week', 'next week on site'], undefined, countryCode);
   };
   
   // Generic function to load past week participants by week_interval
   const loadPastWeekParticipantsByInterval = async (interval: string) => {
     console.log(`🔄 Loading participants for interval: ${interval}`);
-    return await fetchParticipantsByStatus('past', interval);
+    return await fetchParticipantsByStatus('past', interval, countryCode);
   };
 
   // Load participants for THIS WEEK section - FOR ALL USERS
   const loadThisWeekParticipants = async () => {
     console.log('🔄 Loading THIS WEEK participants for all users...');
-    return await fetchParticipantsByStatus('this week');
+    return await fetchParticipantsByStatus('this week', undefined, countryCode);
   };
 
 
@@ -177,7 +178,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     });
     
     return () => subscription.unsubscribe();
-  }, [title, weekInterval]); // Add weekInterval to dependencies
+  }, [title, weekInterval, countryCode]); // Add weekInterval and countryCode to dependencies
 
 
   // Load participants based on title
