@@ -3,6 +3,8 @@ import { NextWeekSection } from "./NextWeekSection";
 import { usePastWeekIntervals } from "../hooks/usePastWeekIntervals";
 import { VirtualizedList } from "@/components/performance/VirtualizedList";
 import { useMemo } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
+import { formatIntervalSync } from "../utils/formatInterval";
 
 interface ContestWeeksRendererProps {
   viewMode: 'compact' | 'full';
@@ -11,28 +13,6 @@ interface ContestWeeksRendererProps {
   enableVirtualization?: boolean;
 }
 
-const formatInterval = (interval: string): string => {
-  try {
-    const parts = interval.split('-');
-    if (parts.length !== 2) return interval;
-    
-    const startParts = parts[0].split('/');
-    const endParts = parts[1].split('/');
-    
-    if (startParts.length !== 2 || endParts.length !== 3) return interval;
-    
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const startDay = startParts[0];
-    const startMonth = months[parseInt(startParts[1]) - 1];
-    const endDay = endParts[0];
-    const endMonth = months[parseInt(endParts[1]) - 1];
-    const year = `20${endParts[2]}`;
-    
-    return `${startDay} ${startMonth} - ${endDay} ${endMonth} ${year}`;
-  } catch (error) {
-    return interval;
-  }
-};
 
 export const ContestWeeksRenderer = ({ 
   viewMode, 
@@ -40,13 +20,14 @@ export const ContestWeeksRenderer = ({
   timezone = "Asia/Manila",
   enableVirtualization = true
 }: ContestWeeksRendererProps) => {
+  const { t } = useTranslation();
   const { intervals: pastWeekIntervals } = usePastWeekIntervals(countryCode, timezone);
 
   // Prepare past week items for virtualization
   const pastWeekItems = useMemo(() => {
     return pastWeekIntervals.map((item) => {
       const adjustedWeeksAgo = item.weeksAgo + 1;
-      const weekLabel = adjustedWeeksAgo === 1 ? '1 WEEK AGO' : `${adjustedWeeksAgo} WEEKS AGO`;
+      const weekLabel = adjustedWeeksAgo === 1 ? t('1 WEEK AGO') : t(`${adjustedWeeksAgo} WEEKS AGO`);
       
       return {
         id: item.interval,
@@ -54,8 +35,8 @@ export const ContestWeeksRenderer = ({
           <ContestSection
             key={item.interval}
             title={weekLabel}
-            titleSuffix="(Closed)"
-            subtitle={formatInterval(item.interval)}
+            titleSuffix={t("(Closed)")}
+            subtitle={formatIntervalSync(item.interval)}
             centerSubtitle
             showWinner={true}
             viewMode={viewMode}
@@ -65,7 +46,7 @@ export const ContestWeeksRenderer = ({
         )
       };
     });
-  }, [pastWeekIntervals, viewMode]);
+  }, [pastWeekIntervals, viewMode, t]);
 
   return (
     <>
@@ -73,9 +54,9 @@ export const ContestWeeksRenderer = ({
       
       <section className="max-w-6xl mx-auto pt-2 mb-1 sm:mb-3 bg-background rounded-lg shadow-sm shadow-foreground/10">
         <ContestSection
-          title="THIS WEEK"
-          subtitle="Choose the winner"
-          description="Weekly contest is live now!"
+          title={t("THIS WEEK")}
+          subtitle={t("Choose the winner")}
+          description={t("Weekly contest is live now!")}
           isActive={true}
           noWrapTitle
           viewMode={viewMode}

@@ -7,6 +7,7 @@ import WeightFilterDropdown from "@/components/ui/weight-filter-dropdown";
 import LocaleCountryFilter from "@/components/locale-country-filter";
 import { AlignJustify, Grid2X2 } from "lucide-react";
 import { patchSearchParams } from "@/utils/urlFilters";
+import { useTranslation } from "@/hooks/useTranslation";
 
 type Gender = "male" | "female";
 export type Category = "teen" | "miss" | "ms" | "mrs";
@@ -56,6 +57,7 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
   weight,
   onWeightChange,
 }) => {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Sync filters with URL on mount
@@ -122,10 +124,10 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
   const genderOptions: Option[] = useMemo(() => {
     const av = genderAvailability ?? { male: false, female: true };
     return [
-      { value: "female", label: "Female", disabled: !av.female },
-      { value: "male", label: "Male", disabled: !av.male },
+      { value: "female", label: t("Female"), disabled: !av.female },
+      { value: "male", label: t("Male"), disabled: !av.male },
     ];
-  }, [genderAvailability]);
+  }, [genderAvailability, t]);
 
   const categoryOptions: Option[] = useMemo(() => [
     { value: "teen", label: "Teen (13-17 y.o.)", disabled: true },
@@ -194,7 +196,7 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
                 <SelectValue placeholder="Age" />
               </SelectTrigger>
               <SelectContent className="bg-background border z-50">
-                <SelectItem value="">All Ages</SelectItem>
+                <SelectItem value="">{t("All Ages")}</SelectItem>
                 <SelectItem value="18-25">18-25</SelectItem>
                 <SelectItem value="26-35">26-35</SelectItem>
                 <SelectItem value="36-45">36-45</SelectItem>
@@ -212,11 +214,11 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent className="bg-background border z-50">
-                <SelectItem value="">All Status</SelectItem>
-                <SelectItem value="single">Single</SelectItem>
-                <SelectItem value="married">Married</SelectItem>
-                <SelectItem value="divorced">Divorced</SelectItem>
-                <SelectItem value="widowed">Widowed</SelectItem>
+                <SelectItem value="">{t("All Status")}</SelectItem>
+                <SelectItem value="single">{t("Single")}</SelectItem>
+                <SelectItem value="married">{t("Married")}</SelectItem>
+                <SelectItem value="divorced">{t("Divorced")}</SelectItem>
+                <SelectItem value="widowed">{t("Widowed")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -230,9 +232,9 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
                 <SelectValue placeholder="Children" />
               </SelectTrigger>
               <SelectContent className="bg-background border z-50">
-                <SelectItem value="">All</SelectItem>
-                <SelectItem value="true">Has Children</SelectItem>
-                <SelectItem value="false">No Children</SelectItem>
+                <SelectItem value="">{t("All")}</SelectItem>
+                <SelectItem value="true">{t("Has Children")}</SelectItem>
+                <SelectItem value="false">{t("No Children")}</SelectItem>
               </SelectContent>
             </Select>
           </div>

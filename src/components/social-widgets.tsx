@@ -60,37 +60,37 @@ export const SocialWidgets = () => {
   }, []);
 
   return (
-    <div className="fixed bottom-6 right-6 flex flex-col items-end gap-3 z-50">
+    <div className="fixed bottom-20 right-6 flex flex-col items-end gap-3 z-50">
       {/* Социальные кнопки - показываются только когда меню открыто */}
       {isOpen && (
         <>
           <Button
             onClick={() => handleSocialClick(openMessenger)}
             size="lg"
-            className="w-12 h-12 rounded-full bg-transparent hover:bg-transparent transition-all duration-300 animate-fade-in p-0"
+            className="w-10 h-10 rounded-full bg-transparent hover:bg-transparent transition-all duration-300 animate-fade-in p-0"
             aria-label="Написать в Facebook Messenger"
           >
             <img 
               src={messengerMainIcon} 
               alt="Facebook Messenger" 
-              className="w-12 h-12 object-contain"
+              className="w-10 h-10 object-contain"
             />
           </Button>
           
           <Button
             onClick={() => handleSocialClick(openTelegram)}
-            className="!w-10 !h-10 !min-w-10 !min-h-10 !max-w-10 !max-h-10 rounded-full bg-blue-500 hover:bg-blue-600 transition-all duration-300 animate-fade-in flex items-center justify-center !p-0"
+            className="!w-8 !h-8 !min-w-8 !min-h-8 !max-w-8 !max-h-8 rounded-full bg-blue-500 hover:bg-blue-600 transition-all duration-300 animate-fade-in flex items-center justify-center !p-0"
             aria-label="Написать в Telegram"
           >
-            <Send className="w-5 h-5 text-white" />
+            <Send className="w-4 h-4 text-white" />
           </Button>
           
           <Button
             onClick={() => handleSocialClick(openWhatsApp)}
-            className="!w-10 !h-10 !min-w-10 !min-h-10 !max-w-10 !max-h-10 rounded-full bg-green-500 hover:bg-green-600 transition-all duration-300 animate-fade-in flex items-center justify-center !p-0"
+            className="!w-8 !h-8 !min-w-8 !min-h-8 !max-w-8 !max-h-8 rounded-full bg-green-500 hover:bg-green-600 transition-all duration-300 animate-fade-in flex items-center justify-center !p-0"
             aria-label="Написать в WhatsApp"
           >
-            <MessageCircle className="w-5 h-5 text-white" />
+            <MessageCircle className="w-4 h-4 text-white" />
           </Button>
         </>
       )}
@@ -99,13 +99,13 @@ export const SocialWidgets = () => {
       <Button
         onClick={toggleMenu}
         size="lg"
-        className="w-14 h-14 rounded-full bg-transparent hover:bg-transparent transition-all duration-300 p-0"
+        className="w-11 h-11 rounded-full bg-transparent hover:bg-transparent transition-all duration-300 p-0"
         aria-label="Связаться с нами"
       >
         <img 
           src={messengerMainIcon} 
           alt="Messenger" 
-          className="w-20 h-20 object-contain"
+          className="w-16 h-16 object-contain"
         />
       </Button>
     </div>
