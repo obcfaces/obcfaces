@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Clock, Info } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface WeeklyCutoverNoticeProps {
   variant?: 'default' | 'compact';
@@ -52,11 +53,36 @@ export function WeeklyCutoverNotice({ variant = 'default' }: WeeklyCutoverNotice
   }, []);
 
   if (variant === 'compact') {
+    if (!timeUntilCutover) {
+      return (
+        <div className="flex items-center justify-center gap-2 text-sm">
+          <span>⏰ Weekly contest ends in:</span>
+          <Skeleton className="h-5 w-32" />
+        </div>
+      );
+    }
+    
     return (
       <div className="flex items-center justify-center gap-2 text-sm text-foreground/80">
         <span>⏰ Weekly contest ends in:</span>
         <span className="font-medium text-foreground">{timeUntilCutover} (UTC)</span>
       </div>
+    );
+  }
+
+  if (!timeUntilCutover) {
+    return (
+      <Alert>
+        <Info className="h-4 w-4" />
+        <AlertTitle>Weekly Contest Cutover</AlertTitle>
+        <AlertDescription className="space-y-1">
+          <div className="flex items-center gap-2">
+            <Clock className="h-4 w-4" />
+            <Skeleton className="h-5 w-40" />
+          </div>
+          <Skeleton className="h-4 w-64" />
+        </AlertDescription>
+      </Alert>
     );
   }
 
