@@ -257,11 +257,33 @@ export function AdminPastWeekTab({
           const participantName = `${appData.first_name} ${appData.last_name}`;
           const isWinner = participant.final_rank === 1;
 
+          const firstName = appData.first_name || appData.firstName || '';
+          const lastName = appData.last_name || appData.lastName || '';
+          const photo1 = appData.photo_1_url || appData.photo1_url || appData.photo1Url || appData.photoUrl1 || '';
+          const photo2 = appData.photo_2_url || appData.photo2_url || appData.photo2Url || appData.photoUrl2 || '';
+
           return (
             <Card key={participant.id} className="overflow-hidden relative mx-0 rounded-lg h-[149px]">
               <CardContent className="p-0">
-                {/* Edit button - hide for past participants */}
-                {participant.admin_status !== 'past' && onEdit && (
+                {/* Date/Time badge - left top corner */}
+                {participant.created_at && (
+                  <Badge 
+                    variant="outline" 
+                    className="absolute top-0 left-0 z-20 text-xs rounded-none rounded-br-md font-normal bg-muted/90 border-border"
+                  >
+                    {new Date(participant.created_at).toLocaleDateString('en-GB', { 
+                      day: 'numeric', 
+                      month: 'short' 
+                    })} {new Date(participant.created_at).toLocaleTimeString('en-GB', { 
+                      hour: '2-digit', 
+                      minute: '2-digit',
+                      hour12: false 
+                    })}
+                  </Badge>
+                )}
+
+                {/* Edit button in bottom left corner */}
+                {onEdit && (
                   <Button
                     size="sm"
                     variant="outline"
@@ -272,220 +294,145 @@ export function AdminPastWeekTab({
                     <Edit className="w-4 h-4" />
                   </Button>
                 )}
-
-                {/* Desktop layout */}
-                <div className="hidden md:flex md:overflow-visible">
-                  {/* Column 1: Photos (25ch) */}
-                  <div className="w-[25ch] flex-shrink-0 p-0">
-                    <div className="flex gap-px">
-                      {(participantProfile?.photo_1_url || appData.photo1_url || appData.photo_1_url) && (
-                        <div className="w-full">
-                          <img
-                            src={participantProfile?.photo_1_url || appData.photo1_url || appData.photo_1_url}
-                            alt="Portrait"
-                            className="w-full h-36 object-contain cursor-pointer hover:opacity-90 transition-opacity"
-                            onClick={() => onViewPhotos([
-                              participantProfile?.photo_1_url || appData.photo1_url || appData.photo_1_url,
-                              participantProfile?.photo_2_url || appData.photo2_url || appData.photo_2_url
-                            ].filter(Boolean), 0, participantName)}
-                          />
-                        </div>
-                      )}
-                      {(participantProfile?.photo_2_url || appData.photo2_url || appData.photo_2_url) && (
-                        <div className="w-full">
-                          <img 
-                            src={participantProfile?.photo_2_url || appData.photo2_url || appData.photo_2_url} 
-                            alt="Full length"
-                            className="w-full h-36 object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                            onClick={() => onViewPhotos([
-                              participantProfile?.photo_1_url || appData.photo1_url || appData.photo_1_url,
-                              participantProfile?.photo_2_url || appData.photo2_url || appData.photo_2_url
-                            ].filter(Boolean), 1, participantName)}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Column 2: Information (25ch) */}
-                  <div className="w-[25ch] flex-shrink-0 p-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Avatar className="h-6 w-6 flex-shrink-0">
-                        <AvatarImage src={participantProfile?.photo_1_url || appData.photo1_url || appData.photo_1_url || participantProfile?.avatar_url || ''} />
-                        <AvatarFallback className="text-xs">
-                          {appData.first_name?.charAt(0) || 'U'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="text-sm font-semibold whitespace-nowrap flex items-center gap-1">
-                        {isWinner && <span className="text-yellow-500">🏆</span>}
-                        {participant.final_rank > 1 && <span className="text-slate-500">🥈</span>}
-                        {appData.first_name} {appData.last_name} {appData.birth_year ? new Date().getFullYear() - parseInt(appData.birth_year) : ''}
-                      </span>
-                    </div>
-                    
-                    <div 
-                      className="text-xs text-muted-foreground mb-1 cursor-pointer hover:text-foreground transition-colors"
-                      onClick={() => {
-                        const newExpanded = new Set(expandedDesktopItems);
-                        if (expandedDesktopItems.has(participant.id)) {
-                          newExpanded.delete(participant.id);
-                        } else {
-                          newExpanded.add(participant.id);
-                        }
-                        setExpandedDesktopItems(newExpanded);
-                      }}
-                    >
-                      {appData.city} {appData.state} {appData.country}
-                    </div>
-                    
-                    {/* Expanded information */}
-                    {expandedDesktopItems.has(participant.id) && (
-                      <div className="text-xs text-muted-foreground mb-1">
-                        {appData.weight_kg}kg • {appData.height_cm}cm • {appData.gender} • {appData.birth_year} • {appData.marital_status} • {appData.has_children ? 'Has children' : 'No children'}
+                
+                {/* Desktop/Tablet layout - same style as new applications */}
+                <div className="hidden md:flex h-[149px]">
+                  {/* Photos section - Fixed width */}
+                  <div className="flex gap-px w-[200px] flex-shrink-0 h-[149px]">
+                    {photo1 && (
+                      <div className="w-[100px] h-[149px] flex-shrink-0 relative overflow-hidden">
+                        <img 
+                          src={photo1} 
+                          alt="Portrait" 
+                          className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                          onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 0, participantName)}
+                        />
                       </div>
                     )}
+                    {photo2 && (
+                      <div className="w-[100px] h-[149px] flex-shrink-0 relative overflow-hidden">
+                        <img 
+                          src={photo2} 
+                          alt="Full length" 
+                          className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                          onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 1, participantName)}
+                        />
+                      </div>
+                    )}
+                    {!photo2 && (
+                      <div className="w-[100px] h-[149px] flex-shrink-0 bg-muted flex items-center justify-center border border-border overflow-hidden">
+                        <div className="text-center text-muted-foreground">
+                          <p className="text-xs font-medium">No Photo 2</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
 
-                    {/* Rating and Votes */}
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="flex items-center gap-1">
-                        <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
-                        <span className="text-xs font-semibold">
-                          {Number(participant.average_rating || 0).toFixed(1)}
+                  {/* Info section - same as new applications */}
+                  <div className="flex-1 p-2 flex flex-col justify-between overflow-hidden">
+                    <div>
+                      <div className="flex items-center gap-1 mb-0.5">
+                        <Avatar className="h-5 w-5 flex-shrink-0">
+                          <AvatarImage src={photo1 || ''} />
+                          <AvatarFallback className="text-[10px]">
+                            {firstName?.charAt(0) || 'U'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-xs font-semibold flex items-center gap-1">
+                          {isWinner && <span className="text-yellow-500">🏆</span>}
+                          {participant.final_rank > 1 && <span className="text-slate-500">🥈</span>}
+                          {firstName} {lastName} {appData.birth_year ? new Date().getFullYear() - parseInt(appData.birth_year) : ''}
                         </span>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <Heart className="h-3 w-3 text-pink-500 fill-pink-500" />
-                        <span className="text-xs font-semibold">
-                          {participant.total_votes || 0}
-                        </span>
+                      <div className="text-[10px] text-muted-foreground mb-1">
+                        <span>{appData.city}, {appData.country}</span>
                       </div>
-                    </div>
 
-                    {/* Email */}
-                    <div className="text-xs text-muted-foreground mb-1">
-                      {participantProfile?.email && (
-                        <div className="flex items-center gap-1">
-                          <span 
-                            className="cursor-pointer" 
-                            title={participantProfile.email}
-                          >
-                            {participantProfile.email.length > 25 ? `${participantProfile.email.substring(0, 25)}...` : participantProfile.email}
+                      {/* Rating and Votes */}
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="flex items-center gap-0.5">
+                          <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                          <span className="text-[10px] font-semibold">
+                            {Number(participant.average_rating || 0).toFixed(1)}
                           </span>
-                          <Copy 
-                            className="h-3 w-3 cursor-pointer hover:text-foreground" 
-                            onClick={() => navigator.clipboard.writeText(participantProfile.email)}
-                          />
                         </div>
-                      )}
-                    </div>
-
-                    {/* Phone */}
-                    <div className="text-xs text-muted-foreground mb-3">
-                      <div className="flex items-center gap-2">
-                        {(() => {
-                          const phone = appData.phone?.country && appData.phone?.number 
-                            ? `${appData.phone.country} ${appData.phone.number}` 
-                            : 'Not provided';
-                          return <span>{phone}</span>;
-                        })()}
-                        {appData.facebook_url && (
-                          <a
-                            href={appData.facebook_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline"
-                          >
-                            FB
-                          </a>
-                        )}
+                        <div className="flex items-center gap-0.5">
+                          <Heart className="h-3 w-3 text-pink-500 fill-pink-500" />
+                          <span className="text-[10px] font-semibold">
+                            {participant.total_votes || 0}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-              
-                  {/* Column 3: Winner video button */}
-                  <div className="w-[40ch] flex-shrink-0 p-2 flex items-center justify-center">
-                    {isWinner && onOpenWinnerModal && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-12 w-12 p-0 hover:bg-primary/10"
-                        onClick={() => onOpenWinnerModal(participant.id, participant.user_id, participantName)}
-                        title="Управление видео и контентом победительницы"
-                      >
-                        <Video className="h-8 w-8 text-yellow-600" />
-                      </Button>
-                    )}
-                  </div>
 
-                  {/* Column 4: Status and actions (20ch) */}
-                  <div className="w-[20ch] flex-shrink-0 p-4 flex flex-col justify-between">
-                    <div className="text-xs text-muted-foreground mb-2 space-y-2">
-                      {/* Status selector */}
-                      <div>
-                        <div className="font-semibold mb-1">Status:</div>
-                        <Select 
-                          value={pendingPastChanges[participant.id]?.admin_status ?? participant.admin_status ?? 'past'}
-                          onValueChange={(newStatus) => {
+                    {/* Status and Week Interval Dropdowns */}
+                    <div className="flex gap-1">
+                      <div className="flex-1">
+                        <Select
+                          value={pendingPastChanges[participant.id]?.admin_status || participant.admin_status}
+                          onValueChange={(value) => {
                             setPendingPastChanges(prev => ({
                               ...prev,
-                              [participant.id]: {
+                              [participant.id]: { 
                                 ...prev[participant.id],
-                                admin_status: newStatus
+                                admin_status: value as any
                               }
                             }));
                           }}
                         >
-                          <SelectTrigger className={`w-full h-6 text-xs ${getStatusBackgroundColor(pendingPastChanges[participant.id]?.admin_status ?? participant.admin_status ?? 'past')}`}>
+                          <SelectTrigger className={`w-full h-6 text-[10px] ${getStatusBackgroundColor(pendingPastChanges[participant.id]?.admin_status || participant.admin_status)}`}>
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                          <SelectContent className="z-[9999]">
                             <SelectItem value="pending">Pending</SelectItem>
                             <SelectItem value="rejected">Rejected</SelectItem>
+                            <SelectItem value="approved">Approved</SelectItem>
                             <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                            <SelectItem value="this week">This Week</SelectItem>
                             <SelectItem value="next week">Next Week</SelectItem>
                             <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                            <SelectItem value="this week">This Week</SelectItem>
                             <SelectItem value="past">Past</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
-                      
-                      {/* Week interval selector */}
-                      <div>
-                        <div className="font-semibold mb-1">Week Interval:</div>
-                        <Select 
-                          value={pendingPastChanges[participant.id]?.week_interval ?? participant.week_interval ?? ''}
-                          onValueChange={(newInterval) => {
+
+                      <div className="flex-1">
+                        <Select
+                          value={pendingPastChanges[participant.id]?.week_interval || participant.week_interval || ''}
+                          onValueChange={(value) => {
                             setPendingPastChanges(prev => ({
                               ...prev,
-                              [participant.id]: {
+                              [participant.id]: { 
                                 ...prev[participant.id],
-                                week_interval: newInterval
+                                week_interval: value
                               }
                             }));
                           }}
                         >
-                          <SelectTrigger className="w-full h-6 text-xs">
-                            <SelectValue placeholder="Select week" />
+                          <SelectTrigger className="w-full h-6 text-[10px]">
+                            <SelectValue placeholder="Week" />
                           </SelectTrigger>
-                          <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                          <SelectContent className="z-[9999]">
                             {getAvailableWeekIntervals().map((interval) => (
                               <SelectItem key={interval.value} value={interval.value}>
                                 {interval.label}
                               </SelectItem>
-                            ))}</SelectContent>
+                            ))}
+                          </SelectContent>
                         </Select>
                       </div>
-                      
-                      {/* Save button */}
-                      <Button
-                        size="sm"
-                        className="w-full h-7 text-xs"
-                        disabled={!pendingPastChanges[participant.id] || updatingStatuses.has(participant.id)}
-                        onClick={() => handleSaveChanges(participant)}
-                      >
-                        {updatingStatuses.has(participant.id) ? 'Saving...' : 'Save'}
-                      </Button>
+
+                      {pendingPastChanges[participant.id] && (
+                        <Button
+                          size="sm"
+                          variant="default"
+                          onClick={() => handleSaveChanges(participant)}
+                          disabled={updatingStatuses.has(participant.id)}
+                          className="h-6 text-[10px] px-2"
+                        >
+                          {updatingStatuses.has(participant.id) ? '...' : 'Save'}
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>
