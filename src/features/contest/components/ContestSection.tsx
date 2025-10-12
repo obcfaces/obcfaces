@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useContestParticipants } from "../hooks/useContestParticipants";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getWeekRange } from "@/utils/dateFormatting";
+import { WeeklyCutoverNotice } from "./WeeklyCutoverNotice";
 
 import contestant1Face from "@/assets/contestant-1-face.jpg";
 import contestant1Full from "@/assets/contestant-1-full.jpg";
@@ -561,6 +562,11 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     <section className={`max-w-6xl mx-auto mb-2 rounded-lg shadow-lg shadow-foreground/15 ${title === "THIS WEEK" ? "bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800" : "bg-background"} pt-6 pb-0`}>
       <div className="mb-6 px-6">
         <div className="mb-4 text-center">
+          {title?.includes("THIS WEEK") && (
+            <div className="mb-2">
+              <WeeklyCutoverNotice variant="compact" />
+            </div>
+          )}
           <p className={`text-xs sm:text-sm ${title?.includes("THIS WEEK") ? "text-green-600 dark:text-green-400" : "text-muted-foreground/70"} italic mb-1`}>
             {subtitle}
           </p>
