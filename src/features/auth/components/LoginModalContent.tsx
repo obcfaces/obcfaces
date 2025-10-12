@@ -636,7 +636,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
                   const { error } = await supabase.auth.signInWithOAuth({
                     provider: 'google',
                     options: {
-                      redirectTo: `${window.location.origin}/auth/callback`, // CRITICAL: PKCE callback route
+                      redirectTo: `${window.location.origin}/auth`, // Unified auth route
                       queryParams: {
                         access_type: 'offline',
                         prompt: 'consent',
