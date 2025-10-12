@@ -252,15 +252,13 @@ export function AdminPastWeekTab({
         </div>
       ) : (
         paginatedParticipants.map((participant) => {
-          const participantProfile = profiles.find(p => p.id === participant.user_id);
           const appData = participant.application_data || {};
-          const participantName = `${appData.first_name} ${appData.last_name}`;
-          const isWinner = participant.final_rank === 1;
-
           const firstName = appData.first_name || appData.firstName || '';
           const lastName = appData.last_name || appData.lastName || '';
           const photo1 = appData.photo_1_url || appData.photo1_url || appData.photo1Url || appData.photoUrl1 || '';
           const photo2 = appData.photo_2_url || appData.photo2_url || appData.photo2Url || appData.photoUrl2 || '';
+          const participantName = `${firstName} ${lastName}`;
+          const isWinner = participant.final_rank === 1;
 
           return (
             <Card key={participant.id} className="overflow-hidden relative mx-0 rounded-lg h-[149px]">
@@ -295,7 +293,7 @@ export function AdminPastWeekTab({
                   </Button>
                 )}
                 
-                {/* Desktop/Tablet layout - same style as new applications */}
+                {/* Desktop/Tablet layout */}
                 <div className="hidden md:flex h-[149px]">
                   {/* Photos section - Fixed width */}
                   <div className="flex gap-px w-[200px] flex-shrink-0 h-[149px]">
@@ -328,7 +326,7 @@ export function AdminPastWeekTab({
                     )}
                   </div>
 
-                  {/* Info section - same as new applications */}
+                  {/* Info section */}
                   <div className="flex-1 p-2 flex flex-col justify-between overflow-hidden">
                     <div>
                       <div className="flex items-center gap-1 mb-0.5">
@@ -437,122 +435,99 @@ export function AdminPastWeekTab({
                   </div>
                 </div>
 
-                {/* Mobile layout - same as desktop but compact */}
-                <div className="md:hidden flex h-full">
-                  <div className="flex flex-col w-full">
-                    {/* Top Row: Avatar and Name */}
-                    <div className="flex items-center p-2">
-                      <Avatar className="h-8 w-8 mr-2">
-                        <AvatarImage src={participantProfile?.photo_1_url || appData.photo1_url || appData.photo_1_url || participantProfile?.avatar_url || ''} />
-                        <AvatarFallback className="text-xs">
-                          {appData.first_name?.charAt(0) || 'U'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="text-sm font-semibold">
-                        {isWinner && <span className="text-yellow-500">🏆</span>}
-                        {participant.final_rank > 1 && <span className="text-slate-500">🥈</span>}
-                        {appData.first_name} {appData.last_name}
+                {/* Mobile layout */}
+                <div className="md:hidden flex h-[149px]">
+                  <div className="flex gap-px w-[200px] flex-shrink-0 h-[149px]">
+                    {photo1 && (
+                      <div className="w-[100px] h-[149px] flex-shrink-0">
+                        <img 
+                          src={photo1} 
+                          alt="Portrait" 
+                          className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                          onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 0, participantName)}
+                        />
+                      </div>
+                    )}
+                    {photo2 && (
+                      <div className="w-[100px] h-[149px] flex-shrink-0">
+                        <img 
+                          src={photo2} 
+                          alt="Full length" 
+                          className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                          onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 1, participantName)}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex-1 p-2 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center gap-1 mb-0.5">
+                        <Avatar className="h-5 w-5">
+                          <AvatarImage src={photo1 || ''} />
+                          <AvatarFallback className="text-[10px]">
+                            {firstName?.charAt(0) || 'U'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-xs font-semibold flex items-center gap-1">
+                          {isWinner && <span className="text-yellow-500">🏆</span>}
+                          {firstName} {lastName}
+                        </span>
+                      </div>
+                      <div className="text-[10px] text-muted-foreground">
+                        <span>{appData.city}, {appData.country}</span>
                       </div>
                     </div>
 
-                    {/* Middle Row: Photos */}
-                    <div className="flex overflow-x-auto p-1">
-                      {(participantProfile?.photo_1_url || appData.photo1_url || appData.photo_1_url) && (
-                        <img
-                          src={participantProfile?.photo_1_url || appData.photo1_url || appData.photo_1_url}
-                          alt="Portrait"
-                          className="w-24 h-24 object-contain mr-1 cursor-pointer hover:opacity-90 transition-opacity"
-                          onClick={() => onViewPhotos([
-                            participantProfile?.photo_1_url || appData.photo1_url || appData.photo_1_url,
-                            participantProfile?.photo_2_url || appData.photo2_url || appData.photo_2_url
-                          ].filter(Boolean), 0, participantName)}
-                        />
-                      )}
-                      {(participantProfile?.photo_2_url || appData.photo2_url || appData.photo_2_url) && (
-                        <img
-                          src={participantProfile?.photo_2_url || appData.photo2_url || appData.photo_2_url}
-                          alt="Full length"
-                          className="w-24 h-24 object-cover mr-1 cursor-pointer hover:opacity-90 transition-opacity"
-                          onClick={() => onViewPhotos([
-                            participantProfile?.photo_1_url || appData.photo1_url || appData.photo_1_url,
-                            participantProfile?.photo_2_url || appData.photo2_url || appData.photo_2_url
-                          ].filter(Boolean), 1, participantName)}
-                        />
-                      )}
-                    </div>
-
-                    {/* Bottom Row: Status and Actions */}
-                    <div className="p-2 space-y-2">
-                      <div className="text-xs text-muted-foreground">
-                        {appData.city}, {appData.state}, {appData.country}
-                      </div>
-
-                      {/* Status selector */}
-                      <div>
-                        <div className="font-semibold mb-1 text-xs">Status:</div>
-                        <Select
-                          value={pendingPastChanges[participant.id]?.admin_status ?? participant.admin_status ?? 'past'}
-                          onValueChange={(newStatus) => {
-                            setPendingPastChanges(prev => ({
-                              ...prev,
-                              [participant.id]: {
-                                ...prev[participant.id],
-                                admin_status: newStatus
-                              }
-                            }));
-                          }}
-                        >
-                          <SelectTrigger className={`w-full h-6 text-xs ${getStatusBackgroundColor(pendingPastChanges[participant.id]?.admin_status ?? participant.admin_status ?? 'past')}`}>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                            <SelectItem value="pending">Pending</SelectItem>
-                            <SelectItem value="rejected">Rejected</SelectItem>
-                            <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                            <SelectItem value="this week">This Week</SelectItem>
-                            <SelectItem value="next week">Next Week</SelectItem>
-                            <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                            <SelectItem value="past">Past</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {/* Week interval selector */}
-                      <div>
-                        <div className="font-semibold mb-1 text-xs">Week Interval:</div>
-                        <Select
-                          value={pendingPastChanges[participant.id]?.week_interval ?? participant.week_interval ?? ''}
-                          onValueChange={(newInterval) => {
-                            setPendingPastChanges(prev => ({
-                              ...prev,
-                              [participant.id]: {
-                                ...prev[participant.id],
-                                week_interval: newInterval
-                              }
-                            }));
-                          }}
-                        >
-                          <SelectTrigger className="w-full h-6 text-xs">
-                            <SelectValue placeholder="Select week" />
-                          </SelectTrigger>
-                          <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                            {getAvailableWeekIntervals().map((interval) => (
-                              <SelectItem key={interval.value} value={interval.value}>
-                                {interval.label}
-                              </SelectItem>
-                            ))}</SelectContent>
-                        </Select>
-                      </div>
-
-                      {/* Save button */}
-                      <Button
-                        size="sm"
-                        className="w-full h-7 text-xs"
-                        disabled={!pendingPastChanges[participant.id] || updatingStatuses.has(participant.id)}
-                        onClick={() => handleSaveChanges(participant)}
+                    <div className="flex gap-1">
+                      <Select
+                        value={pendingPastChanges[participant.id]?.admin_status || participant.admin_status}
+                        onValueChange={(value) => {
+                          setPendingPastChanges(prev => ({
+                            ...prev,
+                            [participant.id]: { 
+                              ...prev[participant.id],
+                              admin_status: value as any
+                            }
+                          }));
+                        }}
                       >
-                        {updatingStatuses.has(participant.id) ? 'Saving...' : 'Save'}
-                      </Button>
+                        <SelectTrigger className={`w-full h-6 text-[10px] ${getStatusBackgroundColor(pendingPastChanges[participant.id]?.admin_status || participant.admin_status)}`}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="z-[9999]">
+                          <SelectItem value="pending">Pending</SelectItem>
+                          <SelectItem value="rejected">Rejected</SelectItem>
+                          <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                          <SelectItem value="next week">Next Week</SelectItem>
+                          <SelectItem value="this week">This Week</SelectItem>
+                          <SelectItem value="past">Past</SelectItem>
+                        </SelectContent>
+                      </Select>
+
+                      <Select
+                        value={pendingPastChanges[participant.id]?.week_interval || participant.week_interval || ''}
+                        onValueChange={(value) => {
+                          setPendingPastChanges(prev => ({
+                            ...prev,
+                            [participant.id]: { 
+                              ...prev[participant.id],
+                              week_interval: value
+                            }
+                          }));
+                        }}
+                      >
+                        <SelectTrigger className="w-full h-6 text-[10px]">
+                          <SelectValue placeholder="Week" />
+                        </SelectTrigger>
+                        <SelectContent className="z-[9999]">
+                          {getAvailableWeekIntervals().map((interval) => (
+                            <SelectItem key={interval.value} value={interval.value}>
+                              {interval.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 </div>
