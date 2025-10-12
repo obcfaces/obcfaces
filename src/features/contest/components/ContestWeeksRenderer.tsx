@@ -57,10 +57,6 @@ export const ContestWeeksRenderer = ({
     <>
       <NextWeekSection viewMode={viewMode} countryCode={countryCode} />
       
-      <div className="max-w-6xl mx-auto px-4 mb-4">
-        <WeeklyCutoverNotice />
-      </div>
-      
       <section className="max-w-6xl mx-auto pt-2 mb-1 sm:mb-3 bg-background rounded-lg shadow-sm shadow-foreground/10">
         <ContestSection
           title={t("THIS WEEK")}
