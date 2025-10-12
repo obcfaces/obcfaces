@@ -8,9 +8,6 @@ import { useLanguage, languages } from "@/contexts/LanguageContext";
 import { useTranslation } from "@/hooks/useTranslation";
 import type { Category } from "@/features/contest/components/ContestFilters";
 import { useAdminStatus } from "@/hooks/useAdminStatus";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { seedMissingTranslations, triggerAutoTranslate } from "@/utils/seedTranslations";
 
 const Index = () => {
   const [searchParams] = useSearchParams();
@@ -36,7 +33,6 @@ const Index = () => {
     return (param === "full" || param === "compact") ? param : "compact";
   });
   
-  const [isTranslating, setIsTranslating] = useState(false);
   const [activeSection, setActiveSection] = useState("Contest");
   const [category, setCategory] = useState<"" | Category>(() => {
     return (searchParams.get("category") as "" | Category) || "";
@@ -81,28 +77,6 @@ const Index = () => {
   const handleCategoryChange = (newCategory: "" | Category) => {
     setCategory(newCategory);
   };
-  
-  // Admin function to seed and translate
-  const handleSeedAndTranslate = async () => {
-    setIsTranslating(true);
-    try {
-      toast.info('Seeding missing translations...');
-      await seedMissingTranslations('es');
-      
-      toast.info('Starting auto-translate...');
-      const result = await triggerAutoTranslate();
-      
-      toast.success(`✅ Translated ${result.translations_processed || 0} texts`);
-      
-      // Reload page to see translations
-      setTimeout(() => window.location.reload(), 1000);
-    } catch (error) {
-      console.error('Translation error:', error);
-      toast.error('Translation failed');
-    } finally {
-      setIsTranslating(false);
-    }
-  };
 
   
   console.log('Index component rendering, viewMode:', viewMode);
@@ -122,25 +96,6 @@ const Index = () => {
       {/* Content area that changes based on active section */}
       {activeSection === "Contest" && (
         <>
-          {/* Admin translation button */}
-          {isAdmin && (
-            <div className="max-w-6xl mx-auto px-6 pt-6">
-              <div className="bg-muted p-4 rounded-lg flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-semibold">Translate Page to Spanish</p>
-                  <p className="text-xs text-muted-foreground">Seeds missing translations and runs auto-translate</p>
-                </div>
-                <Button 
-                  onClick={handleSeedAndTranslate}
-                  disabled={isTranslating}
-                  size="sm"
-                >
-                  {isTranslating ? 'Translating...' : '🌐 Translate Now'}
-                </Button>
-              </div>
-            </div>
-          )}
-          
           <div className="max-w-6xl mx-auto px-6 pt-6 pb-6 rounded-lg shadow-lg shadow-foreground/15">
             <ContestFilters
               country={country}

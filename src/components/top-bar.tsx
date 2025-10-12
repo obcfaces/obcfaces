@@ -5,11 +5,38 @@ import GlobalSearch from "@/components/global-search";
 import LanguageSelector from "@/components/language-selector";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { useUnreadLikes } from "@/hooks/useUnreadLikes";
+import { useAdminStatus } from "@/hooks/useAdminStatus";
+import { Button } from "@/components/ui/button";
+import { seedMissingTranslations } from "@/utils/seedTranslations";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useState } from "react";
 
 const TopBar = () => {
   const { unreadCount } = useUnreadMessages();
   const { unreadLikesCount } = useUnreadLikes();
+  const { isAdmin } = useAdminStatus();
+  const [isTranslating, setIsTranslating] = useState(false);
   console.log('TopBar: unreadCount =', unreadCount, 'unreadLikesCount =', unreadLikesCount);
+
+  const handleSeedAndTranslate = async () => {
+    setIsTranslating(true);
+    try {
+      await seedMissingTranslations('es');
+      const { error } = await supabase.functions.invoke('auto-translate', {
+        body: { sourceLanguage: 'en', targetLanguage: 'es' }
+      });
+      
+      if (error) throw error;
+      toast.success('Translation completed! Reloading page...');
+      setTimeout(() => window.location.reload(), 1500);
+    } catch (error) {
+      console.error('Translation error:', error);
+      toast.error('Translation failed');
+    } finally {
+      setIsTranslating(false);
+    }
+  };
 
   return (
     <header role="banner" className="w-full bg-background border-b">
@@ -29,6 +56,20 @@ const TopBar = () => {
         
         <div className="flex items-center gap-1">
           <LanguageSelector />
+          
+          {/* Admin-only Translate button */}
+          {isAdmin && (
+            <Button
+              onClick={handleSeedAndTranslate}
+              disabled={isTranslating}
+              variant="ghost"
+              size="icon"
+              className="h-10 w-10"
+              title="Seed and translate"
+            >
+              T
+            </Button>
+          )}
           
           {/* Likes Icon with Unread Count */}
           <Link
