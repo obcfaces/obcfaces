@@ -141,6 +141,25 @@ export function AdminPastWeekTab({
   // Show all filtered participants (no pagination)
   const paginatedParticipants = filteredParticipants;
 
+  // Get available week intervals from participants
+  const availableWeekIntervals = useMemo(() => {
+    const intervals = new Set<string>();
+    participants
+      .filter(p => p.admin_status === 'past' && p.week_interval)
+      .forEach(p => intervals.add(p.week_interval!));
+    
+    const sortedIntervals = Array.from(intervals).sort((a, b) => {
+      // Sort by date descending (newest first)
+      return b.localeCompare(a);
+    });
+    
+    return sortedIntervals.map(interval => ({
+      value: interval,
+      label: interval,
+      count: participants.filter(p => p.admin_status === 'past' && p.week_interval === interval).length
+    }));
+  }, [participants]);
+
   // Calculate filter counts
   const filterCounts = useMemo(() => {
     return getDynamicPastWeekFilters.map((filter: any) => {
@@ -201,21 +220,11 @@ export function AdminPastWeekTab({
         </div>
       </div>
 
-      {/* Week Interval Filter Buttons - Specific 4 weeks from database */}
+      {/* Week Interval Filter Buttons - Dynamic from database */}
       <div className="mt-4">
         <div className="flex gap-2 flex-wrap">
-          {/* Specific 4 week intervals in order */}
-          {[
-            { value: '06/10-12/10/25', label: '06/10-12/10/25' },
-            { value: '29/09-05/10/25', label: '29/09-05/10/25' },
-            { value: '22/09-28/09/25', label: '22/09-28/09/25' },
-            { value: '15/09-21/09/25', label: '15/09-21/09/25' }
-          ].map((interval) => {
-            const participantsInWeek = participants.filter(p => 
-              p.admin_status === 'past' && p.week_interval === interval.value
-            );
-            const count = participantsInWeek.length;
-            
+          {/* Available week intervals from database */}
+          {availableWeekIntervals.map((interval) => {
             return (
               <Button
                 key={interval.value}
@@ -226,7 +235,7 @@ export function AdminPastWeekTab({
               >
                 {interval.label}
                 <Badge variant="secondary" className="ml-1 px-1.5 py-0.5 text-xs">
-                  {count}
+                  {interval.count}
                 </Badge>
               </Button>
             );
@@ -411,7 +420,7 @@ export function AdminPastWeekTab({
                             <SelectValue placeholder="Week" />
                           </SelectTrigger>
                           <SelectContent className="z-[9999]">
-                            {getAvailableWeekIntervals().map((interval) => (
+                            {availableWeekIntervals.map((interval) => (
                               <SelectItem key={interval.value} value={interval.value}>
                                 {interval.label}
                               </SelectItem>
@@ -521,7 +530,7 @@ export function AdminPastWeekTab({
                           <SelectValue placeholder="Week" />
                         </SelectTrigger>
                         <SelectContent className="z-[9999]">
-                          {getAvailableWeekIntervals().map((interval) => (
+                          {availableWeekIntervals.map((interval) => (
                             <SelectItem key={interval.value} value={interval.value}>
                               {interval.label}
                             </SelectItem>
