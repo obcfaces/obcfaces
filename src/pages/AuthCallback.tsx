@@ -67,7 +67,7 @@ const AuthCallback = () => {
 
         // Create/update profile for OAuth user
         try {
-          await supabase
+          const { error: profileError } = await supabase
             .from("profiles")
             .upsert({
               id: user.id,
@@ -76,19 +76,29 @@ const AuthCallback = () => {
               avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
               email_verified: true,
               provider_data: user.user_metadata
-            }, { onConflict: "id" });
+            }, { 
+              onConflict: "id",
+              ignoreDuplicates: false 
+            });
           
-          console.log('✅ Profile created/updated');
+          if (profileError) {
+            console.warn('⚠️ Profile upsert warning:', profileError);
+            // Don't fail the login if profile update fails
+          } else {
+            console.log('✅ Profile created/updated');
+          }
         } catch (profileErr) {
-          console.warn('⚠️ Profile error:', profileErr);
+          console.warn('⚠️ Profile error (non-critical):', profileErr);
+          // Continue with login even if profile update fails
         }
 
         // CRITICAL: Log fingerprint and IP data for OAuth user
         try {
-          const { getDeviceFingerprint } = await import('@/utils/fingerprint');
+          const { getDeviceFingerprint, getCurrentFingerprint } = await import('@/utils/fingerprint');
           
           // Get fingerprint data
           const fingerprintData = await getDeviceFingerprint();
+          const visitorId = await getCurrentFingerprint();
           
           // Get IP address
           const ipResponse = await fetch('https://api.ipify.org?format=json');
@@ -98,10 +108,6 @@ const AuthCallback = () => {
           const loginMethod = user.app_metadata?.provider || 'oauth';
           
           console.log('📱 Saving OAuth user fingerprint:', { userId: user.id, loginMethod, ip: ipData.ip });
-          
-          // Get visitor ID from fingerprint
-          const { getCurrentFingerprint } = await import('@/utils/fingerprint');
-          const visitorId = await getCurrentFingerprint();
           
           // Call edge function to log everything
           const { error: logError } = await supabase.functions.invoke('auth-login-tracker', {
@@ -116,12 +122,13 @@ const AuthCallback = () => {
           });
           
           if (logError) {
-            console.error('Error logging OAuth fingerprint:', logError);
+            console.warn('⚠️ Error logging OAuth fingerprint (non-critical):', logError);
           } else {
             console.log('✅ OAuth fingerprint logged successfully');
           }
         } catch (fpError) {
-          console.error('Error saving OAuth fingerprint:', fpError);
+          console.warn('⚠️ Error saving OAuth fingerprint (non-critical):', fpError);
+          // Continue with login even if fingerprint logging fails
         }
 
         if (!mounted) return;
