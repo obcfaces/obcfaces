@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
-// SIMPLIFIED OAuth callback handler
 const AuthCallbackHandler = () => {
   const navigate = useNavigate();
   const handledRef = useRef<string | null>(null);
@@ -11,10 +10,7 @@ const AuthCallbackHandler = () => {
   useEffect(() => {
     const href = window.location.href;
     
-    // Only process URLs with auth code
     if (!href.includes("code=")) return;
-    
-    // Prevent duplicate processing
     if (handledRef.current === href) return;
     handledRef.current = href;
 
@@ -22,9 +18,8 @@ const AuthCallbackHandler = () => {
 
     (async () => {
       try {
-        console.log('🔐 Processing OAuth callback...');
+        console.log('🔐 OAuth callback - exchanging code for session...');
         
-        // Exchange code for session - SAME AS EMAIL VERIFICATION
         const { data, error } = await supabase.auth.exchangeCodeForSession(href);
         if (cancelled) return;
         
@@ -45,23 +40,48 @@ const AuthCallbackHandler = () => {
           return;
         }
 
-        console.log('✅ OAuth successful, user:', data.session.user.id);
+        const user = data.session.user;
+        console.log('✅ OAuth successful, user:', user.id, 'email confirmed:', user.email_confirmed_at);
+
+        // CRITICAL: Create/update profile for OAuth user
+        try {
+          const { error: profileError } = await supabase
+            .from("profiles")
+            .upsert(
+              {
+                id: user.id,
+                first_name: user.user_metadata?.first_name || user.user_metadata?.name?.split(' ')[0] || null,
+                display_name: user.user_metadata?.full_name || user.user_metadata?.name || null,
+                avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
+                email_verified: true, // OAuth users are already verified by provider
+                provider_data: user.user_metadata
+              },
+              { onConflict: "id" }
+            );
+          
+          if (profileError) {
+            console.warn('⚠️ Profile upsert warning:', profileError);
+          } else {
+            console.log('✅ Profile created/updated for OAuth user');
+          }
+        } catch (profileErr) {
+          console.error('❌ Profile creation error:', profileErr);
+        }
 
         // Clean URL
         const url = new URL(window.location.href);
         ["code", "type", "redirect_to", "next"].forEach((k) => url.searchParams.delete(k));
         window.history.replaceState({}, "", '/');
 
-        // Show success message
         toast({ 
           title: "Success!",
           description: "Successfully signed in!" 
         });
         
-        // Redirect to /account (SAME AS EMAIL VERIFICATION)
+        // Redirect to profile page after short delay
         setTimeout(() => {
-          navigate('/account', { replace: true });
-        }, 2000);
+          navigate(`/u/${user.id}`, { replace: true });
+        }, 1000);
 
       } catch (err) {
         console.error('❌ OAuth exception:', err);
