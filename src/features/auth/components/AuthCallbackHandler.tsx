@@ -121,11 +121,13 @@ const AuthCallbackHandler = () => {
 
         toast({ description: "Email confirmed. Welcome!" });
         
-        // Force navigation to account page if we're on the callback
+        // Navigate to account page after session is saved
+        // Increased delay to ensure session is fully persisted to localStorage
         if (data.session?.user) {
+          console.log('✅ OAuth successful, redirecting to account page for user:', data.session.user.id);
           setTimeout(() => {
             navigate('/account');
-          }, 1000);
+          }, 1500); // Increased from 1000ms to 1500ms
         }
       } catch (err) {
         console.error('Auth callback exception:', err);
