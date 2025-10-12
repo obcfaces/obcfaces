@@ -625,10 +625,18 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
                   setLoading(true);
                   setAuthError("");
                   
+                  // Determine the correct redirect URL
+                  const isProduction = window.location.hostname === 'obcface.com';
+                  const redirectUrl = isProduction 
+                    ? 'https://obcface.com/' 
+                    : `${window.location.origin}/`;
+                  
+                  console.log('🔐 Starting Google OAuth with redirect:', redirectUrl);
+                  
                   const { error } = await supabase.auth.signInWithOAuth({
                     provider: 'google',
                     options: {
-                      redirectTo: `${window.location.origin}/`,
+                      redirectTo: redirectUrl,
                       queryParams: {
                         access_type: 'offline',
                         prompt: 'select_account',
