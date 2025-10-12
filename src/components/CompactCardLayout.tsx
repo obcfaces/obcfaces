@@ -3,6 +3,9 @@ import { ThumbsUp, MessageCircle, Share2, ThumbsDown, Eye, Play } from "lucide-r
 import { Link } from "react-router-dom";
 import { cn, getCountryDisplayName } from "@/lib/utils";
 import { VotingOverlay } from "@/features/contest/components/VotingOverlay";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useTranslation } from "@/hooks/useTranslation";
+import { translateCountry, formatAgeWeightHeight } from "@/utils/dateTranslations";
 
 interface WinnerContent {
   payment_proof_url?: string;
@@ -104,6 +107,12 @@ export function CompactCardLayout({
   setUserRating,
   setIsEditing
 }: CompactCardLayoutProps) {
+  const { t } = useTranslation();
+  const { currentLanguage } = useLanguage();
+  
+  const translatedCountry = getCountryDisplayName(country); // Already uses translations
+  const ageWeightHeightText = formatAgeWeightHeight(age, weight, height, currentLanguage.code);
+  
   const hasWinnerContent = isWinner && winnerContent && (
     winnerContent.payment_proof_url || 
     winnerContent.testimonial_video_url || 
@@ -191,9 +200,9 @@ export function CompactCardLayout({
                    <div className="flex items-center gap-2">
                      <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">{profileId ? (<Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">{name}</Link>) : name}</h3>
                    </div>
-                   <div className="text-xs sm:text-sm text-muted-foreground font-normal">{age} yo · {weight} kg · {height} cm</div>
+                   <div className="text-xs sm:text-sm text-muted-foreground font-normal">{ageWeightHeightText}</div>
                    <div className="text-sm sm:text-base text-contest-blue truncate">
-                     {getCountryDisplayName(country)} · {city}
+                     {translatedCountry} · {city}
                    </div>
                 </div>
               )}
@@ -287,9 +296,9 @@ export function CompactCardLayout({
                    <div className="flex items-center gap-2">
                      <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">{profileId ? (<Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">{name}</Link>) : name}</h3>
                    </div>
-                   <div className="text-xs sm:text-sm text-muted-foreground font-normal">{age} yo · {weight} kg · {height} cm</div>
+                   <div className="text-xs sm:text-sm text-muted-foreground font-normal">{ageWeightHeightText}</div>
                    <div className="text-sm sm:text-base text-contest-blue truncate">
-                     {getCountryDisplayName(country)} · {city}
+                     {translatedCountry} · {city}
                    </div>
                 </div>
               )}
@@ -427,7 +436,7 @@ export function CompactCardLayout({
             <div className="flex-1 p-1 sm:p-2 md:p-3 bg-white overflow-auto">
               {winnerContent.testimonial_text ? (
                 <div className="text-xs italic text-gray-700 text-left">
-                  {winnerContent.testimonial_text}
+                  {t('winner.testimonial')}
                 </div>
               ) : (
                 <div className="w-full h-full bg-gray-50 rounded flex items-center justify-center text-xs text-gray-400">

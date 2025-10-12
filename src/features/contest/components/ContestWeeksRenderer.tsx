@@ -5,6 +5,8 @@ import { VirtualizedList } from "@/components/performance/VirtualizedList";
 import { useMemo } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { formatIntervalSync } from "../utils/formatInterval";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getWeekRange } from "@/utils/dateFormatting";
 
 interface ContestWeeksRendererProps {
   viewMode: 'compact' | 'full';
@@ -21,6 +23,7 @@ export const ContestWeeksRenderer = ({
   enableVirtualization = true
 }: ContestWeeksRendererProps) => {
   const { t } = useTranslation();
+  const { currentLanguage } = useLanguage();
   const { intervals: pastWeekIntervals } = usePastWeekIntervals(countryCode, timezone);
 
   // Prepare past week items for virtualization
@@ -56,7 +59,7 @@ export const ContestWeeksRenderer = ({
       <section className="max-w-6xl mx-auto pt-2 mb-1 sm:mb-3 bg-background rounded-lg shadow-sm shadow-foreground/10">
         <ContestSection
           title={t("THIS WEEK")}
-          subtitle="29 Sep - 05 Oct 2025"
+          subtitle={getWeekRange(0, currentLanguage.code)}
           description={t("Choose the winner")}
           isActive={true}
           noWrapTitle

@@ -1,0 +1,41 @@
+import { translateDateRange } from './dateTranslations';
+
+// Helper function to get week range dates with translations
+export const getWeekRange = (weeksOffset: number = 0, locale: string = 'en'): string => {
+  let dateRange = '';
+  
+  // Get the date range in English first
+  switch (weeksOffset) {
+    case 0:
+      dateRange = "29 Sep - 05 Oct 2025";
+      break;
+    case -1:
+      dateRange = "22 Sep - 28 Sep 2025";
+      break;
+    case -2:
+      dateRange = "15 Sep - 21 Sep 2025";
+      break;
+    case -3:
+      dateRange = "08 Sep - 14 Sep 2025";
+      break;
+    case -4:
+      dateRange = "01 Sep - 07 Sep 2025";
+      break;
+    case 1:
+      dateRange = "06 Oct - 12 Oct 2025";
+      break;
+    case 2:
+      dateRange = "13 Oct - 19 Oct 2025";
+      break;
+    default:
+      dateRange = "29 Sep - 05 Oct 2025";
+  }
+  
+  // Translate month abbreviations based on locale
+  return translateDateRange(dateRange, locale);
+};
+
+export const getNextWeekRange = (locale: string = 'en'): string => {
+  const dateRange = "06 Oct - 12 Oct 2025";
+  return translateDateRange(dateRange, locale);
+};
