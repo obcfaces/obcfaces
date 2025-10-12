@@ -1,7 +1,7 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { saveDeviceFingerprint, getDeviceFingerprint } from '@/utils/fingerprint';
 
 // Handles Supabase email confirmation / magic-link callbacks globally
@@ -9,6 +9,24 @@ const AuthCallbackHandler = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const handledRef = useRef<string | null>(null);
+  const [oauthCompleted, setOauthCompleted] = useState(false);
+
+  // Subscribe to auth state changes to handle OAuth completion properly
+  useEffect(() => {
+    if (!oauthCompleted) return;
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('🔐 Auth state change after OAuth:', event, session?.user?.id);
+      
+      if (event === 'SIGNED_IN' && session?.user) {
+        console.log('✅ Session confirmed in storage, redirecting to account page');
+        // Session is now confirmed to be in localStorage
+        navigate('/account');
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate, oauthCompleted]);
 
   useEffect(() => {
     const href = window.location.href;
@@ -121,13 +139,12 @@ const AuthCallbackHandler = () => {
 
         toast({ description: "Email confirmed. Welcome!" });
         
-        // Navigate to account page after session is saved
-        // Increased delay to ensure session is fully persisted to localStorage
+        // Set flag to trigger auth state listener
         if (data.session?.user) {
-          console.log('✅ OAuth successful, redirecting to account page for user:', data.session.user.id);
-          setTimeout(() => {
-            navigate('/account');
-          }, 1500); // Increased from 1000ms to 1500ms
+          console.log('✅ OAuth successful for user:', data.session.user.id);
+          console.log('⏳ Waiting for session to be saved to localStorage...');
+          setOauthCompleted(true);
+          // Auth state listener will handle the redirect once session is confirmed
         }
       } catch (err) {
         console.error('Auth callback exception:', err);
