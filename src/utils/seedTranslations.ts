@@ -68,6 +68,14 @@ export const MAIN_PAGE_TEXTS = [
   "Privacy Policy",
   "All rights reserved.",
   "Made with",
+  
+  // Week sections
+  "NEXT WEEK",
+  "THIS WEEK",
+  "Choose next week's finalists",
+  "Loading...",
+  "left",
+  "You've rated all cards in this block. New ones will appear next week.",
 ];
 
 export async function seedMissingTranslations(targetLang: string = 'es') {
