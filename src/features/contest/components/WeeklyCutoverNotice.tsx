@@ -53,9 +53,9 @@ export function WeeklyCutoverNotice({ variant = 'default' }: WeeklyCutoverNotice
 
   if (variant === 'compact') {
     return (
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Clock className="h-4 w-4" />
-        <span>Week ends in: <span className="font-medium text-foreground">{timeUntilCutover}</span></span>
+      <div className="flex items-center justify-center gap-2 text-sm text-foreground/80">
+        <span>⏰ Weekly contest ends in:</span>
+        <span className="font-medium text-foreground">{timeUntilCutover} (UTC)</span>
       </div>
     );
   }
