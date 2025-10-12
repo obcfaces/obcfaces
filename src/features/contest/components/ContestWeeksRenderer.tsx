@@ -7,7 +7,6 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { formatIntervalSync } from "../utils/formatInterval";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getWeekRange } from "@/utils/dateFormatting";
-import { WeeklyCutoverNotice } from "./WeeklyCutoverNotice";
 
 interface ContestWeeksRendererProps {
   viewMode: 'compact' | 'full';
@@ -58,9 +57,6 @@ export const ContestWeeksRenderer = ({
       <NextWeekSection viewMode={viewMode} countryCode={countryCode} />
       
       <section className="max-w-6xl mx-auto pt-2 mb-1 sm:mb-3 bg-background rounded-lg shadow-sm shadow-foreground/10">
-        <div className="px-4 pt-2">
-          <WeeklyCutoverNotice variant="compact" />
-        </div>
         <ContestSection
           title={t("THIS WEEK")}
           subtitle={getWeekRange(0, currentLanguage.code)}
