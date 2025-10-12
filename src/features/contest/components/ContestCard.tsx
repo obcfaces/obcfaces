@@ -925,34 +925,34 @@ export function ContestantCard({
         {/* Second row for winner cards only - show ONLY if winner content exists in database */}
         {isWinner && winnerContent && (weekOffset === 1 || weekOffset >= 2) && (
           <>
-            <div className="flex h-36 sm:h-40 md:h-44 relative gap-px">
-               {/* Payment photo - use winner content from database only */}
-               <div className="relative">
+            <div className="flex h-36 sm:h-40 md:h-44 relative">
+               {/* Payment photo - fixed width like face photo */}
+               <div className="relative w-24 sm:w-28 md:w-32 flex-shrink-0">
                  <img 
                    src={resolveAsset(winnerContent.payment_proof_url)} 
                    alt="Payment receipt"
-                   className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                   className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                    onClick={() => openModal(isWinner ? additionalPhotos.length + 2 : 2)}
                  />
                </div>
               
-               {/* Video - use winner content from database only */}
-               <div className="relative">
+               {/* Video - fixed width like full body photo */}
+               <div className="relative w-24 sm:w-28 md:w-32 flex-shrink-0">
                  <video 
                    src={resolveAsset(winnerContent.testimonial_video_url)}
-                   className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                   className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                    controls={false}
                    muted
                    onClick={() => openModal(isWinner ? additionalPhotos.length + 3 : 3)}
                  />
                </div>
               
-               {/* Testimonial text - use winner content from database only */}
-               <div className="flex-1 p-3 flex flex-col items-center justify-start max-h-32 overflow-y-auto scroll-smooth">
-                 <p className="text-sm text-gray-700 italic text-center mb-3">
+               {/* Testimonial text - takes remaining space with scroll */}
+               <div className="flex-1 p-2 sm:p-3 flex flex-col justify-start overflow-y-auto">
+                 <p className="text-xs sm:text-sm text-gray-700 italic text-left mb-2">
                    {winnerContent.testimonial_text}
                  </p>
-                 <p className="text-xs text-gray-600 font-bold italic self-end uppercase">{name}</p>
+                 <p className="text-xs text-gray-600 font-bold italic self-end uppercase mt-auto">{name}</p>
                </div>
             </div>
             
