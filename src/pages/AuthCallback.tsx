@@ -1,38 +1,29 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 
 const AuthCallback = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const [status, setStatus] = useState<'loading' | 'error'>('loading');
 
   useEffect(() => {
+    let mounted = true;
+
     const handleCallback = async () => {
       try {
-        const code = searchParams.get('code');
+        console.log('🔐 Auth callback - waiting for session...');
         
-        if (!code) {
-          console.error('❌ No authorization code in URL');
-          setStatus('error');
-          toast({
-            title: "Authentication Error",
-            description: "No authorization code received",
-            variant: "destructive"
-          });
-          navigate('/auth', { replace: true });
-          return;
-        }
-
-        console.log('🔐 Exchanging code for session...');
+        // Wait a bit for Supabase to process the hash
+        await new Promise(resolve => setTimeout(resolve, 500));
         
-        // CRITICAL: Exchange OAuth code for session
-        const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (!mounted) return;
         
         if (error) {
-          console.error('❌ Session exchange error:', error);
+          console.error('❌ Session error:', error);
           setStatus('error');
           toast({
             title: "Authentication Failed",
@@ -43,14 +34,14 @@ const AuthCallback = () => {
           return;
         }
 
-        if (!data.session?.user) {
-          console.error('❌ No session after exchange');
+        if (!session?.user) {
+          console.error('❌ No session found');
           setStatus('error');
           navigate('/auth', { replace: true });
           return;
         }
 
-        const user = data.session.user;
+        const user = session.user;
         console.log('✅ Session established for user:', user.id);
 
         // Create/update profile for OAuth user
@@ -71,28 +62,35 @@ const AuthCallback = () => {
           console.warn('⚠️ Profile error:', profileErr);
         }
 
+        if (!mounted) return;
+
         toast({
           title: "Success!",
           description: "Successfully signed in"
         });
 
-        // Get redirect destination
-        const next = searchParams.get('next') || `/u/${user.id}`;
-        
-        // Redirect after short delay
+        // Redirect to user profile
         setTimeout(() => {
-          navigate(next, { replace: true });
+          if (mounted) {
+            navigate(`/u/${user.id}`, { replace: true });
+          }
         }, 500);
 
       } catch (err) {
         console.error('❌ Auth callback exception:', err);
-        setStatus('error');
-        navigate('/auth', { replace: true });
+        if (mounted) {
+          setStatus('error');
+          navigate('/auth', { replace: true });
+        }
       }
     };
 
     handleCallback();
-  }, [navigate, searchParams]);
+
+    return () => {
+      mounted = false;
+    };
+  }, [navigate]);
 
   if (status === 'error') {
     return (
