@@ -918,47 +918,6 @@ export function ContestantCard({
             />
           )}
         </div>
-        
-        {/* Divider line between rows */}
-        {isWinner && <div className="border-t border-gray-400 w-full"></div>}
-        
-        {/* Second row for winner cards only - show ONLY if winner content exists in database */}
-        {isWinner && winnerContent && (weekOffset < 0) && (
-          <>
-            <div className="flex h-36 sm:h-40 md:h-44 relative">
-               {/* Payment photo - fixed width like face photo */}
-               <div className="relative w-24 sm:w-28 md:w-32 flex-shrink-0">
-                 <img 
-                   src={resolveAsset(winnerContent.payment_proof_url)} 
-                   alt="Payment receipt"
-                   className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                   onClick={() => openModal(isWinner ? additionalPhotos.length + 2 : 2)}
-                 />
-               </div>
-              
-               {/* Video - fixed width like full body photo */}
-               <div className="relative w-24 sm:w-28 md:w-32 flex-shrink-0">
-                 <video 
-                   src={resolveAsset(winnerContent.testimonial_video_url)}
-                   className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                   controls={false}
-                   muted
-                   onClick={() => openModal(isWinner ? additionalPhotos.length + 3 : 3)}
-                 />
-               </div>
-              
-               {/* Testimonial text - takes remaining space with scroll */}
-               <div className="flex-1 p-2 sm:p-3 flex flex-col justify-start overflow-y-auto">
-                 <p className="text-xs sm:text-sm text-gray-700 italic text-left mb-2">
-                   {winnerContent.testimonial_text}
-                 </p>
-                 <p className="text-xs text-gray-600 font-bold italic self-end uppercase mt-auto">{name}</p>
-               </div>
-            </div>
-            
-            {/* Winner cards end after second row - no extra content area */}
-          </>
-        )}
       </Card>
 
       <PhotoModal
