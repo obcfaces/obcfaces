@@ -112,11 +112,11 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       // Load participants for all users (authenticated and unauthenticated)
       let participantsData: any[] = [];
       
-      if (title === "THIS WEEK") {
+      if (title.includes("THIS WEEK") || weekOffset === 0) {
         console.log('Loading THIS WEEK participants');
         participantsData = await loadThisWeekParticipants();
         console.log('Loaded THIS WEEK participants:', participantsData.length);
-      } else if (title === "NEXT WEEK") {
+      } else if (title.includes("NEXT WEEK")) {
         console.log('Loading NEXT WEEK participants');
         participantsData = await loadNextWeekParticipants();
         console.log('Loaded NEXT WEEK participants:', participantsData.length);
@@ -157,34 +157,33 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     });
     
     return () => subscription.unsubscribe();
-  }, [title, weekInterval, countryCode]); // Add weekInterval and countryCode to dependencies
+  }, [weekOffset, weekInterval, countryCode]); // Use weekOffset instead of title to avoid re-renders on language change
 
 
-  // Load participants based on title
+  // Load participants based on weekOffset and weekInterval
   useEffect(() => {
-    console.log('ContestSection loadParticipants useEffect triggered for:', title, 'weekInterval:', weekInterval);
+    console.log('ContestSection loadParticipants useEffect triggered for weekOffset:', weekOffset, 'weekInterval:', weekInterval);
     const loadParticipants = async () => {
-      console.log('Starting loadParticipants for:', title, 'with weekInterval:', weekInterval);
+      console.log('Starting loadParticipants for weekOffset:', weekOffset, 'with weekInterval:', weekInterval);
       setIsLoading(true);
       
       // Reload participants data when weekInterval changes
       let participantsData: any[] = realContestants;
       
-      console.log(`📊 Checking condition for ${title}:`, {
-        includesWEEK: title.includes("WEEK"),
-        includesAGO: title.includes("AGO"),
+      console.log(`📊 Checking condition for weekOffset ${weekOffset}:`, {
         hasWeekInterval: !!weekInterval,
-        weekInterval
+        weekInterval,
+        isPastWeek: weekOffset < 0
       });
       
-      if (title.includes("WEEK") && title.includes("AGO") && weekInterval) {
-        console.log(`✅ Reloading participants for ${title} with interval ${weekInterval}`);
+      if (weekOffset < 0 && weekInterval) {
+        console.log(`✅ Reloading participants for past week (offset ${weekOffset}) with interval ${weekInterval}`);
         participantsData = await loadPastWeekParticipantsByInterval(weekInterval);
-        console.log(`✅ Reloaded ${title} participants:`, participantsData.length);
+        console.log(`✅ Reloaded past week participants:`, participantsData.length);
         setRealContestants(participantsData);
         setAdminParticipants(participantsData);
       } else {
-        console.log(`⚠️ Condition NOT met for ${title} - using existing realContestants`);
+        console.log(`⚠️ Condition NOT met for weekOffset ${weekOffset} - using existing realContestants`);
       }
       
       // Load user ratings if user is authenticated
@@ -222,7 +221,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     return () => {
       supabase.removeChannel(channel);
     };
-   }, [title, weekInterval, user, isAdmin, adminParticipants.length, realContestants.length]);
+   }, [weekOffset, weekInterval, user, isAdmin, adminParticipants.length, realContestants.length]);
 
   const handleRate = async (contestantId: number, rating: number) => {
     setVotes(prev => ({ ...prev, [contestantId]: rating }));
@@ -245,9 +244,9 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       userRatingsMapSize: Object.keys(userRatingsMap).length
     });
 
-    // For "THIS WEEK" section, show only admin participants if user is admin
-    if (title === "THIS WEEK") {
-      console.log('Processing THIS WEEK section');
+    // For "THIS WEEK" section (weekOffset === 0), show participants for all users
+    if (weekOffset === 0) {
+      console.log('Processing THIS WEEK section (weekOffset === 0)');
       
       // Process participants for all users (admin and non-admin)
       if (actualParticipants && actualParticipants.length > 0) {
@@ -341,9 +340,9 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       }
     }
 
-    // For "1 WEEK AGO" section, show participants for all users
-    if (title === "1 WEEK AGO") {
-      console.log('Processing 1 WEEK AGO section for all users');
+    // For past week sections (weekOffset < 0), show participants for all users
+    if (weekOffset === -1) {
+      console.log('Processing 1 WEEK AGO section (weekOffset === -1) for all users');
       
       // If there are participants, process them
       if (actualParticipants && actualParticipants.length > 0) {
@@ -408,9 +407,9 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       }
     }
 
-    // For any "X WEEKS AGO" sections, show participants for all users
-    if (title.includes("WEEK") && title.includes("AGO")) {
-      console.log(`Processing ${title} section for all users`);
+    // For any past week sections (weekOffset < 0), show participants for all users
+    if (weekOffset < 0 && weekOffset !== -1) {
+      console.log(`Processing past week section (weekOffset ${weekOffset}) for all users`);
       
       // If there are participants, process them
       if (actualParticipants && actualParticipants.length > 0) {
@@ -476,8 +475,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     }
     
     // Use real contestants from weekly contests if available for NEXT WEEK and any past weeks
-    if ((title === "NEXT WEEK" || (title.includes("WEEK") && title.includes("AGO"))) && actualParticipants.length > 0) {
-      console.log(`Using real contestants for ${title}:`, actualParticipants.length);
+    if ((title.includes("NEXT WEEK") || weekOffset < 0) && actualParticipants.length > 0) {
+      console.log(`Using real contestants for weekOffset ${weekOffset}:`, actualParticipants.length);
       const contestantsWithRatings = await Promise.all(
         actualParticipants.map(async (contestant) => {
           // Validate contestant data structure
