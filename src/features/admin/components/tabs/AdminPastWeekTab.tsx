@@ -105,12 +105,26 @@ export function AdminPastWeekTab({
 
   // Filter participants
   const filteredParticipants = useMemo(() => {
+    console.log('🔍 AdminPastWeekTab - Filtering participants');
+    console.log('📊 Total participants:', participants.length);
+    console.log('🎯 pastWeekIntervalFilter:', pastWeekIntervalFilter);
+    
     // Start with only 'past' status participants
     let filtered = participants.filter(p => p.admin_status === 'past');
+    console.log('📋 Past status participants:', filtered.length);
 
     // Apply week interval filter
     if (pastWeekIntervalFilter !== 'all') {
-      filtered = filtered.filter(p => p.week_interval === pastWeekIntervalFilter);
+      const beforeFilter = filtered.length;
+      filtered = filtered.filter(p => {
+        const matches = p.week_interval === pastWeekIntervalFilter;
+        if (matches) {
+          const appData = p.application_data || {};
+          console.log(`✓ Matched: ${appData.first_name} ${appData.last_name}, interval: ${p.week_interval}`);
+        }
+        return matches;
+      });
+      console.log(`🔽 After interval filter: ${filtered.length} (was ${beforeFilter})`);
     }
 
     // Sort by rating
