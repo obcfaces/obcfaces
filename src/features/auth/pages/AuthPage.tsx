@@ -83,6 +83,7 @@ const Auth = () => {
       <div className="w-full max-w-md bg-card rounded-lg border border-border shadow-lg p-8">
         <LoginModalContent 
           defaultMode={mode}
+          isStandalonePage={true}
           onAuthSuccess={() => {
             // Auth success will be handled by onAuthStateChange
           }}
