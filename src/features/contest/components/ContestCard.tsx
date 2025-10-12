@@ -923,7 +923,7 @@ export function ContestantCard({
         {isWinner && <div className="border-t border-gray-400 w-full"></div>}
         
         {/* Second row for winner cards only - show ONLY if winner content exists in database */}
-        {isWinner && winnerContent && (weekOffset === 1 || weekOffset >= 2) && (
+        {isWinner && winnerContent && (weekOffset < 0) && (
           <>
             <div className="flex h-36 sm:h-40 md:h-44 relative">
                {/* Payment photo - fixed width like face photo */}
