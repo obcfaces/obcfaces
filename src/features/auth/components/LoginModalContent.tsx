@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
-import { DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Eye, EyeOff, ChevronDown } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -21,9 +21,10 @@ interface LoginModalContentProps {
   onClose?: () => void;
   defaultMode?: "login" | "signup" | "forgot";
   onAuthSuccess?: () => void;
+  isStandalonePage?: boolean; // New prop to indicate if used on a standalone page
 }
 
-const LoginModalContent = ({ onClose, defaultMode = "login", onAuthSuccess }: LoginModalContentProps) => {
+const LoginModalContent = ({ onClose, defaultMode = "login", onAuthSuccess, isStandalonePage = false }: LoginModalContentProps) => {
   const [mode, setMode] = useState<"login" | "signup" | "forgot">(defaultMode);
   
   // Reset to default mode when modal opens
@@ -386,9 +387,12 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
   if (registrationSuccess && mode === "signup") {
     return (
       <>
-        <DialogHeader>
-          <DialogTitle>{getTitle()}</DialogTitle>
-        </DialogHeader>
+        {!isStandalonePage && (
+          <DialogHeader>
+            <DialogTitle>{getTitle()}</DialogTitle>
+          </DialogHeader>
+        )}
+        {isStandalonePage && <h2 className="text-2xl font-semibold mb-4">{getTitle()}</h2>}
         <div className="text-red-600 text-sm">
           Please check your email and click the confirmation link to activate your account.
         </div>
@@ -398,9 +402,12 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
 
   return (
     <>
-      <DialogHeader>
-        <DialogTitle>{getTitle()}</DialogTitle>
-      </DialogHeader>
+      {!isStandalonePage && (
+        <DialogHeader>
+          <DialogTitle>{getTitle()}</DialogTitle>
+        </DialogHeader>
+      )}
+      {isStandalonePage && <h2 className="text-2xl font-semibold mb-4">{getTitle()}</h2>}
       <form onSubmit={onSubmit} className="space-y-3">
         {authError && (
           <div className="text-destructive text-sm font-medium">
