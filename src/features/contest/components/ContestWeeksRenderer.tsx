@@ -42,6 +42,7 @@ export const ContestWeeksRenderer = ({
             viewMode={viewMode}
             weekOffset={-adjustedWeeksAgo}
             weekInterval={item.interval}
+            countryCode={countryCode}
           />
         )
       };
@@ -50,7 +51,7 @@ export const ContestWeeksRenderer = ({
 
   return (
     <>
-      <NextWeekSection viewMode={viewMode} />
+      <NextWeekSection viewMode={viewMode} countryCode={countryCode} />
       
       <section className="max-w-6xl mx-auto pt-2 mb-1 sm:mb-3 bg-background rounded-lg shadow-sm shadow-foreground/10">
         <ContestSection
@@ -61,6 +62,7 @@ export const ContestWeeksRenderer = ({
           noWrapTitle
           viewMode={viewMode}
           weekOffset={0}
+          countryCode={countryCode}
         />
       </section>
       
