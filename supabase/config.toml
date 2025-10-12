@@ -12,5 +12,5 @@ verify_jwt = false
 [functions.send-email]
 verify_jwt = false
 
-[functions.transition-pre-next-week]
+[functions.weekly-contest-transition]
 verify_jwt = false
