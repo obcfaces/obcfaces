@@ -80,7 +80,21 @@ export const useContestants = ({
 
       // Apply filters
       if (filters.country) {
-        query = query.filter('application_data->>country', 'eq', filters.country);
+        // Support both country code (PH) and full name (Philippines)
+        const countryCode = filters.country.toUpperCase();
+        const countryNames: Record<string, string> = {
+          'PH': 'Philippines',
+          'KZ': 'Kazakhstan',
+          'RU': 'Russia',
+          'UA': 'Ukraine',
+        };
+        const countryName = countryNames[countryCode];
+        
+        if (countryName) {
+          query = query.or(`application_data->>country.eq.${countryCode},application_data->>country.eq.${countryName}`);
+        } else {
+          query = query.filter('application_data->>country', 'eq', filters.country);
+        }
       }
       if (filters.gender) {
         query = query.filter('application_data->>gender', 'eq', filters.gender);
