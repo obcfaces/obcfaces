@@ -73,37 +73,63 @@ const AuthCallbackHandler = () => {
 
         handledRef.current = href;
         
-        console.log('Auth callback successful:', data);
+        console.log('✅ Auth callback successful:', { 
+          userId: data.session?.user?.id,
+          email: data.session?.user?.email,
+          provider: data.session?.user?.app_metadata?.provider
+        });
 
-        // CRITICAL: Collect fingerprint data for OAuth users right after successful authentication
+        // CRITICAL: Create profile for OAuth users FIRST before any other operations
         if (data.session?.user) {
+          const user = data.session.user;
+          
           try {
-            console.log('🔐 OAuth user authenticated, collecting fingerprint data...');
+            console.log('👤 Creating/updating profile for OAuth user...');
             
-            // Save fingerprint
-            const fpId = await saveDeviceFingerprint(data.session.user.id);
+            // Create or update profile with OAuth data
+            const { error: profileError } = await supabase
+              .from('profiles')
+              .upsert({
+                id: user.id,
+                email: user.email,
+                display_name: user.user_metadata?.full_name || user.user_metadata?.name,
+                first_name: user.user_metadata?.full_name?.split(' ')[0] || user.user_metadata?.name,
+                last_name: user.user_metadata?.full_name?.split(' ').slice(1).join(' ') || '',
+                avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture,
+                email_verified: user.user_metadata?.email_verified || false,
+                provider_data: {
+                  provider: user.app_metadata?.provider,
+                  provider_id: user.user_metadata?.provider_id || user.user_metadata?.sub,
+                  full_metadata: user.user_metadata
+                }
+              }, { 
+                onConflict: 'id',
+                ignoreDuplicates: false 
+              });
             
-            // Get full fingerprint data
+            if (profileError) {
+              console.error('❌ Profile creation error:', profileError);
+            } else {
+              console.log('✅ Profile created/updated successfully');
+            }
+          } catch (err) {
+            console.error('❌ Exception creating profile:', err);
+          }
+
+          // THEN collect fingerprint data (non-blocking)
+          try {
+            console.log('🔐 Collecting fingerprint data...');
+            
+            const fpId = await saveDeviceFingerprint(user.id);
             const fullFingerprintData = await getDeviceFingerprint();
-            
-            // Get IP address
             const ipResponse = await fetch('https://api.ipify.org?format=json');
             const ipData = await ipResponse.json();
-            
-            // Determine login method (OAuth provider)
-            const loginMethod = data.session.user.app_metadata?.provider || 'email';
-            
-            console.log('📱 Saving OAuth fingerprint for user:', { 
-              userId: data.session.user.id, 
-              loginMethod, 
-              fpId,
-              ip: ipData.ip 
-            });
+            const loginMethod = user.app_metadata?.provider || 'email';
             
             // Call edge function to log full fingerprint data
-            const { error: fpError } = await supabase.functions.invoke('auth-login-tracker', {
+            await supabase.functions.invoke('auth-login-tracker', {
               body: {
-                userId: data.session.user.id,
+                userId: user.id,
                 loginMethod,
                 ipAddress: ipData.ip,
                 userAgent: navigator.userAgent,
@@ -112,39 +138,29 @@ const AuthCallbackHandler = () => {
               }
             });
             
-            if (fpError) {
-              console.error('❌ Error calling auth-login-tracker:', fpError);
-            } else {
-              console.log('✅ Successfully logged OAuth fingerprint data');
-            }
-            
-            console.log('✅ Profile fingerprint data saved to login logs');
+            console.log('✅ Fingerprint data logged');
           } catch (fpError) {
-            console.error('❌ Error collecting OAuth fingerprint:', fpError);
+            console.error('❌ Error collecting fingerprint (non-critical):', fpError);
           }
         }
 
-        // Clean URL from auth params
+        // Clean URL from auth params but keep the path
         const url = new URL(window.location.href);
+        const originalPath = url.pathname;
         ["code", "type", "redirect_to", "next"].forEach((k) => url.searchParams.delete(k));
         
-        // Always redirect to home page instead of localhost URLs
-        const cleanPath = url.pathname === '/account' ? '/account' : '/';
-        window.history.replaceState({}, "", cleanPath);
+        // Don't change the path, just clean the query params
+        window.history.replaceState({}, "", originalPath);
 
-        // Restore scroll position after URL cleanup
-        setTimeout(() => {
-          window.scrollTo(0, scrollY);
-        }, 0);
+        console.log('🔄 URL cleaned, original path:', originalPath);
 
-        toast({ description: "Email confirmed. Welcome!" });
+        toast({ description: "Successfully signed in with Google!" });
         
-        // Set flag to trigger auth state listener
+        // Set flag to trigger auth state listener which will handle redirect
         if (data.session?.user) {
           console.log('✅ OAuth successful for user:', data.session.user.id);
-          console.log('⏳ Waiting for session to be saved to localStorage...');
+          console.log('⏳ Waiting for SIGNED_IN event from Supabase...');
           setOauthCompleted(true);
-          // Auth state listener will handle the redirect once session is confirmed
         }
       } catch (err) {
         console.error('Auth callback exception:', err);
