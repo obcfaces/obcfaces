@@ -216,7 +216,7 @@ serve(async (req) => {
 
     // ========================================
     // TRANSITION 3: "pre next week" → "next week"
-    // ALL get next week interval (week after transition)
+    // ALL get current week interval (week of transition)
     // Previous interval doesn't matter
     // ========================================
     console.log('\n📊 TRANSITION 3: "pre next week" → "next week"')
@@ -252,7 +252,7 @@ serve(async (req) => {
         old_status: 'pre next week',
         new_status: 'next week',
         old_week_interval: participant.status_history?.['pre next week']?.week_interval,
-        week_interval: nextWeekInterval, // Next week after transition
+        week_interval: currentWeekInterval, // Current week of transition
         timestamp: new Date().toISOString()
       }
 
@@ -262,7 +262,7 @@ serve(async (req) => {
         .from('weekly_contest_participants')
         .update({
           admin_status: 'next week',
-          week_interval: nextWeekInterval, // Assign next week
+          week_interval: currentWeekInterval, // Assign current week interval
           status_history: statusHistory
         })
         .eq('id', participant.id)
@@ -271,7 +271,7 @@ serve(async (req) => {
         console.error(`Error updating participant ${participant.id}:`, updateError)
       } else {
         transitions.preNextToNext++
-        console.log(`✅ ${participantName}: "pre next week" → "next week", week: ${nextWeekInterval}`)
+        console.log(`✅ ${participantName}: "pre next week" → "next week", week: ${currentWeekInterval}`)
       }
     }
 
