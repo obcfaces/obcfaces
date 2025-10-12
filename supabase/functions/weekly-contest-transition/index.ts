@@ -70,7 +70,8 @@ serve(async (req) => {
 
     // ========================================
     // TRANSITION 1: "this week" → "past"
-    // Assign current week interval (when transition happens)
+    // ALL get current week interval (week of transition)
+    // Previous interval doesn't matter
     // ========================================
     console.log('\n📊 TRANSITION 1: "this week" → "past"')
     
@@ -154,7 +155,8 @@ serve(async (req) => {
 
     // ========================================
     // TRANSITION 2: "next week on site" → "this week"
-    // Assign current week interval
+    // ALL get current week interval (week of transition)
+    // Previous interval doesn't matter
     // ========================================
     console.log('\n📊 TRANSITION 2: "next week on site" → "this week"')
     
@@ -214,7 +216,8 @@ serve(async (req) => {
 
     // ========================================
     // TRANSITION 3: "pre next week" → "next week"
-    // Assign next week interval
+    // ALL get next week interval (week after transition)
+    // Previous interval doesn't matter
     // ========================================
     console.log('\n📊 TRANSITION 3: "pre next week" → "next week"')
     
