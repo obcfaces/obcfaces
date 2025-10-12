@@ -194,7 +194,8 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
         // Calculate form fill time
         const formFillTime = formStartTime ? Math.floor((Date.now() - formStartTime) / 1000) : null;
         
-        const redirectUrl = window.location.href; // Confirm email back to current page
+        // Use unified /auth route for email confirmation, same as OAuth
+        const redirectUrl = `${window.location.origin}/auth`;
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
