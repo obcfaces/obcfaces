@@ -105,24 +105,12 @@ export function AdminPastWeekTab({
 
   // Filter participants
   const filteredParticipants = useMemo(() => {
-    let filtered = showAllCards ? participants : participants.filter(p => p.admin_status === 'past');
-
-    // Apply status filter
-    if (pastStatusFilter !== 'all' && !showAllCards) {
-      filtered = filtered.filter(p => p.admin_status === pastStatusFilter);
-    }
+    // Start with only 'past' status participants
+    let filtered = participants.filter(p => p.admin_status === 'past');
 
     // Apply week interval filter
-    if (pastWeekIntervalFilter !== 'all' && !showAllCards) {
+    if (pastWeekIntervalFilter !== 'all') {
       filtered = filtered.filter(p => p.week_interval === pastWeekIntervalFilter);
-    }
-
-    // Apply week filter from buttons
-    if (selectedWeekFilter !== 'all' && !showAllCards) {
-      const selectedFilter = getDynamicPastWeekFilters.find((f: any) => f.id === selectedWeekFilter);
-      if (selectedFilter?.weekInterval) {
-        filtered = filtered.filter(p => p.week_interval === selectedFilter.weekInterval);
-      }
     }
 
     // Sort by rating
@@ -134,13 +122,10 @@ export function AdminPastWeekTab({
       const votesB = Number(b.total_votes) || 0;
       return votesB - votesA;
     });
-  }, [participants, showAllCards, pastStatusFilter, pastWeekIntervalFilter, selectedWeekFilter, getDynamicPastWeekFilters]);
+  }, [participants, pastWeekIntervalFilter]);
 
-  // Pagination
-  const totalPages = Math.ceil(filteredParticipants.length / itemsPerPage);
-  const paginatedParticipants = showAllCards 
-    ? filteredParticipants.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-    : filteredParticipants;
+  // Show all filtered participants (no pagination)
+  const paginatedParticipants = filteredParticipants;
 
   // Calculate filter counts
   const filterCounts = useMemo(() => {
