@@ -306,7 +306,7 @@ serve(async (req) => {
       .from('weekly_contests')
       .select('id')
       .eq('week_start_date', mondayDate.toISOString().split('T')[0])
-      .single()
+      .maybeSingle()
 
     if (!existingContest) {
       const { error: createError } = await supabase
