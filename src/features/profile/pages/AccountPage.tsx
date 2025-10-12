@@ -7,60 +7,27 @@ const Account = () => {
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
+    console.log('📍 AccountPage mounted, checking session...');
     
-    // Subscribe to auth state changes to handle OAuth redirects properly
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('📍 Account page - Auth state change:', { 
-        event, 
-        userId: session?.user?.id,
-        hasSession: !!session 
-      });
-      
-      // Clear any pending timeout
-      if (timeoutId) clearTimeout(timeoutId);
-      
-      if (session?.user) {
-        console.log('✅ Account page - User authenticated, redirecting to profile:', session.user.id);
-        // User is authenticated, redirect to profile
-        navigate(`/u/${session.user.id}`, { replace: true });
-      } else if (!isChecking && event !== 'INITIAL_SESSION') {
-        // No session and done checking, redirect to auth (but not on initial load)
-        console.log('❌ Account page - No session, redirecting to auth');
-        navigate("/auth", { replace: true });
-      }
-    });
-
-    // Also check current session (for direct navigation)
     const checkSession = async () => {
-      console.log('🔍 Account page - Checking current session...');
       const { data: { session } } = await supabase.auth.getSession();
-      console.log('📊 Account page - Session check result:', { 
-        userId: session?.user?.id,
-        hasSession: !!session 
+      console.log('📊 AccountPage session check:', { 
+        hasSession: !!session,
+        userId: session?.user?.id 
       });
       
       if (session?.user) {
-        console.log('✅ Account page - Session found, redirecting to profile');
+        console.log('✅ Session found, redirecting to profile:', session.user.id);
         navigate(`/u/${session.user.id}`, { replace: true });
       } else {
-        console.log('⏳ Account page - No session yet, will wait for auth state change...');
-        // Set a fallback timeout - if no session after 3 seconds, redirect to auth
-        timeoutId = setTimeout(() => {
-          console.log('⏰ Account page - Timeout reached, redirecting to auth');
-          navigate("/auth", { replace: true });
-        }, 3000);
+        console.log('❌ No session, redirecting to auth');
+        navigate("/auth", { replace: true });
       }
       setIsChecking(false);
     };
 
     checkSession();
-
-    return () => {
-      if (timeoutId) clearTimeout(timeoutId);
-      subscription.unsubscribe();
-    };
-  }, [navigate, isChecking]);
+  }, [navigate]);
 
   return (
     <div className="flex items-center justify-center min-h-screen">

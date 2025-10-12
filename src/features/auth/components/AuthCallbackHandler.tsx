@@ -11,21 +11,30 @@ const AuthCallbackHandler = () => {
   const handledRef = useRef<string | null>(null);
   const [oauthCompleted, setOauthCompleted] = useState(false);
 
-  // Subscribe to auth state changes to handle OAuth completion properly
+  // SIMPLIFIED: Just wait for session to be confirmed, then redirect
   useEffect(() => {
     if (!oauthCompleted) return;
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('🔐 Auth state change after OAuth:', event, session?.user?.id);
+    console.log('⏳ OAuth completed, waiting for session confirmation...');
+    
+    // Give Supabase time to save session to localStorage
+    const timeoutId = setTimeout(async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      console.log('🔍 Checking session after OAuth:', { 
+        hasSession: !!session, 
+        userId: session?.user?.id 
+      });
       
-      if (event === 'SIGNED_IN' && session?.user) {
-        console.log('✅ Session confirmed in storage, redirecting to account page');
-        // Session is now confirmed to be in localStorage
+      if (session?.user) {
+        console.log('✅ Session confirmed, redirecting to account');
         navigate('/account');
+      } else {
+        console.log('❌ No session found after OAuth');
+        navigate('/auth');
       }
-    });
+    }, 2000); // Wait 2 seconds for session to be saved
 
-    return () => subscription.unsubscribe();
+    return () => clearTimeout(timeoutId);
   }, [navigate, oauthCompleted]);
 
   useEffect(() => {
@@ -112,24 +121,18 @@ const AuthCallbackHandler = () => {
           })();
         }
 
-        // Clean URL from auth params but keep the path
+        // Clean URL from auth params
         const url = new URL(window.location.href);
-        const originalPath = url.pathname;
         ["code", "type", "redirect_to", "next"].forEach((k) => url.searchParams.delete(k));
-        
-        // Don't change the path, just clean the query params
-        window.history.replaceState({}, "", originalPath);
+        window.history.replaceState({}, "", url.pathname);
 
-        console.log('🔄 URL cleaned, original path:', originalPath);
+        console.log('🔄 URL cleaned');
 
         toast({ description: "Successfully signed in with Google!" });
         
-        // Set flag to trigger auth state listener which will handle redirect
-        if (data.session?.user) {
-          console.log('✅ OAuth successful for user:', data.session.user.id);
-          console.log('⏳ Waiting for SIGNED_IN event from Supabase...');
-          setOauthCompleted(true);
-        }
+        // Trigger the redirect flow
+        console.log('✅ Setting oauthCompleted flag');
+        setOauthCompleted(true);
       } catch (err) {
         console.error('Auth callback exception:', err);
         // Don't show errors to user unless it's critical
