@@ -202,32 +202,36 @@ export function AdminPastWeekTab({
         </div>
       </div>
 
-      {/* Week Interval Filter Buttons - Get last 4 weeks */}
+      {/* Week Interval Filter Buttons - Specific 4 weeks from database */}
       <div className="mt-4">
         <div className="flex gap-2 flex-wrap">
-          {getAvailableWeekIntervals()
-            .slice(0, 4)
-            .map((interval) => {
-              const participantsInWeek = participants.filter(p => 
-                p.admin_status === 'past' && p.week_interval === interval.value
-              );
-              const count = participantsInWeek.length;
-              
-              return (
-                <Button
-                  key={interval.value}
-                  variant={pastWeekIntervalFilter === interval.value ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setPastWeekIntervalFilter(interval.value)}
-                  className="gap-2"
-                >
-                  {interval.label}
-                  <Badge variant="secondary" className="ml-1 px-1.5 py-0.5 text-xs">
-                    {count}
-                  </Badge>
-                </Button>
-              );
-            })}
+          {/* Specific 4 week intervals in order */}
+          {[
+            { value: '06/10-12/10/25', label: '06/10-12/10/25' },
+            { value: '29/09-05/10/25', label: '29/09-05/10/25' },
+            { value: '22/09-28/09/25', label: '22/09-28/09/25' },
+            { value: '15/09-21/09/25', label: '15/09-21/09/25' }
+          ].map((interval) => {
+            const participantsInWeek = participants.filter(p => 
+              p.admin_status === 'past' && p.week_interval === interval.value
+            );
+            const count = participantsInWeek.length;
+            
+            return (
+              <Button
+                key={interval.value}
+                variant={pastWeekIntervalFilter === interval.value ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setPastWeekIntervalFilter(interval.value)}
+                className="gap-2"
+              >
+                {interval.label}
+                <Badge variant="secondary" className="ml-1 px-1.5 py-0.5 text-xs">
+                  {count}
+                </Badge>
+              </Button>
+            );
+          })}
           <Button
             variant={pastWeekIntervalFilter === 'all' ? 'default' : 'outline'}
             size="sm"
