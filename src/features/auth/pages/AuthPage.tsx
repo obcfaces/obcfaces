@@ -2,19 +2,9 @@ import { useEffect, useState } from 'react';
 import { Helmet } from "react-helmet-async";
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import LoginModalContent from "@/features/auth/components/LoginModalContent";
-
-async function safeUpsertProfile(userId: string, extra?: Partial<Record<string, any>>) {
-  // ⚠️ Без email, т.к. в profiles нет такой колонки
-  const { error } = await supabase
-    .from('profiles')
-    .upsert(
-      { id: userId, ...(extra ?? {}) },
-      { onConflict: 'id', ignoreDuplicates: true }
-    );
-  if (error) console.warn('profiles upsert (ignored/warn):', error.message);
-}
+import { exchangeIfCodeInUrl, upsertProfileIdempotent, getCurrentSession } from '../services/auth.service';
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -35,13 +25,13 @@ const Auth = () => {
       try {
         const url = new URL(window.location.href);
         const err = url.searchParams.get('error');
-        const code = url.searchParams.get('code');
 
-        // 0) Уже авторизованы? — сразу увозим
-        const { data: s } = await supabase.auth.getSession();
-        if (s.session?.user) {
+        // 0) Check for existing session
+        const session = await getCurrentSession();
+        
+        if (session?.user) {
           // Check if user has email
-          if (!s.session.user.email) {
+          if (!session.user.email) {
             toast({
               title: "Email Required",
               description: "Your social account doesn't provide an email. Please contact support.",
@@ -75,12 +65,10 @@ const Auth = () => {
           return;
         }
 
-        // 2) Пришли с кодом — меняем на сессию (PKCE)
-        if (code) {
-          const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-          if (error) throw error;
-
-          const user = data.session?.user;
+        // 2) Exchange code for session (PKCE flow)
+        const codeSession = await exchangeIfCodeInUrl();
+        if (codeSession) {
+          const user = codeSession.user;
           if (!user) throw new Error('No user after exchangeCodeForSession');
 
           // Check if user has email
@@ -95,7 +83,7 @@ const Auth = () => {
             return;
           }
 
-          await safeUpsertProfile(user.id);
+          await upsertProfileIdempotent(user.id);
           
           // Check if there's a saved redirect path
           const redirectPath = sessionStorage.getItem('redirectPath');
