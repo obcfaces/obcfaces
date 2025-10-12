@@ -24,7 +24,7 @@ const AuthCallbackHandler = () => {
       try {
         console.log('🔐 Processing OAuth callback...');
         
-        // Exchange code for session
+        // Exchange code for session - SAME AS EMAIL VERIFICATION
         const { data, error } = await supabase.auth.exchangeCodeForSession(href);
         if (cancelled) return;
         
@@ -45,7 +45,7 @@ const AuthCallbackHandler = () => {
           return;
         }
 
-        console.log('✅ OAuth successful for user:', data.session.user.id);
+        console.log('✅ OAuth successful, user:', data.session.user.id);
 
         // Clean URL
         const url = new URL(window.location.href);
@@ -53,12 +53,15 @@ const AuthCallbackHandler = () => {
         window.history.replaceState({}, "", '/');
 
         // Show success message
-        toast({ description: "Successfully signed in!" });
+        toast({ 
+          title: "Success!",
+          description: "Successfully signed in!" 
+        });
         
-        // Redirect to profile
+        // Redirect to /account (SAME AS EMAIL VERIFICATION)
         setTimeout(() => {
-          navigate(`/u/${data.session.user.id}`, { replace: true });
-        }, 500);
+          navigate('/account', { replace: true });
+        }, 2000);
 
       } catch (err) {
         console.error('❌ OAuth exception:', err);
