@@ -13,32 +13,32 @@ const AuthCallback = () => {
 
     const handleCallback = async () => {
       try {
-        console.log('🔐 Auth callback - starting PKCE flow...');
+        console.log('🔐 Auth callback - processing authentication...');
         
         // Check if we have a code in URL (PKCE flow)
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get('code');
         
         if (code) {
-          console.log('📝 Found auth code, exchanging for session...');
-          const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-          
-          if (exchangeError) {
-            console.error('❌ Code exchange error:', exchangeError);
-            setStatus('error');
-            toast({
-              title: "Authentication Failed",
-              description: exchangeError.message,
-              variant: "destructive"
-            });
-            navigate('/auth', { replace: true });
-            return;
+          console.log('📝 Found auth code, attempting PKCE exchange...');
+          try {
+            const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+            
+            if (exchangeError) {
+              console.warn('⚠️ PKCE exchange failed (non-critical):', exchangeError.message);
+              // Don't fail - session might already exist from implicit flow
+            } else {
+              console.log('✅ PKCE code exchanged successfully');
+            }
+          } catch (exchangeErr) {
+            console.warn('⚠️ PKCE exchange error (non-critical):', exchangeErr);
+            // Continue - session might exist via other means
           }
-          
-          console.log('✅ Code exchanged successfully');
+        } else {
+          console.log('ℹ️ No auth code found - checking for existing session (implicit flow)');
         }
         
-        // Get current session
+        // Always check for existing session (works for both flows)
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (!mounted) return;
