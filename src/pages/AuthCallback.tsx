@@ -13,11 +13,32 @@ const AuthCallback = () => {
 
     const handleCallback = async () => {
       try {
-        console.log('🔐 Auth callback - waiting for session...');
+        console.log('🔐 Auth callback - starting PKCE flow...');
         
-        // Wait a bit for Supabase to process the hash
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Check if we have a code in URL (PKCE flow)
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
         
+        if (code) {
+          console.log('📝 Found auth code, exchanging for session...');
+          const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+          
+          if (exchangeError) {
+            console.error('❌ Code exchange error:', exchangeError);
+            setStatus('error');
+            toast({
+              title: "Authentication Failed",
+              description: exchangeError.message,
+              variant: "destructive"
+            });
+            navigate('/auth', { replace: true });
+            return;
+          }
+          
+          console.log('✅ Code exchanged successfully');
+        }
+        
+        // Get current session
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (!mounted) return;
