@@ -14,7 +14,9 @@ export const getMonthAbbreviation = (month: string, locale: string): string => {
     'Dec': { es: 'Dic', ru: 'Дек', en: 'Dec' },
   };
 
-  return monthMap[month]?.[locale] || month;
+  // Extract language code from locale (e.g., 'es-ph' -> 'es')
+  const langCode = locale.split('-')[0] || 'en';
+  return monthMap[month]?.[langCode] || month;
 };
 
 export const translateDateRange = (dateRange: string, locale: string): string => {
