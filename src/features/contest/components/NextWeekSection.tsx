@@ -454,12 +454,12 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
     <section className="max-w-6xl mx-auto pt-6 pb-0 mb-2 mt-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg shadow-lg shadow-foreground/15 border border-blue-200 dark:border-blue-800">
       <div className="mb-6 px-6">
         <div className="mb-4">
-          <div className="flex items-center gap-3 mb-1">
-            <div className="inline-flex flex-col w-fit items-center">
-              <h2 className="text-3xl font-bold text-blue-800 dark:text-blue-200 whitespace-nowrap">{t("NEXT WEEK")}</h2>
-              <p className="text-sm text-blue-600 dark:text-blue-400 italic -mt-1">{getNextWeekRange()}</p>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-1">
+            <div className="inline-flex flex-col w-fit items-start sm:items-center">
+              <h2 className="text-2xl sm:text-3xl font-bold text-blue-800 dark:text-blue-200 max-w-[60%] sm:max-w-none sm:whitespace-nowrap break-words">{t("NEXT WEEK")}</h2>
+              <p className="text-xs sm:text-sm text-blue-600 dark:text-blue-400 italic -mt-0.5 sm:-mt-1 max-w-[60%] sm:max-w-none break-words">{getNextWeekRange()}</p>
             </div>
-            <span className="text-base font-normal text-blue-700 dark:text-blue-300 leading-tight">
+            <span className="text-sm sm:text-base font-normal text-blue-700 dark:text-blue-300 leading-tight">
               {t("Choose next week's finalists")}
             </span>
           </div>

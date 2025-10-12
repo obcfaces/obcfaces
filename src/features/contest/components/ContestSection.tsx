@@ -582,16 +582,16 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     <section className={`max-w-6xl mx-auto mb-2 rounded-lg shadow-lg shadow-foreground/15 ${title === "THIS WEEK" ? "bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800" : "bg-background"} pt-6 pb-0`}>
       <div className="mb-6 px-6">
         <div className="mb-4">
-          <div className="flex items-center gap-3 mb-1">
-            <div className={`inline-flex flex-col w-fit ${centerSubtitle ? "items-center" : "items-center"}`}>
-              <h2 className={`text-3xl font-bold ${title === "THIS WEEK" ? "text-green-800 dark:text-green-200" : "text-contest-text"} ${noWrapTitle ? "whitespace-nowrap" : ""}`}>{title}</h2>
-              <p className={`text-sm ${title === "THIS WEEK" ? "text-green-600 dark:text-green-400" : "text-muted-foreground/70"} italic -mt-1`}>{subtitle}</p>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-1">
+            <div className={`inline-flex flex-col w-fit ${centerSubtitle ? "items-start sm:items-center" : "items-start sm:items-center"}`}>
+              <h2 className={`text-2xl sm:text-3xl font-bold ${title?.includes("THIS WEEK") ? "text-green-800 dark:text-green-200" : "text-contest-text"} ${noWrapTitle ? "max-w-[60%] sm:max-w-none sm:whitespace-nowrap break-words" : "max-w-[60%] sm:max-w-none break-words"}`}>{title}</h2>
+              <p className={`text-xs sm:text-sm ${title?.includes("THIS WEEK") ? "text-green-600 dark:text-green-400" : "text-muted-foreground/70"} italic -mt-0.5 sm:-mt-1 max-w-[60%] sm:max-w-none break-words`}>{subtitle}</p>
             </div>
             {titleSuffix && (
-              <span className="text-2xl font-normal text-muted-foreground">{titleSuffix}</span>
+              <span className="text-xl sm:text-2xl font-normal text-muted-foreground">{titleSuffix}</span>
             )}
             {isActive && description && (
-              <span className={`text-base font-normal ${title === "THIS WEEK" ? "text-green-700 dark:text-green-300" : "text-contest-text"} leading-tight`}>
+              <span className={`text-sm sm:text-base font-normal ${title?.includes("THIS WEEK") ? "text-green-700 dark:text-green-300" : "text-contest-text"} leading-tight`}>
                 {description}
               </span>
             )}
