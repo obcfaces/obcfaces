@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import LoginModalContent from "@/components/login-modal-content";
+import { useTranslation } from "@/hooks/useTranslation";
 
 import contestant1Face from "@/assets/contestant-1-face.jpg";
 import contestant1Full from "@/assets/contestant-1-full.jpg";
@@ -59,6 +60,7 @@ const getNextWeekRange = () => {
 };
 
 export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
+  const { t } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [history, setHistory] = useState<number[]>([]);
   const [user, setUser] = useState<any>(null);
@@ -454,11 +456,11 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         <div className="mb-4">
           <div className="flex items-center gap-3 mb-1">
             <div className="inline-flex flex-col w-fit items-center">
-              <h2 className="text-3xl font-bold text-blue-800 dark:text-blue-200 whitespace-nowrap">NEXT WEEK</h2>
+              <h2 className="text-3xl font-bold text-blue-800 dark:text-blue-200 whitespace-nowrap">{t("NEXT WEEK")}</h2>
               <p className="text-sm text-blue-600 dark:text-blue-400 italic -mt-1">{getNextWeekRange()}</p>
             </div>
             <span className="text-base font-normal text-blue-700 dark:text-blue-300 leading-tight">
-              Choose next week's finalists
+              {t("Choose next week's finalists")}
             </span>
           </div>
         </div>
@@ -487,14 +489,14 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
           
           {isTransitioning && (
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-              <div className="animate-pulse text-muted-foreground text-sm">Loading...</div>
+              <div className="animate-pulse text-muted-foreground text-sm">{t("Loading...")}</div>
             </div>
           )}
           
           <div className="flex items-center justify-center gap-6 mt-6 pb-6">
             <div className="flex items-center gap-4">
               <span className="text-lg text-blue-800 dark:text-blue-200 font-medium">
-                {remainingCandidates} left
+                {remainingCandidates} {t("left")}
               </span>
               {history.length > 0 && (
                 <Button
@@ -531,7 +533,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         </div>
       ) : (
         <div className="text-center py-4">
-          <p className="text-base text-blue-700 dark:text-blue-300">You've rated all cards in this block. New ones will appear next week.</p>
+          <p className="text-base text-blue-700 dark:text-blue-300">{t("You've rated all cards in this block. New ones will appear next week.")}</p>
         </div>
       )}
 
