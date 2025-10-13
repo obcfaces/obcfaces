@@ -152,9 +152,30 @@ export function AdminPastWeekTab({
       .filter(p => p.admin_status === 'past' && p.week_interval)
       .forEach(p => intervals.add(p.week_interval!));
     
+    // Parse interval string to Date for proper sorting
+    const parseInterval = (interval: string): Date => {
+      const parts = interval.split('-');
+      if (parts.length !== 2) return new Date(0);
+      
+      const startParts = parts[0].split('/');
+      if (startParts.length !== 2) return new Date(0);
+      
+      const endParts = parts[1].split('/');
+      if (endParts.length !== 3) return new Date(0);
+      
+      const day = parseInt(startParts[0]);
+      const month = parseInt(startParts[1]) - 1; // JavaScript months are 0-indexed
+      const year = parseInt(endParts[2]);
+      const fullYear = year < 50 ? 2000 + year : 1900 + year;
+      
+      return new Date(fullYear, month, day);
+    };
+    
     const sortedIntervals = Array.from(intervals).sort((a, b) => {
       // Sort by date descending (newest first)
-      return b.localeCompare(a);
+      const dateA = parseInterval(a);
+      const dateB = parseInterval(b);
+      return dateB.getTime() - dateA.getTime();
     });
     
     return sortedIntervals.map(interval => ({
