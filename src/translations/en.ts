@@ -69,6 +69,50 @@ export default {
   'footer.copyright': 'All rights reserved.',
   'footer.madeWith': 'Made with ❤️',
 
+  // Months (abbreviated)
+  'month.jan': 'Jan',
+  'month.feb': 'Feb',
+  'month.mar': 'Mar',
+  'month.apr': 'Apr',
+  'month.may': 'May',
+  'month.jun': 'Jun',
+  'month.jul': 'Jul',
+  'month.aug': 'Aug',
+  'month.sep': 'Sep',
+  'month.oct': 'Oct',
+  'month.nov': 'Nov',
+  'month.dec': 'Dec',
+
+  // Units (abbreviations)
+  'unit.years.short': 'yo',  // years old
+  'unit.kg': 'kg',
+  'unit.cm': 'cm',
+
+  // Countries
+  'country.Philippines': 'Philippines',
+  'country.Kazakhstan': 'Kazakhstan',
+  'country.Russia': 'Russia',
+  'country.Ukraine': 'Ukraine',
+  'country.United States': 'United States',
+  'country.Canada': 'Canada',
+  'country.United Kingdom': 'United Kingdom',
+  'country.Australia': 'Australia',
+  'country.Japan': 'Japan',
+  'country.South Korea': 'South Korea',
+  'country.China': 'China',
+  'country.India': 'India',
+  'country.Indonesia': 'Indonesia',
+  'country.Malaysia': 'Malaysia',
+  'country.Singapore': 'Singapore',
+  'country.Thailand': 'Thailand',
+  'country.Vietnam': 'Vietnam',
+  'country.France': 'France',
+  'country.Germany': 'Germany',
+  'country.Italy': 'Italy',
+  'country.Spain': 'Spain',
+  'country.Brazil': 'Brazil',
+  'country.Mexico': 'Mexico',
+
   // Participation Status
   'participation.trackStatus': 'Track the status of your application here.',
   'participation.status.pending': 'Pending',
