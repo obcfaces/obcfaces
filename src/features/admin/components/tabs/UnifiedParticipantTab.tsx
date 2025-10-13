@@ -263,36 +263,29 @@ const ParticipantCardWithHistory = ({
   const participantName = `${firstName} ${lastName}`;
   const isWinner = 'final_rank' in participant && participant.final_rank === 1;
 
-  // Get rejection reasons - они хранятся напрямую в weekly_contest_participants.rejection_reason_types
+  // Get rejection reasons from status_history - это правильный способ!
   const getRejectionReasons = () => {
     if (participant.admin_status !== 'rejected') return [];
     
-    // Debug для NEW табы
-    if (tabType === 'new') {
-      console.log('🔍 REJECTION REASONS DEBUG for', participantName, {
-        admin_status: participant.admin_status,
-        rejection_reason_types: participant.rejection_reason_types,
-        rejection_reason_types_type: typeof participant.rejection_reason_types,
-        rejection_reason: participant.rejection_reason,
-        participant_keys: Object.keys(participant),
-        full_participant: participant
-      });
+    // Проверяем status_history на наличие rejected entry с причинами
+    if (participant.status_history && typeof participant.status_history === 'object') {
+      const historyEntries = Object.values(participant.status_history);
+      // Ищем последний rejected entry
+      const rejectedEntry = historyEntries
+        .filter((entry: any) => entry?.new_status === 'rejected' || entry?.change_reason?.includes('rejected'))
+        .sort((a: any, b: any) => {
+          const aTime = new Date(a.timestamp || a.changed_at).getTime();
+          const bTime = new Date(b.timestamp || b.changed_at).getTime();
+          return bTime - aTime;
+        })[0] as any;
+      
+      if (rejectedEntry?.rejection_reason_types) {
+        return rejectedEntry.rejection_reason_types;
+      }
     }
     
-    // Сначала проверяем rejection_reason_types напрямую в participant (это правильный источник!)
-    if (participant.rejection_reason_types && Array.isArray(participant.rejection_reason_types)) {
-      console.log('✅ Found rejection_reason_types in participant:', participant.rejection_reason_types);
-      return participant.rejection_reason_types;
-    }
-    
-    // Fallback к application_data если есть (для старых записей)
-    if (appData.rejection_reason_types && Array.isArray(appData.rejection_reason_types)) {
-      console.log('✅ Found rejection_reason_types in appData:', appData.rejection_reason_types);
-      return appData.rejection_reason_types;
-    }
-    
-    console.log('❌ No rejection reasons found for', participantName);
-    return [];
+    // Fallback к application_data если есть
+    return appData.rejection_reason_types || [];
   };
 
   const rejectionReasons = getRejectionReasons();
