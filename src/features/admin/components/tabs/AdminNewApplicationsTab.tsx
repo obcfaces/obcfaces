@@ -57,8 +57,7 @@ export function AdminNewApplicationsTab({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">New Applications</h2>
+      <div className="flex items-center justify-end">
         <div className="flex items-center space-x-2">
           <Checkbox
             id="show-deleted-apps"
