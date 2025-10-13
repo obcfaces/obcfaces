@@ -25,6 +25,7 @@ interface ContestParticipationModalProps {
   onOpenChange?: (open: boolean) => void;
   editMode?: boolean;
   existingData?: any;
+  isAdminEdit?: boolean; // New prop to indicate admin editing
 }
 
 export const ContestParticipationModal = ({ 
@@ -32,7 +33,8 @@ export const ContestParticipationModal = ({
   isOpen: controlledIsOpen, 
   onOpenChange: controlledOnOpenChange, 
   editMode = false, 
-  existingData 
+  existingData,
+  isAdminEdit = false 
 }: ContestParticipationModalProps) => {
   const navigate = useNavigate();
   const [internalIsOpen, setInternalIsOpen] = useState(false);
@@ -813,7 +815,10 @@ export const ContestParticipationModal = ({
         };
         
         // Check if status should be updated to pending
-        const shouldUpdateToPending = existingData.status === 'rejected' || (existingData as any).admin_status === 'rejected';
+        // IMPORTANT: Only change status if it's user editing their own rejected application
+        // Admin edits should NOT change the status
+        const shouldUpdateToPending = !isAdminEdit && 
+          (existingData.status === 'rejected' || (existingData as any).admin_status === 'rejected');
         
         if (shouldUpdateToPending) {
           updateData.admin_status = 'pending';
