@@ -1362,6 +1362,24 @@ export type Database = {
         }
         Relationships: []
       }
+      weekly_jobs: {
+        Row: {
+          ran_at: string
+          run_details: Json | null
+          week_start: string
+        }
+        Insert: {
+          ran_at?: string
+          run_details?: Json | null
+          week_start: string
+        }
+        Update: {
+          ran_at?: string
+          run_details?: Json | null
+          week_start?: string
+        }
+        Relationships: []
+      }
       winner_content: {
         Row: {
           created_at: string
@@ -2428,6 +2446,15 @@ export type Database = {
       user_is_in_conversation: {
         Args: { conversation_id_param: string; user_id_param: string }
         Returns: boolean
+      }
+      verify_weekly_migration: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          check_name: string
+          count: number
+          details: string
+          status: string
+        }[]
       }
       week_start_wita: {
         Args: { ts: string }

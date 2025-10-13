@@ -6,21 +6,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-function weekStartWITA(d = new Date()): Date {
-  // UTC -> shift -8h -> truncate to Monday -> shift back +8h
-  const utc = new Date(d.toISOString());
-  const shifted = new Date(utc.getTime() - 8 * 3600 * 1000);
-  const day = shifted.getUTCDay(); // 0 Sun..6 Sat
-  const diffToMon = (day + 6) % 7; // days back to Monday
-  const monUTC = Date.UTC(
-    shifted.getUTCFullYear(),
-    shifted.getUTCMonth(),
-    shifted.getUTCDate() - diffToMon,
-    0, 0, 0, 0
-  );
-  return new Date(monUTC + 8 * 3600 * 1000); // back to WITA
-}
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -32,18 +17,93 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const nowWeek = weekStartWITA();
-    const lastWeek = new Date(nowWeek.getTime() - 7 * 24 * 3600 * 1000);
-
     console.log('🔄 Starting weekly rollover...');
-    console.log(`📅 Current week start (WITA): ${nowWeek.toISOString()}`);
-    console.log(`📅 Previous week start (WITA): ${lastWeek.toISOString()}`);
+    
+    // Get current week start using database WITA function
+    const { data: nowWeekData, error: nowWeekError } = await supabase.rpc('week_start_wita', {
+      ts: new Date().toISOString()
+    });
+
+    if (nowWeekError) {
+      console.error('❌ Error getting current week start:', nowWeekError);
+      return new Response(
+        JSON.stringify({ ok: false, error: 'Failed to calculate week start: ' + nowWeekError.message }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const nowWeek = nowWeekData as string;
+    const lastWeekDate = new Date(new Date(nowWeek).getTime() - 7 * 24 * 3600 * 1000);
+    
+    const { data: lastWeekData, error: lastWeekError } = await supabase.rpc('week_start_wita', {
+      ts: lastWeekDate.toISOString()
+    });
+
+    if (lastWeekError) {
+      console.error('❌ Error getting previous week start:', lastWeekError);
+      return new Response(
+        JSON.stringify({ ok: false, error: 'Failed to calculate previous week: ' + lastWeekError.message }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const lastWeek = lastWeekData as string;
+
+    console.log(`📅 Current week start (WITA): ${nowWeek}`);
+    console.log(`📅 Previous week start (WITA): ${lastWeek}`);
+
+    // Check if rollover already completed for this week (idempotency)
+    const { data: existingJob, error: jobCheckError } = await supabase
+      .from('weekly_jobs')
+      .select('week_start, ran_at')
+      .eq('week_start', nowWeek)
+      .maybeSingle();
+
+    if (jobCheckError) {
+      console.error('❌ Error checking job history:', jobCheckError);
+      return new Response(
+        JSON.stringify({ ok: false, error: 'Failed to check job history: ' + jobCheckError.message }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (existingJob) {
+      console.log(`✅ Rollover already completed for week ${nowWeek} at ${existingJob.ran_at}`);
+      return new Response(
+        JSON.stringify({
+          ok: true,
+          message: 'Rollover already completed for this week',
+          nowWeek,
+          completedAt: existingJob.ran_at
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Record that we're starting this job
+    const { error: jobInsertError } = await supabase
+      .from('weekly_jobs')
+      .insert({
+        week_start: nowWeek,
+        run_details: {
+          started_at: new Date().toISOString(),
+          previous_week: lastWeek
+        }
+      });
+
+    if (jobInsertError) {
+      console.error('❌ Error recording job start:', jobInsertError);
+      return new Response(
+        JSON.stringify({ ok: false, error: 'Failed to record job start: ' + jobInsertError.message }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     // 1) Close previous this_week -> past (determine winner)
     console.log('Step 1: Closing previous week and determining winner...');
     const { data: closing, error: e1 } = await supabase.rpc('sp_close_this_week', {
-      p_week_start: nowWeek.toISOString(),
-      p_prev_week_start: lastWeek.toISOString()
+      p_week_start: nowWeek,
+      p_prev_week_start: lastWeek
     });
 
     if (e1) {
@@ -59,7 +119,7 @@ serve(async (req) => {
     // 2) next_week(current) -> this_week(current)
     console.log('Step 2: Promoting next week to this week...');
     const { error: e2 } = await supabase.rpc('sp_promote_next_to_this', {
-      p_week_start: nowWeek.toISOString()
+      p_week_start: nowWeek
     });
 
     if (e2) {
@@ -75,7 +135,7 @@ serve(async (req) => {
     // 3) pre_next_week -> next_week (preview_week_start=current)
     console.log('Step 3: Publishing pre-next week to next week...');
     const { error: e3 } = await supabase.rpc('sp_publish_pre_to_next', {
-      p_preview_week_start: nowWeek.toISOString()
+      p_preview_week_start: nowWeek
     });
 
     if (e3) {
@@ -87,14 +147,30 @@ serve(async (req) => {
     }
 
     console.log('✅ Step 3 complete');
+    
+    // Update job record with completion details
+    await supabase
+      .from('weekly_jobs')
+      .update({
+        run_details: {
+          started_at: new Date().toISOString(),
+          completed_at: new Date().toISOString(),
+          previous_week: lastWeek,
+          winner: closing,
+          status: 'completed'
+        }
+      })
+      .eq('week_start', nowWeek);
+
     console.log('🎉 Weekly rollover completed successfully!');
 
     return new Response(
       JSON.stringify({
         ok: true,
-        nowWeek: nowWeek.toISOString(),
-        lastWeek: lastWeek.toISOString(),
-        winner: closing
+        nowWeek,
+        lastWeek,
+        winner: closing,
+        message: 'Weekly rollover completed successfully'
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
