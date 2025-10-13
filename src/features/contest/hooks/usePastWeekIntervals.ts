@@ -75,11 +75,15 @@ export const usePastWeekIntervals = (countryCode: string, timezone: string) => {
           const intervalMonday = parseIntervalToMonday(interval);
           if (!intervalMonday) return;
           
-          const diffTime = currentMonday.getTime() - intervalMonday.getTime();
+          // Calculate weeks ago from NEXT Monday (so current week interval shows as "1 week ago")
+          const nextMonday = new Date(currentMonday);
+          nextMonday.setUTCDate(nextMonday.getUTCDate() + 7);
+          
+          const diffTime = nextMonday.getTime() - intervalMonday.getTime();
           const diffDays = Math.floor(diffTime / (24 * 60 * 60 * 1000));
           const weeksAgo = Math.floor(diffDays / 7);
           
-          // Skip weeks with weeksAgo = 0 (current week participants)
+          // Only include intervals that are at least 1 week ago
           if (weeksAgo > 0) {
             intervalsMap.set(interval, { interval, weeksAgo });
           }
