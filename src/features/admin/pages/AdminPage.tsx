@@ -3135,10 +3135,6 @@ const AdminContent = () => {
           console.log('📑 Tab changed to:', tab);
             setActiveTab(tab);
           }} className="space-y-6">
-            {/* Weekly Transition Self-Check Panel */}
-            <div className="mb-6">
-              <WeeklyTransitionSelfCheck />
-            </div>
             
             {/* Mobile layout for new tabs */}
             <div className="md:hidden">
