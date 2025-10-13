@@ -6,23 +6,25 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Edit, Heart, Star, ThumbsUp, ThumbsDown, Trophy, MoreVertical, History, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
-import { WeeklyContestParticipant } from '@/types/admin';
+import { WeeklyContestParticipant, ContestApplication } from '@/types/admin';
 import { LoadingSpinner } from '../LoadingSpinner';
 import { useAdminCountry } from '@/contexts/AdminCountryContext';
 import { useApplicationHistory } from '@/hooks/useApplicationHistory';
 import { Country } from 'country-state-city';
 
 interface UnifiedParticipantTabProps {
-  participants: WeeklyContestParticipant[];
-  tabType: 'pre-next' | 'next' | 'this' | 'past';
+  participants: WeeklyContestParticipant[] | ContestApplication[];
+  tabType: 'pre-next' | 'next' | 'this' | 'past' | 'new';
   onViewPhotos: (images: string[], index: number, name: string) => void;
-  onStatusChange: (participant: WeeklyContestParticipant, newStatus: string) => Promise<void>;
+  onStatusChange?: (participant: WeeklyContestParticipant | ContestApplication, newStatus: string) => Promise<void>;
   onEdit?: (participant: any) => void;
   onViewVoters?: (participant: { id: string; name: string }) => void;
   onViewLikeDislike?: (participantName: string, type: 'like' | 'dislike') => void;
-  onDelete?: (participant: WeeklyContestParticipant) => void;
-  onRestore?: (participant: WeeklyContestParticipant) => void;
+  onDelete?: (participant: WeeklyContestParticipant | ContestApplication) => void;
+  onRestore?: (participant: WeeklyContestParticipant | ContestApplication) => void;
   onViewStatusHistory?: (participantId: string, participantName: string, statusHistory: any) => void;
+  onApprove?: (participant: ContestApplication) => void;
+  onReject?: (participant: ContestApplication) => void;
   loading?: boolean;
   
   // Past week specific props
@@ -42,6 +44,8 @@ export function UnifiedParticipantTab({
   onDelete,
   onRestore,
   onViewStatusHistory,
+  onApprove,
+  onReject,
   loading = false,
   weekIntervalFilter = 'all',
   setWeekIntervalFilter,
@@ -52,28 +56,31 @@ export function UnifiedParticipantTab({
 
   const filteredParticipants = useMemo(() => {
     let filtered = participants.filter(p => {
-      const country = p.application_data?.country || p.profiles?.country;
+      const country = p.application_data?.country || ('profiles' in p ? p.profiles?.country : undefined);
       return country === selectedCountry;
     });
 
     // Apply week interval filter for past tab
     if (tabType === 'past' && weekIntervalFilter !== 'all') {
-      filtered = filtered.filter(p => p.week_interval === weekIntervalFilter);
+      filtered = filtered.filter(p => 'week_interval' in p && p.week_interval === weekIntervalFilter);
     }
 
-    // Sort by rating for this and past tabs
+    // Sort by rating for this and past tabs (only for WeeklyContestParticipant)
     if (tabType === 'this' || tabType === 'past') {
       filtered.sort((a, b) => {
-        if (a.final_rank && !b.final_rank) return -1;
-        if (!a.final_rank && b.final_rank) return 1;
-        if (a.final_rank && b.final_rank) return a.final_rank - b.final_rank;
+        const aRank = 'final_rank' in a ? a.final_rank : undefined;
+        const bRank = 'final_rank' in b ? b.final_rank : undefined;
         
-        const ratingA = Number(a.average_rating) || 0;
-        const ratingB = Number(b.average_rating) || 0;
+        if (aRank && !bRank) return -1;
+        if (!aRank && bRank) return 1;
+        if (aRank && bRank) return aRank - bRank;
+        
+        const ratingA = 'average_rating' in a ? Number(a.average_rating) || 0 : 0;
+        const ratingB = 'average_rating' in b ? Number(b.average_rating) || 0 : 0;
         if (ratingB !== ratingA) return ratingB - ratingA;
         
-        const votesA = Number(a.total_votes) || 0;
-        const votesB = Number(b.total_votes) || 0;
+        const votesA = 'total_votes' in a ? Number(a.total_votes) || 0 : 0;
+        const votesB = 'total_votes' in b ? Number(b.total_votes) || 0 : 0;
         return votesB - votesA;
       });
     }
