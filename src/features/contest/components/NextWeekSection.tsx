@@ -475,6 +475,9 @@ export function NextWeekSection({ viewMode = 'full', countryCode = "PH" }: NextW
       <section className="max-w-6xl mx-auto pt-6 pb-0 mb-2 mt-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg shadow-lg shadow-foreground/15 border border-blue-200 dark:border-blue-800">
         <div className="mb-6 px-6">
           <div className="mb-4 text-center">
+            <p className="text-sm text-blue-600 dark:text-blue-400 mb-2">
+              {getNextWeekRange(currentLanguage.code)}
+            </p>
             <h2 className="text-2xl sm:text-3xl font-bold text-blue-800 dark:text-blue-200 mb-1">
               {t("NEXT WEEK")}
             </h2>

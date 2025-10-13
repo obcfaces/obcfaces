@@ -14,7 +14,7 @@ interface ContestWeeksRendererProps {
 }
 
 
-// Calculate dynamic past weeks based on current Monday
+// Calculate dynamic past weeks based on current Monday (format: 13-19 Oct 2025)
 const calculatePastWeeks = () => {
   const now = new Date();
   const currentMonday = new Date(now);
@@ -31,9 +31,18 @@ const calculatePastWeeks = () => {
     const sunday = new Date(monday);
     sunday.setDate(monday.getDate() + 6);
     
-    const formatDate = (d: Date) => d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' });
-    const formatYear = (d: Date) => String(d.getFullYear()).slice(-2);
-    const interval = `${formatDate(monday)}-${formatDate(sunday)}/${formatYear(sunday)}`;
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const formatDay = (d: Date) => d.getDate().toString();
+    const formatMonth = (d: Date) => monthNames[d.getMonth()];
+    const formatYear = (d: Date) => d.getFullYear();
+    
+    // Format: "13-19 Oct 2025" or "29 Sep-05 Oct 2025" if months differ
+    let interval;
+    if (monday.getMonth() === sunday.getMonth()) {
+      interval = `${formatDay(monday)}-${formatDay(sunday)} ${formatMonth(sunday)} ${formatYear(sunday)}`;
+    } else {
+      interval = `${formatDay(monday)} ${formatMonth(monday)}-${formatDay(sunday)} ${formatMonth(sunday)} ${formatYear(sunday)}`;
+    }
     
     weeks.push({ interval, weeksAgo: i });
   }
