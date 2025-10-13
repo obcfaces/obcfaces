@@ -3955,6 +3955,7 @@ const AdminContent = () => {
         }}
         editMode={true}
         existingData={editingParticipantData}
+        isAdminEdit={true}
       />
 
       {/* Delete Confirmation Modal */}
