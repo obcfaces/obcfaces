@@ -13,7 +13,6 @@ const getStatusBadgeVariant = (status: string) => {
     case 'this week':
       return 'default';
     case 'next week':
-    case 'next week on site':
       return 'secondary';
     case 'pre next week':
       return 'outline';

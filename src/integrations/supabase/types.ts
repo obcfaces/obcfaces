@@ -2399,6 +2399,10 @@ export type Database = {
         Args: { conversation_id_param: string; user_id_param: string }
         Returns: boolean
       }
+      week_start_wita: {
+        Args: { ts: string }
+        Returns: string
+      }
     }
     Enums: {
       app_role:

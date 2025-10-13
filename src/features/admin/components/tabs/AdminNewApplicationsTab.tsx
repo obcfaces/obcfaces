@@ -77,8 +77,6 @@ export function AdminNewApplicationsTab({
         return 'bg-purple-100 dark:bg-purple-900';
       case 'next week':
         return 'bg-[hsl(var(--status-next-week))]';
-      case 'next week on site':
-        return 'bg-[hsl(var(--status-next-week-on-site))]';
       case 'this week':
         return 'bg-[hsl(var(--status-this-week))]';
       case 'past':
@@ -306,7 +304,7 @@ const ApplicationCardWithHistory = ({
                     className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                     onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 0, `${firstName} ${lastName}`)}
                   />
-                  {['this week', 'next week', 'next week on site', 'pre next week'].includes(participant.admin_status || '') && (
+                  {['this week', 'next week', 'pre next week'].includes(participant.admin_status || '') && (
                     <Badge variant="outline" className="absolute bottom-1 left-1 text-[10px] px-1 py-0 h-4 bg-green-500/90 text-white border-green-600 shadow-sm">
                       on site
                     </Badge>
@@ -451,7 +449,6 @@ const ApplicationCardWithHistory = ({
                     <SelectItem value="pre next week">Pre Next Week</SelectItem>
                     <SelectItem value="this week">This Week</SelectItem>
                     <SelectItem value="next week">Next Week</SelectItem>
-                    <SelectItem value="next week on site">Next Week On Site</SelectItem>
                     <SelectItem value="past">Past</SelectItem>
                   </SelectContent>
                 </Select>
@@ -593,7 +590,6 @@ const ApplicationCardWithHistory = ({
                       <SelectItem value="pre next week">Pre Next Week</SelectItem>
                       <SelectItem value="this week">This Week</SelectItem>
                       <SelectItem value="next week">Next Week</SelectItem>
-                      <SelectItem value="next week on site">Next Week On Site</SelectItem>
                       <SelectItem value="past">Past</SelectItem>
                     </SelectContent>
                   </Select>

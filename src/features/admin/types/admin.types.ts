@@ -5,7 +5,7 @@
 
 import { ALL_COUNTRIES, PRIORITY_LOCALES } from '@/data/locale-config';
 
-export type ParticipantStatus = 'pending' | 'rejected' | 'pre next week' | 'this week' | 'next week' | 'next week on site' | 'past';
+export type ParticipantStatus = 'pending' | 'rejected' | 'pre next week' | 'this week' | 'next week' | 'past';
 
 export interface ContestCountryConfig {
   code: string;

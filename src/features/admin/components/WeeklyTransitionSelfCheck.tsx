@@ -59,7 +59,7 @@ export const WeeklyTransitionSelfCheck = () => {
       const checks = await Promise.all([
         supabase.from('weekly_contests').select('id', { count: 'exact' }).eq('status', 'active'),
         supabase.from('weekly_contest_participants').select('id', { count: 'exact' }).eq('admin_status', 'this week').is('deleted_at', null),
-        supabase.from('weekly_contest_participants').select('id', { count: 'exact' }).eq('admin_status', 'next week on site').is('deleted_at', null),
+        supabase.from('weekly_contest_participants').select('id', { count: 'exact' }).eq('admin_status', 'next week').is('deleted_at', null),
         supabase.from('weekly_contest_participants').select('id', { count: 'exact' }).eq('admin_status', 'pre next week').is('deleted_at', null),
         ...pastIntervals.map(interval => 
           supabase.from('weekly_contest_participants').select('id', { count: 'exact' }).eq('admin_status', 'past').eq('week_interval', interval).is('deleted_at', null)
@@ -69,7 +69,7 @@ export const WeeklyTransitionSelfCheck = () => {
       setSystemChecks([
         { check_type: 'Active weeks', value: checks[0].count || 0, status: checks[0].count === 1 ? '✅' : '❌' },
         { check_type: 'This week participants', value: checks[1].count || 0, status: checks[1].count! > 0 ? '✅' : '⚠️' },
-        { check_type: 'Next week on site', value: checks[2].count || 0, status: checks[2].count! > 0 ? '✅' : '⚠️' },
+        { check_type: 'Next week participants', value: checks[2].count || 0, status: checks[2].count! > 0 ? '✅' : '⚠️' },
         { check_type: 'Pre next week', value: checks[3].count || 0, status: checks[3].count! > 0 ? '✅' : '⚠️' },
         { check_type: '1 week ago', value: checks[4].count || 0, status: checks[4].count! > 0 ? '✅' : '⚠️' },
         { check_type: '2 weeks ago', value: checks[5].count || 0, status: checks[5].count! > 0 ? '✅' : '⚠️' },
@@ -135,7 +135,7 @@ export const WeeklyTransitionSelfCheck = () => {
       if (result.transitions) {
         message += `\n\nTransitions:`;
         message += `\n- "this week" → "past": ${result.transitions.thisWeekToPast}`;
-        message += `\n- "next week on site" → "this week": ${result.transitions.nextWeekOnSiteToThisWeek}`;
+        message += `\n- "next week" → "this week": ${result.transitions.nextWeekOnSiteToThisWeek}`;
         message += `\n- "pre next week" → "next week": ${result.transitions.preNextWeekToNextWeek}`;
       }
 

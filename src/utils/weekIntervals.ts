@@ -96,7 +96,6 @@ export const getWeekIntervalForStatus = (adminStatus: string): string => {
   const statusMapping: { [key: string]: string } = {
     'this week': currentWeek.formatted,
     'next week': nextWeek.formatted,
-    'next week on site': nextWeek.formatted,
     'pre next week': nextWeek.formatted,
     'past': pastWeek.formatted,
   };

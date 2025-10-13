@@ -59,7 +59,7 @@ import {
 } from '@/utils/weekIntervals';
 
 // Unified status type for participants - only real statuses from DB
-type ParticipantStatus = 'pending' | 'rejected' | 'pre next week' | 'this week' | 'next week' | 'next week on site' | 'past';
+type ParticipantStatus = 'pending' | 'rejected' | 'pre next week' | 'this week' | 'next week' | 'past';
 
 // Helper function to check if rejection reason is a duplicate of predefined reasons
 const isReasonDuplicate = (rejectionReason: string, reasonTypes: string[]) => {
@@ -142,7 +142,7 @@ interface ContestApplication {
   deleted_at?: string;
   is_active: boolean;
   notes?: string;
-  admin_status?: 'pending' | 'rejected' | 'pre next week' | 'this week' | 'next week' | 'next week on site' | 'past';
+  admin_status?: 'pending' | 'rejected' | 'pre next week' | 'this week' | 'next week' | 'past';
   status_history?: {
     [key: string]: {
       changed_at?: string;
@@ -871,7 +871,6 @@ const AdminContent = () => {
       case 'this week':
         return '29/09-05/10/25'; // Current actual week  
       case 'next week':
-      case 'next week on site':
         return '06/10-12/10/25'; // Next week
       case 'past':
         // For 'past' status, use status_history to determine week interval
@@ -1577,8 +1576,6 @@ const AdminContent = () => {
         return 'bg-purple-100 dark:bg-purple-900';
       case 'next week':
         return 'bg-[hsl(var(--status-next-week))]';
-      case 'next week on site':
-        return 'bg-[hsl(var(--status-next-week-on-site))]';
       case 'this week':
         return 'bg-[hsl(var(--status-this-week))]';
       case 'past':
@@ -2269,7 +2266,7 @@ const AdminContent = () => {
     const { data, error } = await supabase
       .from('weekly_contest_participants')
       .select('*')
-      .in('admin_status', ['pending', 'rejected', 'pre next week', 'this week', 'next week', 'next week on site', 'past'] as any)
+      .in('admin_status', ['pending', 'rejected', 'pre next week', 'this week', 'next week', 'past'] as any)
       .not('deleted_at', 'is', null)
       .order('deleted_at', { ascending: false });
 
@@ -2640,11 +2637,11 @@ const AdminContent = () => {
     try {
       console.log('Fetching next week participants...');
       
-      // Get ALL participants with next week or next week on site status - no other filters
+      // Get ALL participants with next week status - no other filters
       const { data: nextWeekData, error } = await supabase
         .from('weekly_contest_participants')
         .select('*')
-        .in('admin_status', ['next week', 'next week on site'])
+        .eq('admin_status', 'next week')
         .is('deleted_at', null)
         .order('created_at', { ascending: false });
       
@@ -3390,7 +3387,7 @@ const AdminContent = () => {
                     // Show applications that were CHANGED TO pre/next/this week statuses on this day
                     // Check status_history for these status changes on this day
                     const statusHistory = app.status_history || {};
-                    const reservedStatuses = ['pre next week', 'next week', 'next week on site', 'this week', 'past'];
+                    const reservedStatuses = ['pre next week', 'next week', 'this week', 'past'];
                     
                     return reservedStatuses.some(status => {
                       const statusData = statusHistory[status];
