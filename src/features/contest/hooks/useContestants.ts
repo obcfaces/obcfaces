@@ -58,24 +58,35 @@ export const useContestants = ({
         .eq('is_active', true)
         .is('deleted_at', null);
 
-      // Filter by week offset
+      // Filter by week offset using week_start dates
       if (weekOffset === 0) {
-        query = query.eq('admin_status', 'this week');
-      } else if (weekOffset === 1) {
-        query = query.eq('admin_status', 'next week');
-      } else if (weekOffset < 0) {
-        // For past weeks, we need to join with weekly_contests
-        const { data: weekData } = await supabase
-          .from('weekly_contests')
-          .select('week_start_date')
-          .order('week_start_date', { ascending: false })
-          .limit(Math.abs(weekOffset))
-          .throwOnError();
+        // This week - current Monday
+        const now = new Date();
+        const currentMonday = new Date(now);
+        const dayOfWeek = currentMonday.getDay();
+        const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+        currentMonday.setDate(currentMonday.getDate() + daysToMonday);
+        currentMonday.setHours(0, 0, 0, 0);
         
-        if (weekData && weekData.length > 0) {
-          const targetWeek = weekData[weekData.length - 1];
-          // Get participants for this specific week
-        }
+        const weekStartStr = currentMonday.toISOString().split('T')[0];
+        query = query.eq('week_start', weekStartStr).eq('admin_status', 'this week');
+      } else if (weekOffset === 1) {
+        // Next week - using preview_week_start
+        query = query.eq('admin_status', 'next week').not('preview_week_start', 'is', null);
+      } else if (weekOffset < 0) {
+        // Past weeks - calculate specific Monday
+        const now = new Date();
+        const currentMonday = new Date(now);
+        const dayOfWeek = currentMonday.getDay();
+        const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+        currentMonday.setDate(currentMonday.getDate() + daysToMonday);
+        
+        const targetMonday = new Date(currentMonday);
+        targetMonday.setDate(currentMonday.getDate() + (weekOffset * 7));
+        targetMonday.setHours(0, 0, 0, 0);
+        
+        const weekStartStr = targetMonday.toISOString().split('T')[0];
+        query = query.eq('week_start', weekStartStr).eq('admin_status', 'past');
       }
 
       // Apply filters
