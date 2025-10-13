@@ -155,10 +155,10 @@ export function UnifiedParticipantTab({
               variant={weekIntervalFilter === interval.value ? 'default' : 'outline'}
               size="sm"
               onClick={() => setWeekIntervalFilter(interval.value)}
-              className="gap-2"
+              className="gap-1 h-7 px-2 text-xs"
             >
-              {interval.label}
-              <Badge variant="secondary" className="ml-1 px-1.5 py-0.5 text-xs">
+              <span className="text-[10px]">{interval.label}</span>
+              <Badge variant="secondary" className="ml-0.5 px-1 py-0 text-[10px] h-4">
                 {interval.count}
               </Badge>
             </Button>
@@ -167,9 +167,10 @@ export function UnifiedParticipantTab({
             variant={weekIntervalFilter === 'all' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setWeekIntervalFilter('all')}
+            className="gap-1 h-7 px-2 text-xs"
           >
-            All
-            <Badge variant="secondary" className="ml-1 px-1.5 py-0.5 text-xs">
+            <span className="text-[10px]">All</span>
+            <Badge variant="secondary" className="ml-0.5 px-1 py-0 text-[10px] h-4">
               {participants.length}
             </Badge>
           </Button>
@@ -705,12 +706,12 @@ const ParticipantCardWithHistory = ({
     </Card>
 
     {/* Rejection reasons - показываем под карточкой для NEW и REJECTED */}
-    {tabType === 'new' && participant.admin_status === 'rejected' && rejectionReasons.length > 0 && (
+    {tabType === 'new' && participant.admin_status === 'rejected' && rejectionReasons && rejectionReasons.length > 0 && (
       <div className="mt-2 px-3 py-2 bg-red-50 dark:bg-red-900/20 rounded-md border border-red-200 dark:border-red-800">
         <p className="text-xs font-semibold text-red-700 dark:text-red-400 mb-1">Rejection Reasons:</p>
         <div className="flex flex-wrap gap-1">
           {rejectionReasons.map((reasonType: string, index: number) => {
-            const reasonText = typeof REJECTION_REASONS === 'object' && REJECTION_REASONS[reasonType];
+            const reasonText = REJECTION_REASONS[reasonType as keyof typeof REJECTION_REASONS];
             return (
               <Badge key={index} variant="destructive" className="text-xs">
                 {reasonText || reasonType}
