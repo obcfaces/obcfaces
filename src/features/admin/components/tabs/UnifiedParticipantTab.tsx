@@ -792,15 +792,15 @@ const ParticipantCardWithHistory = ({
 
     {/* Rejection reasons - показываем под карточкой для NEW и REJECTED */}
     {tabType === 'new' && participant.admin_status === 'rejected' && rejectionReasons && rejectionReasons.length > 0 && (
-      <div className="px-3 py-2">
+      <div className="mt-2 px-3 py-2 bg-red-50 dark:bg-red-900/20 rounded-md border border-red-200 dark:border-red-800">
+        <p className="text-xs font-semibold text-red-700 dark:text-red-400 mb-1">Rejection Reasons:</p>
         <div className="flex flex-wrap gap-1">
           {rejectionReasons.map((reasonType: string, index: number) => {
             const reasonText = REJECTION_REASONS[reasonType as keyof typeof REJECTION_REASONS];
             return (
-              <span key={index} className="text-xs text-red-600 dark:text-red-400">
+              <Badge key={index} variant="destructive" className="text-xs">
                 {reasonText || reasonType}
-                {index < rejectionReasons.length - 1 && ', '}
-              </span>
+              </Badge>
             );
           })}
         </div>
