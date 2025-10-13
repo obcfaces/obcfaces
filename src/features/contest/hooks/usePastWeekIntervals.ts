@@ -39,7 +39,8 @@ export const usePastWeekIntervals = (countryCode: string, timezone: string) => {
       const year = parseInt(endParts[2]);
       const fullYear = year < 50 ? 2000 + year : 1900 + year;
       
-      return new Date(fullYear, month, day, 0, 0, 0, 0);
+      // Return UTC date for consistent comparison with getCurrentMonday
+      return new Date(Date.UTC(fullYear, month, day, 0, 0, 0, 0));
     } catch (error) {
       console.error('Error parsing interval:', interval, error);
       return null;
