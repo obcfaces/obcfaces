@@ -49,6 +49,7 @@ import { AdminAllParticipantsTab } from '../components/tabs/AdminAllParticipants
 import { AdminRegistrationsTab } from '../components/tabs/AdminRegistrationsTab';
 import { AdminStatisticsTab } from '../components/tabs/AdminStatisticsTab';
 import { BackupTrigger } from '../components/BackupTrigger';
+import { WeeklyTransitionButton } from '@/features/contest/components/WeeklyTransitionButton';
 import { AdminCountryProvider, useAdminCountry } from '@/contexts/AdminCountryContext';
 import { CONTEST_COUNTRIES } from '@/types/admin';
 import { 
@@ -3117,7 +3118,10 @@ const AdminContent = () => {
                 </SelectContent>
               </Select>
               
-              <BackupTrigger />
+              <div className="flex items-center gap-2">
+                <WeeklyTransitionButton />
+                <BackupTrigger />
+              </div>
             </div>
 
             <div className="flex items-center gap-4">
