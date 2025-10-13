@@ -1,10 +1,7 @@
 import { ContestSection } from "./ContestSection";
 import { NextWeekSection } from "./NextWeekSection";
-import { usePastWeekIntervals } from "../hooks/usePastWeekIntervals";
-import { VirtualizedList } from "@/components/performance/VirtualizedList";
 import { useMemo } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
-import { formatIntervalSync } from "../utils/formatInterval";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getWeekRange } from "@/utils/dateFormatting";
 
@@ -16,6 +13,15 @@ interface ContestWeeksRendererProps {
 }
 
 
+// Fixed week intervals mapping
+const FIXED_WEEK_INTERVALS = [
+  { interval: '06/10-12/10/25', weeksAgo: 1 },
+  { interval: '29/09-05/10/25', weeksAgo: 2 },
+  { interval: '22/09-28/09/25', weeksAgo: 3 },
+  { interval: '15/09-21/09/25', weeksAgo: 4 },
+  { interval: '08/09-14/09/25', weeksAgo: 5 },
+];
+
 export const ContestWeeksRenderer = ({ 
   viewMode, 
   countryCode = "PH", 
@@ -24,11 +30,10 @@ export const ContestWeeksRenderer = ({
 }: ContestWeeksRendererProps) => {
   const { t } = useTranslation();
   const { currentLanguage } = useLanguage();
-  const { intervals: pastWeekIntervals } = usePastWeekIntervals(countryCode, timezone);
 
-  // Prepare past week items for virtualization
+  // Prepare past week items using fixed intervals
   const pastWeekItems = useMemo(() => {
-    return pastWeekIntervals.map((item) => {
+    return FIXED_WEEK_INTERVALS.map((item) => {
       const weekLabel = item.weeksAgo === 1 ? t('1 WEEK AGO') : t(`${item.weeksAgo} WEEKS AGO`);
       
       return {
@@ -38,7 +43,7 @@ export const ContestWeeksRenderer = ({
             key={item.interval}
             title={weekLabel}
             titleSuffix={t("(Closed)")}
-            subtitle={formatIntervalSync(item.interval)}
+            subtitle={item.interval}
             centerSubtitle
             showWinner={true}
             viewMode={viewMode}
@@ -49,7 +54,7 @@ export const ContestWeeksRenderer = ({
         )
       };
     });
-  }, [pastWeekIntervals, viewMode, t]);
+  }, [viewMode, t, countryCode]);
 
   return (
     <>
