@@ -2218,14 +2218,7 @@ const AdminContent = () => {
     // Debug: Check applications for Saturday 11/10
     const saturdayApps = processedData.filter((app: any) => {
       if (!app.submitted_at) return false;
-      const appDateStr = new Date(app.submitted_at).toLocaleString('en-US', { 
-        timeZone: 'Asia/Manila',
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
-      }).split(',')[0];
-      const [appMonth, appDay, appYear] = appDateStr.split('/');
-      const appDate = `${appYear}-${appMonth.padStart(2, '0')}-${appDay.padStart(2, '0')}`;
+      const appDate = new Date(app.submitted_at).toISOString().split('T')[0];
       return appDate === '2025-10-11';
     });
     
@@ -3362,15 +3355,8 @@ const AdminContent = () => {
                     if (hasDifferentStatus) return false;
                   }
                   
-                  // Parse dates in Manila timezone for comparison
-                  const appDateStr = new Date(app.submitted_at).toLocaleString('en-US', { 
-                    timeZone: 'Asia/Manila',
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit'
-                  }).split(',')[0];
-                  const [appMonth, appDay, appYear] = appDateStr.split('/');
-                  const appDate = `${appYear}-${appMonth.padStart(2, '0')}-${appDay.padStart(2, '0')}`;
+                  // Parse dates in UTC for comparison
+                  const appDate = new Date(app.submitted_at).toISOString().split('T')[0];
                   
                   const filterDate = selectedNewAppDay.date;
                   
@@ -3393,14 +3379,7 @@ const AdminContent = () => {
                       const statusData = statusHistory[status];
                       if (!statusData || !statusData.changed_at) return false;
                       
-                      const changedAtStr = new Date(statusData.changed_at).toLocaleString('en-US', {
-                        timeZone: 'Asia/Manila',
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit'
-                      }).split(',')[0];
-                      const [cMonth, cDay, cYear] = changedAtStr.split('/');
-                      const changedDate = `${cYear}-${cMonth.padStart(2, '0')}-${cDay.padStart(2, '0')}`;
+                      const changedDate = new Date(statusData.changed_at).toISOString().split('T')[0];
                       
                       return changedDate === filterDate;
                     });
