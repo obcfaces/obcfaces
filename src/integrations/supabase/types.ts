@@ -2144,6 +2144,10 @@ export type Database = {
         Args: { input_date?: string }
         Returns: string
       }
+      get_week_monday_wita: {
+        Args: { ts?: string }
+        Returns: string
+      }
       get_weekly_contest_participants: {
         Args: { weeks_offset?: number }
         Returns: {
