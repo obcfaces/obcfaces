@@ -27,6 +27,7 @@ interface UnifiedParticipantTabProps {
   onApprove?: (participant: ContestApplication) => void;
   onReject?: (participant: ContestApplication) => void;
   loading?: boolean;
+  getParticipantVotes?: (participantName: string) => Promise<{ likes: number; dislikes: number }>;
   
   // Past week specific props
   weekIntervalFilter?: string;
@@ -50,11 +51,13 @@ export function UnifiedParticipantTab({
   weekIntervalFilter = 'all',
   setWeekIntervalFilter,
   availableIntervals = [],
+  getParticipantVotes,
 }: UnifiedParticipantTabProps) {
   const { selectedCountry } = useAdminCountry();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showStatusHistoryModal, setShowStatusHistoryModal] = useState(false);
   const [selectedParticipant, setSelectedParticipant] = useState<any>(null);
+  const [votesCache, setVotesCache] = useState<Map<string, { likes: number; dislikes: number }>>(new Map());
 
   const filteredParticipants = useMemo(() => {
     let filtered = participants.filter(p => {
@@ -115,25 +118,33 @@ export function UnifiedParticipantTab({
   };
 
   const getTitle = () => {
-    switch (tabType) {
-      case 'pre-next': return 'Pre Next Week';
-      case 'next': return 'Next Week';
-      case 'this': return 'This Week';
-      case 'past': return 'Past Weeks';
-      default: return '';
-    }
+    // Не показываем заголовки
+    return '';
   };
 
-  // Mock data for next week votes (replace with real data)
-  const getParticipantVotes = (participantName: string) => {
+  // Функция для получения голосов (с кешированием)
+  const getVotesForParticipant = async (participantName: string) => {
+    if (votesCache.has(participantName)) {
+      return votesCache.get(participantName)!;
+    }
+    
+    if (getParticipantVotes) {
+      const votes = await getParticipantVotes(participantName);
+      setVotesCache(prev => new Map(prev).set(participantName, votes));
+      return votes;
+    }
+    
     return { likes: 0, dislikes: 0 };
   };
 
   return (
     <div className="space-y-4 md:space-y-4">
-      <div className="flex items-center justify-between px-4 md:px-0">
-        <h2 className="text-2xl font-bold">{getTitle()} ({filteredParticipants.length})</h2>
-      </div>
+      {/* Убираем заголовок */}
+      {getTitle() && (
+        <div className="flex items-center justify-between px-4 md:px-0">
+          <h2 className="text-2xl font-bold">{getTitle()} ({filteredParticipants.length})</h2>
+        </div>
+      )}
 
       {/* Week Interval Filter for Past tab */}
       {tabType === 'past' && setWeekIntervalFilter && (
@@ -191,7 +202,7 @@ export function UnifiedParticipantTab({
             onApprove={onApprove}
             onReject={onReject}
             getStatusBackgroundColor={getStatusBackgroundColor}
-            getParticipantVotes={getParticipantVotes}
+            getVotesForParticipant={getVotesForParticipant}
           />
         ))}
       </div>
@@ -236,10 +247,11 @@ const ParticipantCardWithHistory = ({
   onApprove,
   onReject,
   getStatusBackgroundColor,
-  getParticipantVotes,
+  getVotesForParticipant,
 }: any) => {
   const { history, loading } = useApplicationHistory(participant.id);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [votes, setVotes] = useState<{ likes: number; dislikes: number }>({ likes: 0, dislikes: 0 });
   
   const historyCount = history.length;
   const appData = participant.application_data || {};
@@ -249,12 +261,18 @@ const ParticipantCardWithHistory = ({
   const photo2 = appData.photo_2_url || appData.photo2_url || appData.photo2Url || appData.photoUrl2 || '';
   const participantName = `${firstName} ${lastName}`;
   const isWinner = 'final_rank' in participant && participant.final_rank === 1;
-  const votes = getParticipantVotes(participantName);
 
   // Get rejection reasons if rejected
   const rejectionReasons = participant.admin_status === 'rejected' && appData.rejection_reason_types
     ? appData.rejection_reason_types
     : [];
+
+  // Load votes for Next Week tab
+  React.useEffect(() => {
+    if (tabType === 'next' && getVotesForParticipant) {
+      getVotesForParticipant(participantName).then(setVotes);
+    }
+  }, [tabType, participantName, getVotesForParticipant]);
 
   // Get the latest status change date
   const getLatestStatusChangeDate = () => {
