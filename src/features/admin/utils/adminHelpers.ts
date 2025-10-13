@@ -49,7 +49,6 @@ export const getStatusBadgeVariant = (status: string): "default" | "secondary" |
     'pre next week': 'secondary',
     'this week': 'default',
     'next week': 'secondary',
-    'next week on site': 'secondary',
     'past': 'outline',
   };
   
@@ -66,7 +65,6 @@ export const getStatusText = (status: string): string => {
     'pre next week': 'Pre Next Week',
     'this week': 'This Week',
     'next week': 'Next Week',
-    'next week on site': 'Next Week On Site',
     'past': 'Past',
   };
   

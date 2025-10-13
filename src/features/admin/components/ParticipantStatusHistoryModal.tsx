@@ -269,7 +269,6 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
       case 'this week':
         return 'default';
       case 'next week':
-      case 'next week on site':
       case 'pre next week':
         return 'secondary';
       case 'past':

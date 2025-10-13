@@ -50,8 +50,6 @@ export function AdminAllParticipantsTab({
         return 'bg-purple-100 dark:bg-purple-900';
       case 'next week':
         return 'bg-[hsl(var(--status-next-week))]';
-      case 'next week on site':
-        return 'bg-[hsl(var(--status-next-week-on-site))]';
       case 'this week':
         return 'bg-[hsl(var(--status-this-week))]';
       case 'past':
@@ -134,7 +132,6 @@ export function AdminAllParticipantsTab({
               <SelectItem value="rejected">Rejected</SelectItem>
               <SelectItem value="pre next week">Pre Next Week</SelectItem>
               <SelectItem value="next week">Next Week</SelectItem>
-              <SelectItem value="next week on site">Next Week On Site</SelectItem>
               <SelectItem value="this week">This Week</SelectItem>
               <SelectItem value="past">Past</SelectItem>
             </SelectContent>
@@ -356,7 +353,6 @@ export function AdminAllParticipantsTab({
                             <SelectItem value="pre next week">Pre Next Week</SelectItem>
                             <SelectItem value="this week">This Week</SelectItem>
                             <SelectItem value="next week">Next Week</SelectItem>
-                            <SelectItem value="next week on site">Next Week On Site</SelectItem>
                             <SelectItem value="past">Past</SelectItem>
                           </SelectContent>
                         </Select>
@@ -477,7 +473,6 @@ export function AdminAllParticipantsTab({
                             <SelectItem value="pre next week">Pre Next Week</SelectItem>
                             <SelectItem value="this week">This Week</SelectItem>
                             <SelectItem value="next week">Next Week</SelectItem>
-                            <SelectItem value="next week on site">Next Week On Site</SelectItem>
                             <SelectItem value="past">Past</SelectItem>
                           </SelectContent>
                         </Select>
