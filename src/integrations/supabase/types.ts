@@ -2362,6 +2362,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      transition_weekly_contest: {
+        Args: { dry_run?: boolean; target_week_start: string }
+        Returns: Json
+      }
       transition_weekly_participant_statuses: {
         Args: Record<PropertyKey, never>
         Returns: undefined
