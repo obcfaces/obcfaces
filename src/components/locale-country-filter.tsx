@@ -1,9 +1,10 @@
-import React, { useMemo, useContext } from "react";
+import React, { useMemo, useContext, useEffect, useState } from "react";
 import SearchableSelect, { type Option } from "@/components/ui/searchable-select";
 import { ALL_COUNTRIES } from "@/data/locale-config";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "@/hooks/useTranslation";
+import { supabase } from "@/integrations/supabase/client";
 
 interface LocaleCountryFilterProps {
   value?: string;
@@ -17,6 +18,26 @@ const LocaleCountryFilter: React.FC<LocaleCountryFilterProps> = ({
   const { currentLanguage } = useLanguage();
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [activeCountries, setActiveCountries] = useState<string[]>([]);
+
+  // Fetch countries that have active participants
+  useEffect(() => {
+    const fetchActiveCountries = async () => {
+      try {
+        const { data, error } = await supabase
+          .rpc('get_weekly_contest_participants_public', { weeks_offset: 0 });
+        
+        if (!error && data) {
+          const uniqueCountries = [...new Set(data.map((p: any) => p.country).filter(Boolean))];
+          setActiveCountries(uniqueCountries as string[]);
+        }
+      } catch (err) {
+        console.error('Error fetching active countries:', err);
+      }
+    };
+    
+    fetchActiveCountries();
+  }, []);
 
   // Try to get context from PublicCountryProvider if available
   let contextCountryCode: string | undefined;
@@ -38,7 +59,12 @@ const LocaleCountryFilter: React.FC<LocaleCountryFilterProps> = ({
   const languageCode = contextLanguageCode || currentLanguage.code;
 
   const countryOptions: Option[] = useMemo(() => {
-    const allCountries = ALL_COUNTRIES.map(country => {
+    // Filter countries to only show those with active participants
+    const availableCountries = ALL_COUNTRIES.filter(country => 
+      activeCountries.includes(country.code)
+    );
+    
+    const allCountries = availableCountries.map(country => {
       // Translate country name
       const translatedName = t(`country.${country.name}`) !== `country.${country.name}` 
         ? t(`country.${country.name}`) 
@@ -46,26 +72,26 @@ const LocaleCountryFilter: React.FC<LocaleCountryFilterProps> = ({
       
       return {
         value: country.code,
-        label: country.code === 'PH' ? translatedName : `${translatedName} soon`,
-        disabled: country.code !== 'PH',
+        label: translatedName,
+        disabled: false,
         flag: country.flag,
       };
     });
     
-    // Sort alphabetically but put Philippines first
-    const philippines = allCountries.find(c => c.value === 'PH');
+    // Sort alphabetically but put current country first
+    const currentCountry = allCountries.find(c => c.value === countryCode);
     const otherCountries = allCountries
-      .filter(c => c.value !== 'PH')
+      .filter(c => c.value !== countryCode)
       .sort((a, b) => a.label.localeCompare(b.label));
     
     return [
-      // Active countries
-      ...(philippines ? [philippines] : []),
-      { value: "__divider__", label: "", disabled: true, divider: true },
-      // All other countries with "soon" label
+      // Current country first
+      ...(currentCountry ? [currentCountry] : []),
+      ...(otherCountries.length > 0 ? [{ value: "__divider__", label: "", disabled: true, divider: true }] : []),
+      // Other active countries
       ...otherCountries
     ];
-  }, [t]);
+  }, [t, activeCountries, countryCode]);
 
   const handleCountryChange = (newCountryCode: string) => {
     // If context navigator is available, use it
@@ -84,7 +110,7 @@ const LocaleCountryFilter: React.FC<LocaleCountryFilterProps> = ({
 
   return (
     <div className="w-full sm:w-48 shrink-0">
-      <div className="[&_button]:bg-contest-light-bg [&_button]:border-contest-border [&_button:hover]:bg-contest-light-bg [&_button]:text-contest-text [&_button:hover]:text-contest-text">
+      <div className="[&_button]:bg-contest-light-bg [&_button]:border-contest-border [&_button:hover]:bg-contest-light-bg [&_button:hover]:border-primary [&_button]:text-contest-text [&_button:hover]:text-contest-text [&_button]:transition-colors">
         <SearchableSelect
           value={countryCode}
           onValueChange={handleCountryChange}

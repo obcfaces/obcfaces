@@ -27,9 +27,9 @@ export function ContestHeader({ activeSection, onSectionChange, viewMode = "comp
     <div className="bg-contest-light-bg">
       <div className="max-w-6xl mx-auto px-6 py-4">
         {/* First line: Title "of" and Country Selector */}
-        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2">
+        <div className="flex items-center gap-2">
           <h1 className="text-xl sm:text-2xl font-bold text-contest-text whitespace-nowrap">OBC faces</h1>
-          <span className="text-xl sm:text-2xl font-bold text-contest-text">{t("of")}</span>
+          <span className="text-xl sm:text-2xl font-bold text-contest-text whitespace-nowrap">{t("of")}</span>
           <LocaleCountryFilter />
         </div>
         
