@@ -83,15 +83,28 @@ const LocaleCountryFilter: React.FC<LocaleCountryFilterProps> = ({
   };
 
   return (
-    <div className="w-36 shrink-0">
-      <SearchableSelect
-        value={countryCode}
-        onValueChange={handleCountryChange}
-        options={countryOptions}
-        placeholder="Select country"
-        ariaLabel="Country filter"
-        highlightSelected
-      />
+    <div className="w-48 shrink-0">
+      <div className="[&_button]:bg-contest-light-bg [&_button]:border-contest-border [&_button:hover]:bg-contest-light-bg">
+        <SearchableSelect
+          value={countryCode}
+          onValueChange={handleCountryChange}
+          options={countryOptions}
+          placeholder="Select country"
+          ariaLabel="Country filter"
+          highlightSelected
+          customTriggerRenderer={(val, opts) => {
+            const selected = opts.find(o => o.value === val);
+            return selected ? (
+              <span className="flex items-center gap-2">
+                {selected.flag && <span>{selected.flag}</span>}
+                <span>{selected.label}</span>
+              </span>
+            ) : (
+              <span className="text-muted-foreground">Select country</span>
+            );
+          }}
+        />
+      </div>
     </div>
   );
 };

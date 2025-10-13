@@ -5,7 +5,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { ChevronDown, Check, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export type Option = { value: string; label: string; disabled?: boolean; divider?: boolean };
+export type Option = { value: string; label: string; disabled?: boolean; divider?: boolean; flag?: string };
 
 interface SearchableSelectProps {
   value: string;
@@ -89,7 +89,10 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
           {customTriggerRenderer ? (
             customTriggerRenderer(value, options)
           ) : selected ? (
-            <span className="text-left leading-tight break-words">{selected.label}</span>
+            <span className="flex items-center gap-2 text-left leading-tight break-words">
+              {selected.flag && <span>{selected.flag}</span>}
+              <span>{selected.label}</span>
+            </span>
           ) : isCustomValue ? (
             <span className="text-left leading-tight break-words">{value}</span>
           ) : (
@@ -168,20 +171,21 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
                       "cursor-pointer select-none rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground hover:bg-accent hover:text-accent-foreground",
                       opt.disabled && "opacity-60"
                     )}
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 size-4",
-                        value === opt.value ? "opacity-100" : "opacity-0"
-                      )}
-                    />
-                    <span className="flex items-center gap-2">
-                      <span className="text-left leading-tight break-words">{opt.label}</span>
-                      {opt.disabled && (
-                        <span className="text-xs italic text-muted-foreground flex-shrink-0">soon</span>
-                      )}
-                    </span>
-                  </CommandItem>
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 size-4",
+                          value === opt.value ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      <span className="flex items-center gap-2">
+                        {opt.flag && <span>{opt.flag}</span>}
+                        <span className="text-left leading-tight break-words">{opt.label}</span>
+                        {opt.disabled && (
+                          <span className="text-xs italic text-muted-foreground flex-shrink-0">soon</span>
+                        )}
+                      </span>
+                    </CommandItem>
                 )
               ))}
               
