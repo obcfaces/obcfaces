@@ -138,52 +138,10 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
 
   return (
     <div className="space-y-4 w-full">
-      {/* First row - Main filters */}
+      {/* First row - Main filters (without gender and view toggles) */}
       <div className="flex flex-row flex-nowrap items-center gap-2 w-full">
         {/* Country filter with locale support */}
         <LocaleCountryFilter value={country} onCountryChange={onCountryChange} />
-
-        {/* Gender filter */}
-        <div className="w-24 shrink-0">
-          <SearchableSelect
-            value={gender}
-            onValueChange={(v) => handleGenderChange(v as Gender)}
-            options={genderOptions}
-            placeholder="Select gender"
-            ariaLabel="Gender filter"
-            highlightSelected
-          />
-        </div>
-
-        {/* View toggles */}
-        <div className="ml-auto flex items-center gap-1 shrink-0">
-          <button
-            type="button"
-            onClick={() => handleViewChange("compact")}
-            aria-pressed={viewMode === "compact"}
-            aria-label="List view"
-            className="p-1 rounded-md hover:bg-accent transition-colors"
-          >
-            <AlignJustify 
-              size={28} 
-              strokeWidth={1}
-              className={viewMode === "compact" ? "text-primary" : "text-muted-foreground"}
-            />
-          </button>
-          <button
-            type="button"
-            onClick={() => handleViewChange("full")}
-            aria-pressed={viewMode === "full"}
-            aria-label="Grid view"
-            className="p-1 rounded-md hover:bg-accent transition-colors"
-          >
-            <Grid2X2 
-              size={28} 
-              strokeWidth={1}
-              className={viewMode === "full" ? "text-primary" : "text-muted-foreground"}
-            />
-          </button>
-        </div>
       </div>
 
       {/* Second row - Additional filters */}

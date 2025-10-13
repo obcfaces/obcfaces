@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Camera, Upload, Facebook, Instagram, Globe } from "lucide-react";
+import { Camera, Upload, Facebook, Instagram, Globe, AlignJustify, Grid2X2 } from "lucide-react";
 import { AuthProtectedModal } from "@/components/auth-protected-modal";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -8,12 +8,16 @@ import { CONTEST_COUNTRIES } from "@/types/admin";
 import { usePublicCountry } from "@/contexts/PublicCountryContext";
 import { useTranslation } from "@/hooks/useTranslation";
 
+export type ViewMode = "compact" | "full";
+
 interface ContestHeaderProps {
   activeSection: string;
   onSectionChange: (section: string) => void;
+  viewMode?: ViewMode;
+  onViewModeChange?: (mode: ViewMode) => void;
 }
 
-export function ContestHeader({ activeSection, onSectionChange }: ContestHeaderProps) {
+export function ContestHeader({ activeSection, onSectionChange, viewMode = "compact", onViewModeChange }: ContestHeaderProps) {
   const { t } = useTranslation();
   
   // Try to get country context - it may not exist on all pages
@@ -40,37 +44,39 @@ export function ContestHeader({ activeSection, onSectionChange }: ContestHeaderP
   return (
     <div className="bg-contest-light-bg">
       <div className="max-w-6xl mx-auto px-6 py-4">
-        {/* Title, Country Selector and button in one line */}
-        <div className="flex items-center justify-between w-full gap-4">
-          <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-bold text-contest-text">OBC faces</h1>
-            
-            {/* Country Selector - only show if navigation is available */}
-            {navigateToCountry && (
-              <Select value={countryCode} onValueChange={navigateToCountry}>
-                <SelectTrigger className="w-[200px] bg-background border-contest-border">
-                  <Globe className="h-4 w-4 mr-2" />
-                  <SelectValue>
-                    <span className="flex items-center gap-2">
-                      <span>{flag}</span>
-                      <span>{countryName}</span>
-                    </span>
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {CONTEST_COUNTRIES.map((country) => (
-                    <SelectItem key={country.code} value={country.code}>
-                      <span className="flex items-center gap-2">
-                        <span>{country.flag}</span>
-                        <span>{country.name}</span>
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          </div>
+        {/* First line: Title "of" and Country Selector */}
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-contest-text">OBC faces</h1>
+          <span className="text-2xl font-bold text-contest-text">{t("of")}</span>
           
+          {/* Country Selector - only show if navigation is available */}
+          {navigateToCountry && (
+            <Select value={countryCode} onValueChange={navigateToCountry}>
+              <SelectTrigger className="w-[200px] bg-background border-contest-border">
+                <Globe className="h-4 w-4 mr-2" />
+                <SelectValue>
+                  <span className="flex items-center gap-2">
+                    <span>{flag}</span>
+                    <span>{countryName}</span>
+                  </span>
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {CONTEST_COUNTRIES.map((country) => (
+                  <SelectItem key={country.code} value={country.code}>
+                    <span className="flex items-center gap-2">
+                      <span>{country.flag}</span>
+                      <span>{country.name}</span>
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        </div>
+        
+        {/* Second line: Join button */}
+        <div className="mt-4">
           <AuthProtectedModal>
             <Button 
               className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 whitespace-nowrap"
@@ -138,20 +144,54 @@ export function ContestHeader({ activeSection, onSectionChange }: ContestHeaderP
         </div>
         
         {/* Navigation sections below description */}
-        <nav className="flex items-center gap-6 text-sm -mb-6 mt-8">
-          {navItems.map((item) => (
-            <button
-              key={item.key}
-              onClick={() => onSectionChange(item.key)}
-              className={`py-0 transition-colors ${
-                activeSection === item.key
-                  ? "text-contest-blue font-medium"
-                  : "text-muted-foreground hover:text-contest-blue"
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
+        <nav className="flex items-center justify-between gap-6 text-sm -mb-6 mt-8">
+          <div className="flex items-center gap-6">
+            {navItems.map((item) => (
+              <button
+                key={item.key}
+                onClick={() => onSectionChange(item.key)}
+                className={`py-0 transition-colors ${
+                  activeSection === item.key
+                    ? "text-contest-blue font-medium"
+                    : "text-muted-foreground hover:text-contest-blue"
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+          
+          {/* View mode toggles */}
+          {onViewModeChange && (
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                type="button"
+                onClick={() => onViewModeChange("compact")}
+                aria-pressed={viewMode === "compact"}
+                aria-label="List view"
+                className="p-1 rounded-md hover:bg-accent transition-colors"
+              >
+                <AlignJustify 
+                  size={28} 
+                  strokeWidth={1}
+                  className={viewMode === "compact" ? "text-primary" : "text-muted-foreground"}
+                />
+              </button>
+              <button
+                type="button"
+                onClick={() => onViewModeChange("full")}
+                aria-pressed={viewMode === "full"}
+                aria-label="Grid view"
+                className="p-1 rounded-md hover:bg-accent transition-colors"
+              >
+                <Grid2X2 
+                  size={28} 
+                  strokeWidth={1}
+                  className={viewMode === "full" ? "text-primary" : "text-muted-foreground"}
+                />
+              </button>
+            </div>
+          )}
         </nav>
       </div>
       

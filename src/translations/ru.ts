@@ -69,6 +69,11 @@ export default {
   'footer.copyright': 'Все права защищены.',
   'footer.madeWith': 'Сделано с ❤️',
 
+  // Contest Header
+  'of': 'из',
+  'Contest': 'Конкурс',
+  'How it works': 'Как это работает',
+
   // Months (abbreviated)
   'month.jan': 'Янв',
   'month.feb': 'Фев',
