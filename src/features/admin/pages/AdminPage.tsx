@@ -3338,6 +3338,17 @@ const AdminContent = () => {
                 applications={selectedNewAppDay ? (selectedNewAppDay.filter === 'all' ? allApplicationsByDate : contestApplications).filter(app => {
                   if (!app.submitted_at) return false;
                   
+                  // Exclude duplicates: if this user_id already has an entry with a different status, hide this pending one
+                  if (app.admin_status === 'pending') {
+                    const hasDifferentStatus = weeklyParticipants.some(other => 
+                      other.user_id === app.user_id && 
+                      other.id !== app.id && 
+                      other.admin_status !== 'pending' &&
+                      !other.deleted_at
+                    );
+                    if (hasDifferentStatus) return false;
+                  }
+                  
                   // Parse dates in Manila timezone for comparison
                   const appDateStr = new Date(app.submitted_at).toLocaleString('en-US', { 
                     timeZone: 'Asia/Manila',
