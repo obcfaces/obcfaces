@@ -88,7 +88,6 @@ export function AdminPastWeekTab({
         tabType="past"
         onViewPhotos={onViewPhotos}
         onStatusChange={onStatusChange!}
-        onViewStatusHistory={onViewStatusHistory}
         onViewVoters={handleViewVoters}
         loading={loading}
         weekIntervalFilter={pastWeekIntervalFilter}
