@@ -116,14 +116,14 @@ export function UnifiedParticipantTab({
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 md:space-y-4">
+      <div className="flex items-center justify-between px-4 md:px-0">
         <h2 className="text-2xl font-bold">{getTitle()} ({filteredParticipants.length})</h2>
       </div>
 
       {/* Week Interval Filter for Past tab */}
       {tabType === 'past' && setWeekIntervalFilter && (
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap px-4 md:px-0">
           {availableIntervals.map((interval) => (
             <Button
               key={interval.value}
@@ -151,28 +151,31 @@ export function UnifiedParticipantTab({
         </div>
       )}
 
-      {filteredParticipants.map((participant) => (
-        <ParticipantCardWithHistory
-          key={participant.id}
-          participant={participant}
-          tabType={tabType}
-          expandedId={expandedId}
-          setExpandedId={setExpandedId}
-          onViewPhotos={onViewPhotos}
-          onEdit={onEdit}
-          onStatusChange={onStatusChange}
-          onDelete={onDelete}
-          onRestore={onRestore}
-          onViewStatusHistory={onViewStatusHistory}
-          onViewVoters={onViewVoters}
-          onViewLikeDislike={onViewLikeDislike}
-          getStatusBackgroundColor={getStatusBackgroundColor}
-          getParticipantVotes={getParticipantVotes}
-        />
-      ))}
+      {/* Карточки без отступов на мобильной версии */}
+      <div className="space-y-4 md:space-y-4 -mx-4 md:mx-0">
+        {filteredParticipants.map((participant) => (
+          <ParticipantCardWithHistory
+            key={participant.id}
+            participant={participant}
+            tabType={tabType}
+            expandedId={expandedId}
+            setExpandedId={setExpandedId}
+            onViewPhotos={onViewPhotos}
+            onEdit={onEdit}
+            onStatusChange={onStatusChange}
+            onDelete={onDelete}
+            onRestore={onRestore}
+            onViewStatusHistory={onViewStatusHistory}
+            onViewVoters={onViewVoters}
+            onViewLikeDislike={onViewLikeDislike}
+            getStatusBackgroundColor={getStatusBackgroundColor}
+            getParticipantVotes={getParticipantVotes}
+          />
+        ))}
+      </div>
 
       {filteredParticipants.length === 0 && (
-        <div className="text-center py-12 text-muted-foreground">
+        <div className="text-center py-12 text-muted-foreground px-4 md:px-0">
           No participants for {getTitle()}
         </div>
       )}
@@ -234,7 +237,7 @@ const ParticipantCardWithHistory = ({
   const submittedDate = getLatestStatusChangeDate();
 
   return (
-    <Card className={`overflow-hidden relative mx-0 rounded-lg h-[149px] ${participant.admin_status === 'rejected' ? 'bg-red-50 border-red-200' : ''} ${participant.deleted_at ? 'opacity-60' : ''} ${isWinner ? 'border-yellow-500' : ''}`}>
+    <Card className={`overflow-hidden relative rounded-lg md:rounded-lg h-[149px] ${participant.admin_status === 'rejected' ? 'bg-red-50 border-red-200' : ''} ${participant.deleted_at ? 'opacity-60' : ''} ${isWinner ? 'border-yellow-500' : ''}`}>
       <CardContent className="p-0">
         {/* Date/Time badge - left top corner */}
         {submittedDate && (
@@ -519,63 +522,102 @@ const ParticipantCardWithHistory = ({
 
         {/* Mobile layout - same as New Applications */}
         <div className="md:hidden flex h-[149px]">
-          <div className="flex gap-1 w-[120px] flex-shrink-0">
+          {/* Photos section - Fixed width как в New */}
+          <div className="flex gap-px w-[200px] flex-shrink-0 h-[149px]">
             {photo1 && (
-              <div className="w-[60px] h-[149px]">
+              <div className="w-[100px] h-[149px] flex-shrink-0 overflow-hidden">
                 <img 
                   src={photo1} 
                   alt="Portrait" 
-                  className="w-full h-full object-cover cursor-pointer"
+                  className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                   onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 0, participantName)}
                 />
+                {isWinner && (
+                  <div className="absolute top-1 left-1">
+                    <Trophy className="h-4 w-4 text-yellow-500 drop-shadow-lg" />
+                  </div>
+                )}
               </div>
             )}
             {photo2 && (
-              <div className="w-[60px] h-[149px]">
+              <div className="w-[100px] h-[149px] flex-shrink-0 overflow-hidden">
                 <img 
                   src={photo2} 
-                  alt="Full" 
-                  className="w-full h-full object-cover cursor-pointer"
+                  alt="Full length" 
+                  className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                   onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 1, participantName)}
                 />
               </div>
             )}
+            {!photo2 && (
+              <div className="w-[100px] h-[149px] flex-shrink-0 bg-muted flex items-center justify-center border border-border overflow-hidden">
+                <div className="text-center text-muted-foreground">
+                  <p className="text-xs font-medium">No Photo 2</p>
+                </div>
+              </div>
+            )}
           </div>
           
-          <div className="flex-1 p-2 flex flex-col justify-between overflow-hidden min-w-0">
+          {/* Info section - same as New */}
+          <div className="flex-1 p-2 flex flex-col justify-between overflow-hidden">
             <div>
               <div className="flex items-center gap-1 mb-0.5">
-                <Avatar className="h-4 w-4 flex-shrink-0">
+                <Avatar className="h-5 w-5 flex-shrink-0">
                   <AvatarImage src={photo1 || ''} />
-                  <AvatarFallback className="text-[8px]">
+                  <AvatarFallback className="text-[10px]">
                     {firstName?.charAt(0) || 'U'}
                   </AvatarFallback>
                 </Avatar>
-                <span className="text-[10px] font-semibold truncate">
-                  {firstName} {lastName}
+                <span className="text-xs font-semibold">
+                  {firstName} {lastName} {appData.birth_year ? new Date().getFullYear() - parseInt(appData.birth_year) : ''}
                 </span>
               </div>
-              <div className="text-[9px] text-muted-foreground mb-0.5 truncate">
+              <div className="text-[10px] text-muted-foreground mb-1">
                 {appData.city}, {appData.country}
               </div>
               
               {/* Stats for mobile */}
-              <div className="flex items-center gap-2 text-[9px]">
-                {tabType === 'next' && (
+              <div className="flex items-center gap-2 text-[10px] mt-1">
+                {tabType === 'next' && onViewLikeDislike && (
                   <>
-                    <span>👍 {votes.likes}</span>
-                    <span>👎 {votes.dislikes}</span>
+                    <div 
+                      className="flex items-center gap-0.5 cursor-pointer hover:opacity-80"
+                      onClick={() => onViewLikeDislike(participantName, 'like')}
+                    >
+                      <ThumbsUp className="h-3 w-3 text-green-500 fill-green-500" />
+                      <span className="font-semibold">{votes.likes}</span>
+                    </div>
+                    <div 
+                      className="flex items-center gap-0.5 cursor-pointer hover:opacity-80"
+                      onClick={() => onViewLikeDislike(participantName, 'dislike')}
+                    >
+                      <ThumbsDown className="h-3 w-3 text-red-500 fill-red-500" />
+                      <span className="font-semibold">{votes.dislikes}</span>
+                    </div>
                   </>
                 )}
-                {(tabType === 'this' || tabType === 'past') && (
+                {(tabType === 'this' || tabType === 'past') && onViewVoters && (
                   <>
-                    <span>⭐ {Number(participant.average_rating || 0).toFixed(1)}</span>
-                    <span>❤️ {participant.total_votes || 0}</span>
+                    <div 
+                      className="flex items-center gap-0.5 cursor-pointer hover:opacity-80"
+                      onClick={() => onViewVoters({ id: participant.id, name: participantName })}
+                    >
+                      <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                      <span className="font-semibold">{Number(participant.average_rating || 0).toFixed(1)}</span>
+                    </div>
+                    <div 
+                      className="flex items-center gap-0.5 cursor-pointer hover:opacity-80"
+                      onClick={() => onViewVoters({ id: participant.id, name: participantName })}
+                    >
+                      <Heart className="h-3 w-3 text-pink-500 fill-pink-500" />
+                      <span className="font-semibold">{participant.total_votes || 0}</span>
+                    </div>
                   </>
                 )}
               </div>
             </div>
             
+            {/* Status dropdown */}
             <div className="flex items-center gap-1">
               <Select 
                 value={participant.admin_status || tabType} 
@@ -583,15 +625,15 @@ const ParticipantCardWithHistory = ({
                   await onStatusChange(participant, value);
                 }}
               >
-                <SelectTrigger className={`w-16 h-5 text-[9px] ${getStatusBackgroundColor(participant.admin_status || tabType)}`}>
+                <SelectTrigger className={`w-[100px] text-[10px] h-5 ${getStatusBackgroundColor(participant.admin_status || tabType)}`}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="z-[9999]">
                   <SelectItem value="pending">Pending</SelectItem>
                   <SelectItem value="rejected">Rejected</SelectItem>
-                  <SelectItem value="pre next week">Pre Next</SelectItem>
-                  <SelectItem value="this week">This</SelectItem>
-                  <SelectItem value="next week">Next</SelectItem>
+                  <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                  <SelectItem value="this week">This Week</SelectItem>
+                  <SelectItem value="next week">Next Week</SelectItem>
                   <SelectItem value="past">Past</SelectItem>
                 </SelectContent>
               </Select>
