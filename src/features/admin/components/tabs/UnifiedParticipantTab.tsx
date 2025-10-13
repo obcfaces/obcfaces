@@ -574,7 +574,12 @@ const ParticipantCardWithHistory = ({
               <Select 
                 value={participant.admin_status || tabType} 
                 onValueChange={async (value) => {
-                  await onStatusChange(participant, value);
+                  if (value === 'rejected' && onReject) {
+                    // Open reject modal for reason selection
+                    onReject(participant);
+                  } else if (onStatusChange) {
+                    await onStatusChange(participant, value);
+                  }
                 }}
               >
                 <SelectTrigger className={`w-20 h-6 text-[10px] ${getStatusBackgroundColor(participant.admin_status || tabType)}`}>
