@@ -62,6 +62,11 @@ export function UnifiedParticipantTab({
       return country === selectedCountry;
     });
 
+    // Filter by status for THIS tab - only "this week"
+    if (tabType === 'this') {
+      filtered = filtered.filter(p => p.admin_status === 'this week');
+    }
+
     // Apply week interval filter for past tab
     if (tabType === 'past' && weekIntervalFilter !== 'all') {
       filtered = filtered.filter(p => 'week_interval' in p && p.week_interval === weekIntervalFilter);
@@ -160,8 +165,11 @@ export function UnifiedParticipantTab({
         </div>
       )}
 
-      {/* Карточки БЕЗ отступов на мобильной версии */}
-      <div className="space-y-4 md:space-y-4">
+      {/* Карточки - среднее между полным размером и -mx-4 */}
+      {/* ТЕКУЩЕЕ: space-y-4 без отступов */}
+      {/* ПРЕДЫДУЩЕЕ БЫЛО: -mx-4 md:mx-0 (растягивание на мобайл) */}
+      {/* СРЕДНЕЕ РЕШЕНИЕ: -mx-2 md:mx-0 (небольшое растягивание) */}
+      <div className="space-y-4 md:space-y-4 -mx-2 md:mx-0">
         {filteredParticipants.map((participant) => (
           <ParticipantCardWithHistory
             key={participant.id}
