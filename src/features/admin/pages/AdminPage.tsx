@@ -357,6 +357,9 @@ const AdminContent = () => {
   
   console.log('Admin component rendering, adminStatusFilter:', adminStatusFilter);
 
+  // Ref to track ongoing status updates to prevent concurrent updates
+  const statusUpdateInProgress = useRef<Set<string>>(new Set());
+
   // Centralized function to update participant status with history
   const updateParticipantStatusWithHistory = async (
     participantId: string,
@@ -371,6 +374,15 @@ const AdminContent = () => {
   ): Promise<{ success: boolean; error?: any }> => {
     try {
       console.log('🟢 updateParticipantStatusWithHistory called:', { participantId, newStatus, participantName, additionalData });
+      
+      // Check if update is already in progress for this participant
+      if (statusUpdateInProgress.current.has(participantId)) {
+        console.log('🟡 STATUS UPDATE ALREADY IN PROGRESS for participant:', participantId, 'Skipping duplicate request');
+        return { success: false, error: 'Update already in progress' };
+      }
+      
+      // Mark update as in progress
+      statusUpdateInProgress.current.add(participantId);
       
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();
@@ -467,6 +479,9 @@ const AdminContent = () => {
     } catch (error) {
       console.error('🟢 EXCEPTION in updateParticipantStatusWithHistory:', error);
       return { success: false, error };
+    } finally {
+      // Always remove from in-progress set
+      statusUpdateInProgress.current.delete(participantId);
     }
   };
 
