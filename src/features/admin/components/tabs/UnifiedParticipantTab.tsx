@@ -263,21 +263,32 @@ const ParticipantCardWithHistory = ({
   const participantName = `${firstName} ${lastName}`;
   const isWinner = 'final_rank' in participant && participant.final_rank === 1;
 
-  // Get rejection reasons if rejected
-  const rejectionReasons = participant.admin_status === 'rejected' && appData.rejection_reason_types
-    ? appData.rejection_reason_types
-    : [];
+  // Get rejection reasons from status_history - это правильный способ!
+  const getRejectionReasons = () => {
+    if (participant.admin_status !== 'rejected') return [];
+    
+    // Проверяем status_history на наличие rejected entry с причинами
+    if (participant.status_history && typeof participant.status_history === 'object') {
+      const historyEntries = Object.values(participant.status_history);
+      // Ищем последний rejected entry
+      const rejectedEntry = historyEntries
+        .filter((entry: any) => entry?.new_status === 'rejected' || entry?.change_reason?.includes('rejected'))
+        .sort((a: any, b: any) => {
+          const aTime = new Date(a.timestamp || a.changed_at).getTime();
+          const bTime = new Date(b.timestamp || b.changed_at).getTime();
+          return bTime - aTime;
+        })[0] as any;
+      
+      if (rejectedEntry?.rejection_reason_types) {
+        return rejectedEntry.rejection_reason_types;
+      }
+    }
+    
+    // Fallback к application_data если есть
+    return appData.rejection_reason_types || [];
+  };
 
-  // Debug logging for rejection reasons
-  if (tabType === 'new' && participant.admin_status === 'rejected') {
-    console.log('🔴 REJECTION DEBUG:', {
-      participantName,
-      status: participant.admin_status,
-      rejectionReasons,
-      appData_keys: Object.keys(appData),
-      full_appData: appData
-    });
-  }
+  const rejectionReasons = getRejectionReasons();
 
   // Load votes for Next Week tab
   React.useEffect(() => {
@@ -571,29 +582,52 @@ const ParticipantCardWithHistory = ({
 
             {/* Status dropdown */}
             <div className="flex items-center gap-1">
-              <Select 
-                value={participant.admin_status || tabType} 
-                onValueChange={async (value) => {
-                  if (value === 'rejected' && onReject) {
-                    // Open reject modal for reason selection
-                    onReject(participant);
-                  } else if (onStatusChange) {
-                    await onStatusChange(participant, value);
-                  }
-                }}
-              >
-                <SelectTrigger className={`w-20 h-6 text-[10px] ${getStatusBackgroundColor(participant.admin_status || tabType)}`}>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="z-[9999]">
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="rejected">Rejected</SelectItem>
-                  <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                  <SelectItem value="this week">This Week</SelectItem>
-                  <SelectItem value="next week">Next Week</SelectItem>
-                  <SelectItem value="past">Past</SelectItem>
-                </SelectContent>
-              </Select>
+              {onReject ? (
+                <Select 
+                  value={participant.admin_status || tabType} 
+                  onValueChange={async (value) => {
+                    if (value === 'rejected') {
+                      // Open reject modal for reason selection
+                      onReject(participant);
+                    } else if (onStatusChange) {
+                      await onStatusChange(participant, value);
+                    }
+                  }}
+                >
+                  <SelectTrigger className={`w-20 h-6 text-[10px] ${getStatusBackgroundColor(participant.admin_status || tabType)}`}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="z-[9999]">
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
+                    <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                    <SelectItem value="this week">This Week</SelectItem>
+                    <SelectItem value="next week">Next Week</SelectItem>
+                    <SelectItem value="past">Past</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Select 
+                  value={participant.admin_status || tabType} 
+                  onValueChange={async (value) => {
+                    if (onStatusChange) {
+                      await onStatusChange(participant, value);
+                    }
+                  }}
+                >
+                  <SelectTrigger className={`w-20 h-6 text-[10px] ${getStatusBackgroundColor(participant.admin_status || tabType)}`}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="z-[9999]">
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
+                    <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                    <SelectItem value="this week">This Week</SelectItem>
+                    <SelectItem value="next week">Next Week</SelectItem>
+                    <SelectItem value="past">Past</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
             </div>
           </div>
         </div>
@@ -697,24 +731,52 @@ const ParticipantCardWithHistory = ({
             
             {/* Status dropdown */}
             <div className="flex items-center gap-1">
-              <Select 
-                value={participant.admin_status || tabType} 
-                onValueChange={async (value) => {
-                  await onStatusChange(participant, value);
-                }}
-              >
-                <SelectTrigger className={`w-[100px] text-[10px] h-5 ${getStatusBackgroundColor(participant.admin_status || tabType)}`}>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="z-[9999]">
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="rejected">Rejected</SelectItem>
-                  <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                  <SelectItem value="this week">This Week</SelectItem>
-                  <SelectItem value="next week">Next Week</SelectItem>
-                  <SelectItem value="past">Past</SelectItem>
-                </SelectContent>
-              </Select>
+              {onReject ? (
+                <Select 
+                  value={participant.admin_status || tabType} 
+                  onValueChange={async (value) => {
+                    if (value === 'rejected') {
+                      // Open reject modal for reason selection
+                      onReject(participant);
+                    } else if (onStatusChange) {
+                      await onStatusChange(participant, value);
+                    }
+                  }}
+                >
+                  <SelectTrigger className={`w-[100px] text-[10px] h-5 ${getStatusBackgroundColor(participant.admin_status || tabType)}`}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="z-[9999]">
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
+                    <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                    <SelectItem value="this week">This Week</SelectItem>
+                    <SelectItem value="next week">Next Week</SelectItem>
+                    <SelectItem value="past">Past</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Select 
+                  value={participant.admin_status || tabType} 
+                  onValueChange={async (value) => {
+                    if (onStatusChange) {
+                      await onStatusChange(participant, value);
+                    }
+                  }}
+                >
+                  <SelectTrigger className={`w-[100px] text-[10px] h-5 ${getStatusBackgroundColor(participant.admin_status || tabType)}`}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="z-[9999]">
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
+                    <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                    <SelectItem value="this week">This Week</SelectItem>
+                    <SelectItem value="next week">Next Week</SelectItem>
+                    <SelectItem value="past">Past</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
             </div>
           </div>
         </div>
