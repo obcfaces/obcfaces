@@ -42,11 +42,28 @@ export const WeeklyTransitionSelfCheck = () => {
   const loadSystemChecks = async () => {
     setIsLoadingChecks(true);
     try {
+      // Get current Monday to calculate past week intervals
+      const { data: mondayData } = await supabase.rpc('get_current_monday_utc');
+      const currentMonday = new Date(mondayData as string);
+      
+      // Calculate intervals for past 5 weeks
+      const pastIntervals = Array.from({ length: 5 }, (_, i) => {
+        const weekStart = new Date(currentMonday);
+        weekStart.setDate(weekStart.getDate() - (7 * (i + 1)));
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekEnd.getDate() + 6);
+        
+        return `${weekStart.getDate().toString().padStart(2, '0')}/${(weekStart.getMonth() + 1).toString().padStart(2, '0')}-${weekEnd.getDate().toString().padStart(2, '0')}/${(weekEnd.getMonth() + 1).toString().padStart(2, '0')}/${weekEnd.getFullYear().toString().slice(-2)}`;
+      });
+
       const checks = await Promise.all([
         supabase.from('weekly_contests').select('id', { count: 'exact' }).eq('status', 'active'),
         supabase.from('weekly_contest_participants').select('id', { count: 'exact' }).eq('admin_status', 'this week').is('deleted_at', null),
         supabase.from('weekly_contest_participants').select('id', { count: 'exact' }).eq('admin_status', 'next week on site').is('deleted_at', null),
         supabase.from('weekly_contest_participants').select('id', { count: 'exact' }).eq('admin_status', 'pre next week').is('deleted_at', null),
+        ...pastIntervals.map(interval => 
+          supabase.from('weekly_contest_participants').select('id', { count: 'exact' }).eq('admin_status', 'past').eq('week_interval', interval).is('deleted_at', null)
+        ),
       ]);
 
       setSystemChecks([
@@ -54,6 +71,11 @@ export const WeeklyTransitionSelfCheck = () => {
         { check_type: 'This week participants', value: checks[1].count || 0, status: checks[1].count! > 0 ? '✅' : '⚠️' },
         { check_type: 'Next week on site', value: checks[2].count || 0, status: checks[2].count! > 0 ? '✅' : '⚠️' },
         { check_type: 'Pre next week', value: checks[3].count || 0, status: checks[3].count! > 0 ? '✅' : '⚠️' },
+        { check_type: '1 week ago', value: checks[4].count || 0, status: checks[4].count! > 0 ? '✅' : '⚠️' },
+        { check_type: '2 weeks ago', value: checks[5].count || 0, status: checks[5].count! > 0 ? '✅' : '⚠️' },
+        { check_type: '3 weeks ago', value: checks[6].count || 0, status: checks[6].count! > 0 ? '✅' : '⚠️' },
+        { check_type: '4 weeks ago', value: checks[7].count || 0, status: checks[7].count! > 0 ? '✅' : '⚠️' },
+        { check_type: '5 weeks ago', value: checks[8].count || 0, status: checks[8].count! > 0 ? '✅' : '⚠️' },
       ]);
     } catch (error) {
       console.error('Failed to load system checks:', error);
@@ -172,7 +194,7 @@ export const WeeklyTransitionSelfCheck = () => {
               <RefreshCw className={`h-3 w-3 ${isLoadingChecks ? 'animate-spin' : ''}`} />
             </Button>
           </h3>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
             {systemChecks.map((check) => (
               <div
                 key={check.check_type}
