@@ -1248,7 +1248,12 @@ export type Database = {
           final_rank: number | null
           id: string
           is_active: boolean
+          is_weekly_winner: boolean | null
           notes: string | null
+          nw_is_promoted: boolean | null
+          nw_rank_segment: number | null
+          nw_score: number | null
+          preview_week_start: string | null
           rejection_reason: string | null
           rejection_reason_types: string[] | null
           reviewed_at: string | null
@@ -1258,6 +1263,7 @@ export type Database = {
           total_votes: number | null
           user_id: string | null
           week_interval: string | null
+          week_start: string | null
         }
         Insert: {
           admin_status?: Database["public"]["Enums"]["participant_admin_status"]
@@ -1269,7 +1275,12 @@ export type Database = {
           final_rank?: number | null
           id?: string
           is_active?: boolean
+          is_weekly_winner?: boolean | null
           notes?: string | null
+          nw_is_promoted?: boolean | null
+          nw_rank_segment?: number | null
+          nw_score?: number | null
+          preview_week_start?: string | null
           rejection_reason?: string | null
           rejection_reason_types?: string[] | null
           reviewed_at?: string | null
@@ -1279,6 +1290,7 @@ export type Database = {
           total_votes?: number | null
           user_id?: string | null
           week_interval?: string | null
+          week_start?: string | null
         }
         Update: {
           admin_status?: Database["public"]["Enums"]["participant_admin_status"]
@@ -1290,7 +1302,12 @@ export type Database = {
           final_rank?: number | null
           id?: string
           is_active?: boolean
+          is_weekly_winner?: boolean | null
           notes?: string | null
+          nw_is_promoted?: boolean | null
+          nw_rank_segment?: number | null
+          nw_score?: number | null
+          preview_week_start?: string | null
           rejection_reason?: string | null
           rejection_reason_types?: string[] | null
           reviewed_at?: string | null
@@ -1300,6 +1317,7 @@ export type Database = {
           total_votes?: number | null
           user_id?: string | null
           week_interval?: string | null
+          week_start?: string | null
         }
         Relationships: [
           {
@@ -2368,6 +2386,18 @@ export type Database = {
       }
       rotate_weekly_contests: {
         Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      sp_close_this_week: {
+        Args: { p_prev_week_start: string; p_week_start: string }
+        Returns: Json
+      }
+      sp_promote_next_to_this: {
+        Args: { p_week_start: string }
+        Returns: undefined
+      }
+      sp_publish_pre_to_next: {
+        Args: { p_preview_week_start: string }
         Returns: undefined
       }
       transition_weekly_contest: {
