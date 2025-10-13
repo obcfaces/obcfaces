@@ -13,14 +13,31 @@ interface ContestWeeksRendererProps {
 }
 
 
-// Fixed week intervals mapping
-const FIXED_WEEK_INTERVALS = [
-  { interval: '06/10-12/10/25', weeksAgo: 1 },
-  { interval: '29/09-05/10/25', weeksAgo: 2 },
-  { interval: '22/09-28/09/25', weeksAgo: 3 },
-  { interval: '15/09-21/09/25', weeksAgo: 4 },
-  { interval: '08/09-14/09/25', weeksAgo: 5 },
-];
+// Calculate dynamic past weeks based on current Monday
+const calculatePastWeeks = () => {
+  const now = new Date();
+  const currentMonday = new Date(now);
+  const dayOfWeek = currentMonday.getDay();
+  const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+  currentMonday.setDate(currentMonday.getDate() + daysToMonday);
+  currentMonday.setHours(0, 0, 0, 0);
+  
+  const weeks = [];
+  for (let i = 1; i <= 5; i++) {
+    const monday = new Date(currentMonday);
+    monday.setDate(currentMonday.getDate() - (i * 7));
+    
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    
+    const formatDate = (d: Date) => d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' });
+    const formatYear = (d: Date) => String(d.getFullYear()).slice(-2);
+    const interval = `${formatDate(monday)}-${formatDate(sunday)}/${formatYear(sunday)}`;
+    
+    weeks.push({ interval, weeksAgo: i });
+  }
+  return weeks;
+};
 
 export const ContestWeeksRenderer = ({ 
   viewMode, 
@@ -31,9 +48,11 @@ export const ContestWeeksRenderer = ({
   const { t } = useTranslation();
   const { currentLanguage } = useLanguage();
 
-  // Prepare past week items using fixed intervals
+  // Prepare past week items using dynamically calculated weeks
   const pastWeekItems = useMemo(() => {
-    return FIXED_WEEK_INTERVALS.map((item) => {
+    const pastWeeks = calculatePastWeeks();
+    
+    return pastWeeks.map((item) => {
       const weekLabel = item.weeksAgo === 1 ? t('1 WEEK AGO') : t(`${item.weeksAgo} WEEKS AGO`);
       
       return {
