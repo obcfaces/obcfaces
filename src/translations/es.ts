@@ -69,11 +69,6 @@ export default {
   'footer.copyright': 'Todos los derechos reservados.',
   'footer.madeWith': 'Hecho con ❤️',
 
-  // Contest Header
-  'of': 'de',
-  'Contest': 'Concurso',
-  'How it works': 'Cómo funciona',
-
   // Months (abbreviated)
   'month.jan': 'Ene',
   'month.feb': 'Feb',

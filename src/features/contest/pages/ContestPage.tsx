@@ -36,12 +36,7 @@ const ContestContent = () => {
       />
 
       <main className="min-h-screen bg-background">
-        <ContestHeader 
-          activeSection={activeSection} 
-          onSectionChange={setActiveSection}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-        />
+        <ContestHeader activeSection={activeSection} onSectionChange={setActiveSection} />
         
         <div className="space-y-8">
           <ContestWeeksRenderer 
