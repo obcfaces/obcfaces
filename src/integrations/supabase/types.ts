@@ -168,6 +168,27 @@ export type Database = {
             foreignKeyName: "contest_application_history_application_id_fkey"
             columns: ["application_id"]
             isOneToOne: false
+            referencedRelation: "v_next_week"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contest_application_history_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "v_past_archive"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contest_application_history_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "v_this_week"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contest_application_history_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
             referencedRelation: "weekly_contest_participants"
             referencedColumns: ["id"]
           },
@@ -253,6 +274,27 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "cached_participant_engagement"
             referencedColumns: ["participant_id"]
+          },
+          {
+            foreignKeyName: "contestant_ratings_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "v_next_week"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contestant_ratings_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "v_past_archive"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contestant_ratings_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "v_this_week"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "contestant_ratings_participant_id_fkey"
@@ -501,6 +543,27 @@ export type Database = {
             foreignKeyName: "likes_participant_id_fkey"
             columns: ["participant_id"]
             isOneToOne: false
+            referencedRelation: "v_next_week"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "likes_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "v_past_archive"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "likes_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "v_this_week"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "likes_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
             referencedRelation: "weekly_contest_participants"
             referencedColumns: ["id"]
           },
@@ -678,6 +741,27 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "cached_participant_engagement"
             referencedColumns: ["participant_id"]
+          },
+          {
+            foreignKeyName: "photo_comments_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "v_next_week"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "photo_comments_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "v_past_archive"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "photo_comments_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "v_this_week"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "photo_comments_participant_id_fkey"
@@ -1480,6 +1564,27 @@ export type Database = {
             foreignKeyName: "contestant_ratings_participant_id_fkey"
             columns: ["participant_id"]
             isOneToOne: false
+            referencedRelation: "v_next_week"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contestant_ratings_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "v_past_archive"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contestant_ratings_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "v_this_week"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contestant_ratings_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
             referencedRelation: "weekly_contest_participants"
             referencedColumns: ["id"]
           },
@@ -1574,6 +1679,303 @@ export type Database = {
           is_contest_participant?: boolean | null
         }
         Relationships: []
+      }
+      v_next_week: {
+        Row: {
+          admin_status:
+            | Database["public"]["Enums"]["participant_admin_status"]
+            | null
+          application_data: Json | null
+          average_rating: number | null
+          contest_id: string | null
+          created_at: string | null
+          deleted_at: string | null
+          final_rank: number | null
+          id: string | null
+          is_active: boolean | null
+          is_weekly_winner: boolean | null
+          notes: string | null
+          nw_is_promoted: boolean | null
+          nw_rank_segment: number | null
+          nw_score: number | null
+          preview_week_start: string | null
+          rejection_reason: string | null
+          rejection_reason_types: string[] | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status_history: Json | null
+          submitted_at: string | null
+          total_votes: number | null
+          user_id: string | null
+          week_interval: string | null
+          week_start: string | null
+        }
+        Insert: {
+          admin_status?:
+            | Database["public"]["Enums"]["participant_admin_status"]
+            | null
+          application_data?: Json | null
+          average_rating?: number | null
+          contest_id?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          final_rank?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          is_weekly_winner?: boolean | null
+          notes?: string | null
+          nw_is_promoted?: boolean | null
+          nw_rank_segment?: number | null
+          nw_score?: number | null
+          preview_week_start?: string | null
+          rejection_reason?: string | null
+          rejection_reason_types?: string[] | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status_history?: Json | null
+          submitted_at?: string | null
+          total_votes?: number | null
+          user_id?: string | null
+          week_interval?: string | null
+          week_start?: string | null
+        }
+        Update: {
+          admin_status?:
+            | Database["public"]["Enums"]["participant_admin_status"]
+            | null
+          application_data?: Json | null
+          average_rating?: number | null
+          contest_id?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          final_rank?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          is_weekly_winner?: boolean | null
+          notes?: string | null
+          nw_is_promoted?: boolean | null
+          nw_rank_segment?: number | null
+          nw_score?: number | null
+          preview_week_start?: string | null
+          rejection_reason?: string | null
+          rejection_reason_types?: string[] | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status_history?: Json | null
+          submitted_at?: string | null
+          total_votes?: number | null
+          user_id?: string | null
+          week_interval?: string | null
+          week_start?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weekly_contest_participants_contest_id_fkey"
+            columns: ["contest_id"]
+            isOneToOne: false
+            referencedRelation: "weekly_contests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_past_archive: {
+        Row: {
+          admin_status:
+            | Database["public"]["Enums"]["participant_admin_status"]
+            | null
+          application_data: Json | null
+          average_rating: number | null
+          contest_id: string | null
+          created_at: string | null
+          deleted_at: string | null
+          final_rank: number | null
+          id: string | null
+          is_active: boolean | null
+          is_weekly_winner: boolean | null
+          notes: string | null
+          nw_is_promoted: boolean | null
+          nw_rank_segment: number | null
+          nw_score: number | null
+          preview_week_start: string | null
+          rejection_reason: string | null
+          rejection_reason_types: string[] | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status_history: Json | null
+          submitted_at: string | null
+          total_votes: number | null
+          user_id: string | null
+          week_index: number | null
+          week_interval: string | null
+          week_start: string | null
+        }
+        Insert: {
+          admin_status?:
+            | Database["public"]["Enums"]["participant_admin_status"]
+            | null
+          application_data?: Json | null
+          average_rating?: number | null
+          contest_id?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          final_rank?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          is_weekly_winner?: boolean | null
+          notes?: string | null
+          nw_is_promoted?: boolean | null
+          nw_rank_segment?: number | null
+          nw_score?: number | null
+          preview_week_start?: string | null
+          rejection_reason?: string | null
+          rejection_reason_types?: string[] | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status_history?: Json | null
+          submitted_at?: string | null
+          total_votes?: number | null
+          user_id?: string | null
+          week_index?: never
+          week_interval?: string | null
+          week_start?: string | null
+        }
+        Update: {
+          admin_status?:
+            | Database["public"]["Enums"]["participant_admin_status"]
+            | null
+          application_data?: Json | null
+          average_rating?: number | null
+          contest_id?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          final_rank?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          is_weekly_winner?: boolean | null
+          notes?: string | null
+          nw_is_promoted?: boolean | null
+          nw_rank_segment?: number | null
+          nw_score?: number | null
+          preview_week_start?: string | null
+          rejection_reason?: string | null
+          rejection_reason_types?: string[] | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status_history?: Json | null
+          submitted_at?: string | null
+          total_votes?: number | null
+          user_id?: string | null
+          week_index?: never
+          week_interval?: string | null
+          week_start?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weekly_contest_participants_contest_id_fkey"
+            columns: ["contest_id"]
+            isOneToOne: false
+            referencedRelation: "weekly_contests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_this_week: {
+        Row: {
+          admin_status:
+            | Database["public"]["Enums"]["participant_admin_status"]
+            | null
+          application_data: Json | null
+          average_rating: number | null
+          contest_id: string | null
+          created_at: string | null
+          deleted_at: string | null
+          final_rank: number | null
+          id: string | null
+          is_active: boolean | null
+          is_weekly_winner: boolean | null
+          notes: string | null
+          nw_is_promoted: boolean | null
+          nw_rank_segment: number | null
+          nw_score: number | null
+          preview_week_start: string | null
+          rejection_reason: string | null
+          rejection_reason_types: string[] | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status_history: Json | null
+          submitted_at: string | null
+          total_votes: number | null
+          user_id: string | null
+          week_interval: string | null
+          week_start: string | null
+        }
+        Insert: {
+          admin_status?:
+            | Database["public"]["Enums"]["participant_admin_status"]
+            | null
+          application_data?: Json | null
+          average_rating?: number | null
+          contest_id?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          final_rank?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          is_weekly_winner?: boolean | null
+          notes?: string | null
+          nw_is_promoted?: boolean | null
+          nw_rank_segment?: number | null
+          nw_score?: number | null
+          preview_week_start?: string | null
+          rejection_reason?: string | null
+          rejection_reason_types?: string[] | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status_history?: Json | null
+          submitted_at?: string | null
+          total_votes?: number | null
+          user_id?: string | null
+          week_interval?: string | null
+          week_start?: string | null
+        }
+        Update: {
+          admin_status?:
+            | Database["public"]["Enums"]["participant_admin_status"]
+            | null
+          application_data?: Json | null
+          average_rating?: number | null
+          contest_id?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          final_rank?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          is_weekly_winner?: boolean | null
+          notes?: string | null
+          nw_is_promoted?: boolean | null
+          nw_rank_segment?: number | null
+          nw_score?: number | null
+          preview_week_start?: string | null
+          rejection_reason?: string | null
+          rejection_reason_types?: string[] | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status_history?: Json | null
+          submitted_at?: string | null
+          total_votes?: number | null
+          user_id?: string | null
+          week_interval?: string | null
+          week_start?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weekly_contest_participants_contest_id_fkey"
+            columns: ["contest_id"]
+            isOneToOne: false
+            referencedRelation: "weekly_contests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {
