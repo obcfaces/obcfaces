@@ -146,7 +146,7 @@ export function AdminPastWeekTab({
     const intervals = new Set<string>();
     
     // Always include the most recent interval first
-    intervals.add('08/10-14/10/25');
+    intervals.add('08/09-14/09/25');
     
     participants
       .filter(p => p.admin_status === 'past' && p.week_interval)
