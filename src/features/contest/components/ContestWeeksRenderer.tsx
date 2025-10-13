@@ -1,9 +1,10 @@
 import { ContestSection } from "./ContestSection";
 import { NextWeekSection } from "./NextWeekSection";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getWeekRange } from "@/utils/dateFormatting";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ContestWeeksRendererProps {
   viewMode: 'compact' | 'full';
@@ -47,6 +48,30 @@ export const ContestWeeksRenderer = ({
 }: ContestWeeksRendererProps) => {
   const { t } = useTranslation();
   const { currentLanguage } = useLanguage();
+  const [thisWeekInterval, setThisWeekInterval] = useState<string>("");
+
+  // Get actual THIS WEEK interval from database
+  useEffect(() => {
+    const fetchThisWeekInterval = async () => {
+      const { data } = await supabase
+        .from('weekly_contest_participants')
+        .select('week_interval')
+        .eq('admin_status', 'this week')
+        .eq('is_active', true)
+        .is('deleted_at', null)
+        .limit(1)
+        .single();
+      
+      if (data?.week_interval) {
+        setThisWeekInterval(data.week_interval);
+      } else {
+        // Fallback to calculated interval if no data
+        setThisWeekInterval(getWeekRange(0, currentLanguage.code));
+      }
+    };
+    
+    fetchThisWeekInterval();
+  }, [currentLanguage.code]);
 
   // Prepare past week items using dynamically calculated weeks
   const pastWeekItems = useMemo(() => {
@@ -81,7 +106,7 @@ export const ContestWeeksRenderer = ({
       
       <ContestSection
         title={t("THIS WEEK")}
-        subtitle={getWeekRange(0, currentLanguage.code)}
+        subtitle={thisWeekInterval || getWeekRange(0, currentLanguage.code)}
         description={t("Choose the winner")}
         isActive={true}
         noWrapTitle
