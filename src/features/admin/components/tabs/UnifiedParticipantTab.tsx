@@ -11,6 +11,8 @@ import { LoadingSpinner } from '../LoadingSpinner';
 import { useAdminCountry } from '@/contexts/AdminCountryContext';
 import { useApplicationHistory } from '@/hooks/useApplicationHistory';
 import { Country } from 'country-state-city';
+import { ParticipantStatusHistoryModal } from '../ParticipantStatusHistoryModal';
+import { REJECTION_REASONS } from '../RejectReasonModal';
 
 interface UnifiedParticipantTabProps {
   participants: WeeklyContestParticipant[] | ContestApplication[];
@@ -22,7 +24,6 @@ interface UnifiedParticipantTabProps {
   onViewLikeDislike?: (participantName: string, type: 'like' | 'dislike') => void;
   onDelete?: (participant: WeeklyContestParticipant | ContestApplication) => void;
   onRestore?: (participant: WeeklyContestParticipant | ContestApplication) => void;
-  onViewStatusHistory?: (participantId: string, participantName: string, statusHistory: any) => void;
   onApprove?: (participant: ContestApplication) => void;
   onReject?: (participant: ContestApplication) => void;
   loading?: boolean;
@@ -43,7 +44,6 @@ export function UnifiedParticipantTab({
   onViewLikeDislike,
   onDelete,
   onRestore,
-  onViewStatusHistory,
   onApprove,
   onReject,
   loading = false,
@@ -53,6 +53,8 @@ export function UnifiedParticipantTab({
 }: UnifiedParticipantTabProps) {
   const { selectedCountry } = useAdminCountry();
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [showStatusHistoryModal, setShowStatusHistoryModal] = useState(false);
+  const [selectedParticipant, setSelectedParticipant] = useState<any>(null);
 
   const filteredParticipants = useMemo(() => {
     let filtered = participants.filter(p => {
@@ -158,8 +160,8 @@ export function UnifiedParticipantTab({
         </div>
       )}
 
-      {/* Карточки без отступов на мобильной версии */}
-      <div className="space-y-4 md:space-y-4 -mx-4 md:mx-0">
+      {/* Карточки БЕЗ отступов на мобильной версии */}
+      <div className="space-y-4 md:space-y-4">
         {filteredParticipants.map((participant) => (
           <ParticipantCardWithHistory
             key={participant.id}
@@ -172,9 +174,14 @@ export function UnifiedParticipantTab({
             onStatusChange={onStatusChange}
             onDelete={onDelete}
             onRestore={onRestore}
-            onViewStatusHistory={onViewStatusHistory}
+            onViewStatusHistory={(id: string, name: string, statusHistory: any) => {
+              setSelectedParticipant({ id, name, statusHistory });
+              setShowStatusHistoryModal(true);
+            }}
             onViewVoters={onViewVoters}
             onViewLikeDislike={onViewLikeDislike}
+            onApprove={onApprove}
+            onReject={onReject}
             getStatusBackgroundColor={getStatusBackgroundColor}
             getParticipantVotes={getParticipantVotes}
           />
@@ -185,6 +192,20 @@ export function UnifiedParticipantTab({
         <div className="text-center py-12 text-muted-foreground px-4 md:px-0">
           No participants for {getTitle()}
         </div>
+      )}
+
+      {/* Status History Modal */}
+      {showStatusHistoryModal && selectedParticipant && (
+        <ParticipantStatusHistoryModal
+          isOpen={showStatusHistoryModal}
+          onClose={() => {
+            setShowStatusHistoryModal(false);
+            setSelectedParticipant(null);
+          }}
+          participantId={selectedParticipant.id}
+          participantName={selectedParticipant.name}
+          statusHistory={selectedParticipant.statusHistory}
+        />
       )}
     </div>
   );
@@ -204,6 +225,8 @@ const ParticipantCardWithHistory = ({
   onViewStatusHistory,
   onViewVoters,
   onViewLikeDislike,
+  onApprove,
+  onReject,
   getStatusBackgroundColor,
   getParticipantVotes,
 }: any) => {
@@ -217,8 +240,13 @@ const ParticipantCardWithHistory = ({
   const photo1 = appData.photo_1_url || appData.photo1_url || appData.photo1Url || appData.photoUrl1 || '';
   const photo2 = appData.photo_2_url || appData.photo2_url || appData.photo2Url || appData.photoUrl2 || '';
   const participantName = `${firstName} ${lastName}`;
-  const isWinner = participant.final_rank === 1;
+  const isWinner = 'final_rank' in participant && participant.final_rank === 1;
   const votes = getParticipantVotes(participantName);
+
+  // Get rejection reasons if rejected
+  const rejectionReasons = participant.admin_status === 'rejected' && appData.rejection_reason_types
+    ? appData.rejection_reason_types
+    : [];
 
   // Get the latest status change date
   const getLatestStatusChangeDate = () => {
@@ -244,74 +272,74 @@ const ParticipantCardWithHistory = ({
   const submittedDate = getLatestStatusChangeDate();
 
   return (
-    <Card className={`overflow-hidden relative rounded-lg md:rounded-lg h-[149px] ${participant.admin_status === 'rejected' ? 'bg-red-50 border-red-200' : ''} ${participant.deleted_at ? 'opacity-60' : ''} ${isWinner ? 'border-yellow-500' : ''}`}>
-      <CardContent className="p-0">
-        {/* Date/Time badge - left top corner */}
-        {submittedDate && (
-          <Badge 
-            variant="outline" 
-            className="absolute top-0 left-0 z-20 text-xs rounded-none rounded-br-md font-normal bg-muted/90 border-border"
-          >
-            {submittedDate.toLocaleDateString('en-GB', { 
-              day: 'numeric', 
-              month: 'short' 
-            })} {submittedDate.toLocaleTimeString('en-GB', { 
-              hour: '2-digit', 
-              minute: '2-digit',
-              hour12: false 
-            })}
-          </Badge>
-        )}
+    <>
+      <Card className={`overflow-hidden relative rounded-lg md:rounded-lg h-[149px] ${participant.admin_status === 'rejected' ? 'bg-red-50 border-red-200' : ''} ${participant.deleted_at ? 'opacity-60' : ''} ${isWinner ? 'border-yellow-500' : ''}`}>
+        <CardContent className="p-0">
+          {/* Date/Time badge - left top corner */}
+          {submittedDate && (
+            <Badge 
+              variant="outline" 
+              className="absolute top-0 left-0 z-20 text-xs rounded-none rounded-br-md font-normal bg-muted/90 border-border"
+            >
+              {submittedDate.toLocaleDateString('en-GB', { 
+                day: 'numeric', 
+                month: 'short' 
+              })} {submittedDate.toLocaleTimeString('en-GB', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+              })}
+            </Badge>
+          )}
 
-        {/* History badge - right of edit button */}
-        {historyCount > 0 && (
-          <div
-            className="absolute bottom-0 left-8 z-20 bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold cursor-pointer hover:bg-primary/90 shadow-lg transition-all border-2 border-background"
-            title={`${historyCount} version${historyCount > 1 ? 's' : ''}`}
-          >
-            {historyCount}
-          </div>
-        )}
+          {/* History badge - right of edit button */}
+          {historyCount > 0 && (
+            <div
+              className="absolute bottom-0 left-8 z-20 bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold cursor-pointer hover:bg-primary/90 shadow-lg transition-all border-2 border-background"
+              onClick={() => onViewStatusHistory && onViewStatusHistory(participant.id, participantName, participant.status_history)}
+              title={`${historyCount} version${historyCount > 1 ? 's' : ''} - click to view history`}
+            >
+              {historyCount}
+            </div>
+          )}
 
-        {/* Three dots menu - top right corner */}
-        <div className="absolute top-0 right-0 z-20">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0 rounded-none rounded-bl-md hover:bg-background/90 bg-background/80"
-              >
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="z-[9999]">
-              {onViewStatusHistory && (
+          {/* Three dots menu - top right corner */}
+          <div className="absolute top-0 right-0 z-20">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 rounded-none rounded-bl-md hover:bg-background/90 bg-background/80"
+                >
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="z-[9999]">
                 <DropdownMenuItem
-                  onClick={() => onViewStatusHistory(participant.id, participantName, participant.status_history)}
+                  onClick={() => onViewStatusHistory && onViewStatusHistory(participant.id, participantName, participant.status_history)}
                 >
                   <History className="h-3.5 w-3.5 mr-2" />
                   History
                 </DropdownMenuItem>
-              )}
-              {onDelete && onRestore && (
-                <DropdownMenuItem
-                  onClick={() => {
-                    if (participant.deleted_at) {
-                      onRestore(participant);
-                    } else {
-                      onDelete(participant);
-                    }
-                  }}
-                  className="text-destructive focus:text-destructive"
-                >
-                  <Trash2 className="h-3.5 w-3.5 mr-2" />
-                  {participant.deleted_at ? 'Restore' : 'Delete'}
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+                {onDelete && onRestore && (
+                  <DropdownMenuItem
+                    onClick={() => {
+                      if (participant.deleted_at) {
+                        onRestore(participant);
+                      } else {
+                        onDelete(participant);
+                      }
+                    }}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <Trash2 className="h-3.5 w-3.5 mr-2" />
+                    {participant.deleted_at ? 'Restore' : 'Delete'}
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
 
         {/* Edit button in bottom left corner - not shown for past */}
         {tabType !== 'past' && onEdit && (
@@ -649,5 +677,23 @@ const ParticipantCardWithHistory = ({
         </div>
       </CardContent>
     </Card>
+
+    {/* Rejection reasons - показываем под карточкой для NEW и REJECTED */}
+    {tabType === 'new' && participant.admin_status === 'rejected' && rejectionReasons.length > 0 && (
+      <div className="mt-2 px-3 py-2 bg-red-50 dark:bg-red-900/20 rounded-md border border-red-200 dark:border-red-800">
+        <p className="text-xs font-semibold text-red-700 dark:text-red-400 mb-1">Rejection Reasons:</p>
+        <div className="flex flex-wrap gap-1">
+          {rejectionReasons.map((reasonType: string, index: number) => {
+            const reasonText = typeof REJECTION_REASONS === 'object' && REJECTION_REASONS[reasonType];
+            return (
+              <Badge key={index} variant="destructive" className="text-xs">
+                {reasonText || reasonType}
+              </Badge>
+            );
+          })}
+        </div>
+      </div>
+    )}
+    </>
   );
 };

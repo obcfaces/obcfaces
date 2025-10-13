@@ -14,9 +14,12 @@ interface AdminPreNextWeekTabProps {
 export function AdminPreNextWeekTab(props: AdminPreNextWeekTabProps) {
   return (
     <UnifiedParticipantTab
-      {...props}
+      participants={props.participants}
       tabType="pre-next"
-      onViewStatusHistory={props.onStatusHistory}
+      onViewPhotos={props.onViewPhotos}
+      onStatusChange={props.onStatusChange}
+      onEdit={props.onEdit}
+      loading={props.loading}
     />
   );
 }
