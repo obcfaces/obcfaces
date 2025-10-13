@@ -16,6 +16,7 @@ interface AdminNewApplicationsTabProps {
   onReject: (app: ContestApplication) => void;
   onDelete: (app: ContestApplication) => void;
   onRestore: (app: ContestApplication) => void;
+  onStatusChange?: (participant: ContestApplication, newStatus: string) => Promise<void>;
   loading?: boolean;
 }
 
@@ -30,6 +31,7 @@ export function AdminNewApplicationsTab({
   onReject,
   onDelete,
   onRestore,
+  onStatusChange,
   loading = false,
 }: AdminNewApplicationsTabProps) {
   const { selectedCountry } = useAdminCountry();
@@ -79,6 +81,7 @@ export function AdminNewApplicationsTab({
         onRestore={onRestore}
         onApprove={onApprove}
         onReject={onReject}
+        onStatusChange={onStatusChange}
       />
 
       {displayApplications.length === 0 && (

@@ -3439,6 +3439,22 @@ const AdminContent = () => {
                   });
                   setRejectModalOpen(true);
                 }}
+                onStatusChange={async (participant, newStatus) => {
+                  const appData = participant.application_data || {};
+                  const participantName = `${appData.first_name} ${appData.last_name}`;
+                  const result = await updateParticipantStatusWithHistory(
+                    participant.id,
+                    newStatus as ParticipantStatus,
+                    participantName
+                  );
+                  if (result.success) {
+                    toast({
+                      title: "Status Updated",
+                      description: `${participantName} status changed to ${newStatus}`,
+                    });
+                    fetchContestApplications();
+                  }
+                }}
                 onDelete={async (app) => {
                   const appData = app.application_data || {};
                   const name = `${appData.first_name} ${appData.last_name}`;

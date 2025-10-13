@@ -268,6 +268,17 @@ const ParticipantCardWithHistory = ({
     ? appData.rejection_reason_types
     : [];
 
+  // Debug logging for rejection reasons
+  if (tabType === 'new' && participant.admin_status === 'rejected') {
+    console.log('🔴 REJECTION DEBUG:', {
+      participantName,
+      status: participant.admin_status,
+      rejectionReasons,
+      appData_keys: Object.keys(appData),
+      full_appData: appData
+    });
+  }
+
   // Load votes for Next Week tab
   React.useEffect(() => {
     if (tabType === 'next' && getVotesForParticipant) {
