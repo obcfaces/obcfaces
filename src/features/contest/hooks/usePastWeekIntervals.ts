@@ -78,7 +78,10 @@ export const usePastWeekIntervals = (countryCode: string, timezone: string) => {
           const diffDays = Math.floor(diffTime / (24 * 60 * 60 * 1000));
           const weeksAgo = Math.floor(diffDays / 7);
           
-          intervalsMap.set(interval, { interval, weeksAgo });
+          // Skip weeks with weeksAgo = 0 (current week participants)
+          if (weeksAgo > 0) {
+            intervalsMap.set(interval, { interval, weeksAgo });
+          }
         });
         
         const sortedIntervals = Array.from(intervalsMap.values())
