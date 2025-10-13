@@ -138,10 +138,9 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
 
   return (
     <div className="space-y-4 w-full">
-      {/* First row - Main filters (without gender and view toggles) */}
+      {/* Filters without country selector (it's in the header now) */}
       <div className="flex flex-row flex-nowrap items-center gap-2 w-full">
-        {/* Country filter with locale support */}
-        <LocaleCountryFilter value={country} onCountryChange={onCountryChange} />
+        {/* Country filter removed - now in ContestHeader */}
       </div>
 
       {/* Second row - Additional filters */}
