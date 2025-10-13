@@ -27,17 +27,17 @@ export function ContestHeader({ activeSection, onSectionChange, viewMode = "comp
     <div className="bg-contest-light-bg">
       <div className="max-w-6xl mx-auto px-6 py-4">
         {/* First line: Title "of" and Country Selector */}
-        <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-bold text-contest-text">OBC faces</h1>
-          <span className="text-2xl font-bold text-contest-text">{t("of")}</span>
+        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2">
+          <h1 className="text-xl sm:text-2xl font-bold text-contest-text whitespace-nowrap">OBC faces</h1>
+          <span className="text-xl sm:text-2xl font-bold text-contest-text">{t("of")}</span>
           <LocaleCountryFilter />
         </div>
         
         {/* Second line: Join button */}
-        <div className="mt-4">
+        <div className="mt-4 w-full">
           <AuthProtectedModal>
             <Button 
-              className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 whitespace-nowrap"
+              className="w-full sm:w-auto bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 whitespace-nowrap"
             >
               🏆 {t("Join & Win 5,000 PHP")}
             </Button>
