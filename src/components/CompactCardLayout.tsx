@@ -110,7 +110,8 @@ export function CompactCardLayout({
   const { t } = useTranslation();
   const { currentLanguage } = useLanguage();
   
-  const translatedCountry = getCountryDisplayName(country); // Already uses translations
+  const countryName = getCountryDisplayName(country);
+  const translatedCountry = t(`country.${countryName}`) !== `country.${countryName}` ? t(`country.${countryName}`) : countryName;
   const ageWeightHeightText = formatAgeWeightHeight(age, weight, height, currentLanguage.code);
   
   const hasWinnerContent = isWinner && winnerContent && (

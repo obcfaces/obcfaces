@@ -1,7 +1,7 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
-// Convert country codes to full names
+// Convert country codes to full names (returns English name - will be translated by t())
 export function getCountryDisplayName(countryValue: string): string {
   const countryMappings: Record<string, string> = {
     'PH': 'Philippines',
@@ -24,7 +24,9 @@ export function getCountryDisplayName(countryValue: string): string {
     'ES': 'Spain',
     'BR': 'Brazil',
     'MX': 'Mexico',
-    'RU': 'Russia'
+    'RU': 'Russia',
+    'KZ': 'Kazakhstan',
+    'UA': 'Ukraine'
   };
   
   // Return full name if it's a code, otherwise return as is

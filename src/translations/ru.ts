@@ -68,4 +68,48 @@ export default {
   'footer.privacy': 'Политика конфиденциальности',
   'footer.copyright': 'Все права защищены.',
   'footer.madeWith': 'Сделано с ❤️',
+
+  // Months (abbreviated)
+  'month.jan': 'Янв',
+  'month.feb': 'Фев',
+  'month.mar': 'Мар',
+  'month.apr': 'Апр',
+  'month.may': 'Май',
+  'month.jun': 'Июн',
+  'month.jul': 'Июл',
+  'month.aug': 'Авг',
+  'month.sep': 'Сен',
+  'month.oct': 'Окт',
+  'month.nov': 'Ноя',
+  'month.dec': 'Дек',
+
+  // Units (abbreviations)
+  'unit.years.short': 'л',  // лет
+  'unit.kg': 'кг',
+  'unit.cm': 'см',
+
+  // Countries
+  'country.Philippines': 'Филиппины',
+  'country.Kazakhstan': 'Казахстан',
+  'country.Russia': 'Россия',
+  'country.Ukraine': 'Украина',
+  'country.United States': 'США',
+  'country.Canada': 'Канада',
+  'country.United Kingdom': 'Великобритания',
+  'country.Australia': 'Австралия',
+  'country.Japan': 'Япония',
+  'country.South Korea': 'Южная Корея',
+  'country.China': 'Китай',
+  'country.India': 'Индия',
+  'country.Indonesia': 'Индонезия',
+  'country.Malaysia': 'Малайзия',
+  'country.Singapore': 'Сингапур',
+  'country.Thailand': 'Таиланд',
+  'country.Vietnam': 'Вьетнам',
+  'country.France': 'Франция',
+  'country.Germany': 'Германия',
+  'country.Italy': 'Италия',
+  'country.Spain': 'Испания',
+  'country.Brazil': 'Бразилия',
+  'country.Mexico': 'Мексика',
 };
