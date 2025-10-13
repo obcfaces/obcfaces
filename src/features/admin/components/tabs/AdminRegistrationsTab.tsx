@@ -95,30 +95,30 @@ export function AdminRegistrationsTab({
       suspicious: { mon: 0, tue: 0, wed: 0, thu: 0, fri: 0, sat: 0, sun: 0 },
     };
 
-    // Get current week's Monday in Manila timezone
-    const nowManila = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila' }));
-    const currentDayOfWeek = nowManila.getDay();
+    // Get current week's Monday in UTC
+    const nowUtc = new Date();
+    const currentDayOfWeek = nowUtc.getUTCDay();
     const daysFromMonday = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
-    const weekStartManila = new Date(nowManila);
-    weekStartManila.setDate(nowManila.getDate() - daysFromMonday);
-    weekStartManila.setHours(0, 0, 0, 0);
+    const weekStartUtc = new Date(Date.UTC(
+      nowUtc.getUTCFullYear(),
+      nowUtc.getUTCMonth(),
+      nowUtc.getUTCDate() - daysFromMonday,
+      0, 0, 0, 0
+    ));
     
-    const weekEndManila = new Date(weekStartManila);
-    weekEndManila.setDate(weekStartManila.getDate() + 6);
-    weekEndManila.setHours(23, 59, 59, 999);
+    const weekEndUtc = new Date(weekStartUtc);
+    weekEndUtc.setUTCDate(weekStartUtc.getUTCDate() + 6);
+    weekEndUtc.setUTCHours(23, 59, 59, 999);
 
     profiles.forEach(profile => {
-      const manilaTimeStr = new Date(profile.created_at).toLocaleString('en-US', { 
-        timeZone: 'Asia/Manila' 
-      });
-      const profileCreatedAtManila = new Date(manilaTimeStr);
+      const profileCreatedAtUtc = new Date(profile.created_at);
 
       // Only count registrations from current week
-      if (profileCreatedAtManila < weekStartManila || profileCreatedAtManila > weekEndManila) {
+      if (profileCreatedAtUtc < weekStartUtc || profileCreatedAtUtc > weekEndUtc) {
         return;
       }
 
-      const dayOfWeek = profileCreatedAtManila.getDay();
+      const dayOfWeek = profileCreatedAtUtc.getUTCDay();
       const dayMap: { [key: number]: keyof typeof stats.all } = {
         1: 'mon', 2: 'tue', 3: 'wed', 4: 'thu', 5: 'fri', 6: 'sat', 0: 'sun'
       };
@@ -168,20 +168,23 @@ export function AdminRegistrationsTab({
 
   // Get current week dates for table headers
   const weekDates = useMemo(() => {
-    const nowManila = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila' }));
-    const currentDayOfWeek = nowManila.getDay();
+    const nowUtc = new Date();
+    const currentDayOfWeek = nowUtc.getUTCDay();
     const daysFromMonday = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
-    const monday = new Date(nowManila);
-    monday.setDate(nowManila.getDate() - daysFromMonday);
+    const monday = new Date(Date.UTC(
+      nowUtc.getUTCFullYear(),
+      nowUtc.getUTCMonth(),
+      nowUtc.getUTCDate() - daysFromMonday
+    ));
 
     return {
-      mon: `${String(monday.getDate()).padStart(2, '0')}/${String(monday.getMonth() + 1).padStart(2, '0')}`,
-      tue: (() => { const d = new Date(monday); d.setDate(monday.getDate() + 1); return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; })(),
-      wed: (() => { const d = new Date(monday); d.setDate(monday.getDate() + 2); return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; })(),
-      thu: (() => { const d = new Date(monday); d.setDate(monday.getDate() + 3); return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; })(),
-      fri: (() => { const d = new Date(monday); d.setDate(monday.getDate() + 4); return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; })(),
-      sat: (() => { const d = new Date(monday); d.setDate(monday.getDate() + 5); return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; })(),
-      sun: (() => { const d = new Date(monday); d.setDate(monday.getDate() + 6); return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; })(),
+      mon: `${String(monday.getUTCDate()).padStart(2, '0')}/${String(monday.getUTCMonth() + 1).padStart(2, '0')}`,
+      tue: (() => { const d = new Date(monday); d.setUTCDate(monday.getUTCDate() + 1); return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}`; })(),
+      wed: (() => { const d = new Date(monday); d.setUTCDate(monday.getUTCDate() + 2); return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}`; })(),
+      thu: (() => { const d = new Date(monday); d.setUTCDate(monday.getUTCDate() + 3); return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}`; })(),
+      fri: (() => { const d = new Date(monday); d.setUTCDate(monday.getUTCDate() + 4); return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}`; })(),
+      sat: (() => { const d = new Date(monday); d.setUTCDate(monday.getUTCDate() + 5); return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}`; })(),
+      sun: (() => { const d = new Date(monday); d.setUTCDate(monday.getUTCDate() + 6); return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}`; })(),
     };
   }, []);
 
