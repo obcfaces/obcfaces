@@ -49,7 +49,7 @@ import { AdminAllParticipantsTab } from '../components/tabs/AdminAllParticipants
 import { AdminRegistrationsTab } from '../components/tabs/AdminRegistrationsTab';
 import { AdminStatisticsTab } from '../components/tabs/AdminStatisticsTab';
 import { BackupTrigger } from '../components/BackupTrigger';
-import { WeeklyTransitionButton } from '@/features/contest/components/WeeklyTransitionButton';
+import { WeeklyTransitionSelfCheck } from '../components/WeeklyTransitionSelfCheck';
 import { AdminCountryProvider, useAdminCountry } from '@/contexts/AdminCountryContext';
 import { CONTEST_COUNTRIES } from '@/types/admin';
 import { 
@@ -3118,10 +3118,7 @@ const AdminContent = () => {
                 </SelectContent>
               </Select>
               
-              <div className="flex items-center gap-2">
-                <WeeklyTransitionButton />
-                <BackupTrigger />
-              </div>
+              <BackupTrigger />
             </div>
 
             <div className="flex items-center gap-4">
@@ -3135,9 +3132,14 @@ const AdminContent = () => {
           </div>
 
           <Tabs value={activeTab} onValueChange={(tab) => {
-            console.log('📑 Tab changed to:', tab);
+          console.log('📑 Tab changed to:', tab);
             setActiveTab(tab);
           }} className="space-y-6">
+            {/* Weekly Transition Self-Check Panel */}
+            <div className="mb-6">
+              <WeeklyTransitionSelfCheck />
+            </div>
+            
             {/* Mobile layout for new tabs */}
             <div className="md:hidden">
               <TabsList className="grid grid-cols-9 w-full gap-1">
