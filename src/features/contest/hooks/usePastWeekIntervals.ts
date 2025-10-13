@@ -11,17 +11,17 @@ export const usePastWeekIntervals = (countryCode: string, timezone: string) => {
   const [loading, setLoading] = useState(true);
 
   const getCurrentMonday = useCallback(() => {
+    // Строгий UTC понедельник (совпадение с Edge/cron)
     const now = new Date();
-    const countryTime = new Date(now.toLocaleString("en-US", { timeZone: timezone }));
-    const currentDayOfWeek = countryTime.getDay();
-    const daysToSubtract = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
-    
-    const currentMonday = new Date(countryTime);
-    currentMonday.setDate(countryTime.getDate() - daysToSubtract);
-    currentMonday.setHours(0, 0, 0, 0);
-    
-    return currentMonday;
-  }, [timezone]);
+    const currentUTC = new Date(Date.UTC(
+      now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()
+    ));
+    const dow = currentUTC.getUTCDay();
+    const daysToSubtract = dow === 0 ? 6 : dow - 1;
+    currentUTC.setUTCDate(currentUTC.getUTCDate() - daysToSubtract);
+    currentUTC.setUTCHours(0, 0, 0, 0);
+    return currentUTC;
+  }, []);
 
   const parseIntervalToMonday = useCallback((interval: string): Date | null => {
     try {
