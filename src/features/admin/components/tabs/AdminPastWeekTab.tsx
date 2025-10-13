@@ -62,6 +62,14 @@ export function AdminPastWeekTab({
   setPastWeekIntervalFilter = () => {},
   loading = false,
 }: AdminPastWeekTabProps) {
+  // Fixed list of week intervals (newest to oldest)
+  const FIXED_WEEK_INTERVALS = [
+    '06/10-12/10/25',
+    '29/09-05/10/25',
+    '22/09-28/09/25',
+    '15/09-21/09/25',
+    '08/09-14/09/25',
+  ];
   if (loading) {
     return <LoadingSpinner message="Loading past weeks..." />;
   }
@@ -143,47 +151,12 @@ export function AdminPastWeekTab({
 
   // Get available week intervals from participants
   const availableWeekIntervals = useMemo(() => {
-    const intervals = new Set<string>();
-    
-    // Always include the most recent interval first
-    intervals.add('08/09-14/09/25');
-    
-    participants
-      .filter(p => p.admin_status === 'past' && p.week_interval)
-      .forEach(p => intervals.add(p.week_interval!));
-    
-    // Parse interval string to Date for proper sorting
-    const parseInterval = (interval: string): Date => {
-      const parts = interval.split('-');
-      if (parts.length !== 2) return new Date(0);
-      
-      const startParts = parts[0].split('/');
-      if (startParts.length !== 2) return new Date(0);
-      
-      const endParts = parts[1].split('/');
-      if (endParts.length !== 3) return new Date(0);
-      
-      const day = parseInt(startParts[0]);
-      const month = parseInt(startParts[1]) - 1; // JavaScript months are 0-indexed
-      const year = parseInt(endParts[2]);
-      const fullYear = year < 50 ? 2000 + year : 1900 + year;
-      
-      return new Date(fullYear, month, day);
-    };
-    
-    const sortedIntervals = Array.from(intervals).sort((a, b) => {
-      // Sort by date descending (newest first)
-      const dateA = parseInterval(a);
-      const dateB = parseInterval(b);
-      return dateB.getTime() - dateA.getTime();
-    });
-    
-    return sortedIntervals.map(interval => ({
+    return FIXED_WEEK_INTERVALS.map(interval => ({
       value: interval,
       label: interval,
       count: participants.filter(p => p.admin_status === 'past' && p.week_interval === interval).length
     }));
-  }, [participants]);
+  }, [participants, FIXED_WEEK_INTERVALS]);
 
   // Calculate filter counts
   const filterCounts = useMemo(() => {
@@ -206,6 +179,11 @@ export function AdminPastWeekTab({
     try {
       const changes = pendingPastChanges[participant.id];
       if (changes) {
+        // If week_interval changed, also update the top filter to match
+        if (changes.week_interval && changes.week_interval !== participant.week_interval) {
+          setPastWeekIntervalFilter(changes.week_interval);
+        }
+        
         // Create updated participant object with both status and week_interval if changed
         const updatedParticipant = {
           ...participant,
