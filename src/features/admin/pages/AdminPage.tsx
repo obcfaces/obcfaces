@@ -370,6 +370,7 @@ const AdminContent = () => {
       rejection_reason?: string | null;
       reviewed_at?: string;
       reviewed_by?: string;
+      week_interval?: string; // Add week_interval to additionalData
     }
   ): Promise<{ success: boolean; error?: any }> => {
     try {
@@ -392,9 +393,9 @@ const AdminContent = () => {
       }
       console.log('🟢 Current user ID:', user.id);
 
-      // Get week interval for the status
-      const weekInterval = getWeekIntervalForStatus(newStatus);
-      console.log('🟢 Week interval:', weekInterval);
+      // Get week interval: use provided one or calculate from status
+      const weekInterval = additionalData?.week_interval || getWeekIntervalForStatus(newStatus);
+      console.log('🟢 Week interval:', weekInterval, additionalData?.week_interval ? '(provided)' : '(calculated)');
       
       // Get current participant data to update status_history
       const { data: currentParticipant, error: fetchError } = await supabase
@@ -3668,10 +3669,17 @@ const AdminContent = () => {
                 onStatusChange={async (participant, newStatus) => {
                   const appData = participant.application_data || {};
                   const participantName = `${appData.first_name} ${appData.last_name}`;
+                  
+                  // Pass week_interval if it exists on the participant object
+                  const additionalData = participant.week_interval ? {
+                    week_interval: participant.week_interval
+                  } : undefined;
+                  
                   const result = await updateParticipantStatusWithHistory(
                     participant.id,
                     newStatus as ParticipantStatus,
-                    participantName
+                    participantName,
+                    additionalData
                   );
                   if (result.success) {
                     toast({

@@ -179,11 +179,6 @@ export function AdminPastWeekTab({
     try {
       const changes = pendingPastChanges[participant.id];
       if (changes) {
-        // If week_interval changed, also update the top filter to match
-        if (changes.week_interval && changes.week_interval !== participant.week_interval) {
-          setPastWeekIntervalFilter(changes.week_interval);
-        }
-        
         // Create updated participant object with both status and week_interval if changed
         const updatedParticipant = {
           ...participant,
@@ -191,7 +186,7 @@ export function AdminPastWeekTab({
           ...(changes.week_interval && { week_interval: changes.week_interval })
         };
         
-        // Call onStatusChange with the new status (keeping the signature)
+        // Call onStatusChange with updated participant data
         await onStatusChange(updatedParticipant, changes.admin_status || participant.admin_status);
       }
       // Clear pending changes
