@@ -144,6 +144,10 @@ export function AdminPastWeekTab({
   // Get available week intervals from participants
   const availableWeekIntervals = useMemo(() => {
     const intervals = new Set<string>();
+    
+    // Always include the most recent interval first
+    intervals.add('08/10-14/10/25');
+    
     participants
       .filter(p => p.admin_status === 'past' && p.week_interval)
       .forEach(p => intervals.add(p.week_interval!));
