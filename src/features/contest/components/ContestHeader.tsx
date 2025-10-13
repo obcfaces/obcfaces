@@ -3,9 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Camera, Upload, Facebook, Instagram, Globe, AlignJustify, Grid2X2 } from "lucide-react";
 import { AuthProtectedModal } from "@/components/auth-protected-modal";
 import { Separator } from "@/components/ui/separator";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CONTEST_COUNTRIES } from "@/types/admin";
-import { usePublicCountry } from "@/contexts/PublicCountryContext";
+import LocaleCountryFilter from "@/components/locale-country-filter";
 import { useTranslation } from "@/hooks/useTranslation";
 
 export type ViewMode = "compact" | "full";
@@ -20,22 +18,6 @@ interface ContestHeaderProps {
 export function ContestHeader({ activeSection, onSectionChange, viewMode = "compact", onViewModeChange }: ContestHeaderProps) {
   const { t } = useTranslation();
   
-  // Try to get country context - it may not exist on all pages
-  let countryCode = 'PH';
-  let navigateToCountry: ((code: string) => void) | undefined;
-  let flag = '🇵🇭';
-  let countryName = 'Philippines';
-  
-  try {
-    const context = usePublicCountry();
-    countryCode = context.countryCode;
-    navigateToCountry = context.navigateToCountry;
-    flag = context.flag;
-    countryName = context.countryName;
-  } catch (e) {
-    // Context not available - using defaults
-  }
-  
   const navItems = [
     { key: "Contest", label: t("Contest"), href: "#" },
     { key: "How it works", label: t("How it works"), href: "#" }
@@ -48,31 +30,7 @@ export function ContestHeader({ activeSection, onSectionChange, viewMode = "comp
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-bold text-contest-text">OBC faces</h1>
           <span className="text-2xl font-bold text-contest-text">{t("of")}</span>
-          
-          {/* Country Selector - only show if navigation is available */}
-          {navigateToCountry && (
-            <Select value={countryCode} onValueChange={navigateToCountry}>
-              <SelectTrigger className="w-[200px] bg-background border-contest-border">
-                <Globe className="h-4 w-4 mr-2" />
-                <SelectValue>
-                  <span className="flex items-center gap-2">
-                    <span>{flag}</span>
-                    <span>{countryName}</span>
-                  </span>
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {CONTEST_COUNTRIES.map((country) => (
-                  <SelectItem key={country.code} value={country.code}>
-                    <span className="flex items-center gap-2">
-                      <span>{country.flag}</span>
-                      <span>{country.name}</span>
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
+          <LocaleCountryFilter />
         </div>
         
         {/* Second line: Join button */}
