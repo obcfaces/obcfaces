@@ -1706,6 +1706,10 @@ export type Database = {
         Args: { conversation_id_param: string; user_id_param: string }
         Returns: number
       }
+      get_current_monday_utc: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_daily_application_stats: {
         Args: Record<PropertyKey, never>
         Returns: {

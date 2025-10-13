@@ -33,23 +33,18 @@ export const WeeklyTransitionButton = () => {
     setIsRunning(true);
     
     try {
-      console.log('⏰ Calling SQL transition function directly...');
+      console.log('⏰ Calling SQL transition function with get_current_monday_utc()...');
       
-      // Calculate current Monday in UTC
-      const now = new Date();
-      const currentMonday = new Date(Date.UTC(
-        now.getUTCFullYear(),
-        now.getUTCMonth(),
-        now.getUTCDate()
-      ));
+      // Get current Monday from SQL function
+      const { data: mondayData, error: mondayError } = await supabase.rpc('get_current_monday_utc');
       
-      const currentDay = currentMonday.getUTCDay();
-      const daysToMonday = currentDay === 0 ? -6 : 1 - currentDay;
-      currentMonday.setUTCDate(currentMonday.getUTCDate() + daysToMonday);
+      if (mondayError) {
+        console.error('❌ Error getting current Monday:', mondayError);
+        throw new Error('Failed to get current Monday: ' + mondayError.message);
+      }
       
-      const targetWeekStart = currentMonday.toISOString().split('T')[0];
-      
-      console.log(`📅 Target week start (Monday UTC): ${targetWeekStart}`);
+      const targetWeekStart = mondayData as string;
+      console.log(`📅 Target week start (Monday UTC from SQL): ${targetWeekStart}`);
       
       // Call SQL function directly
       const { data, error } = await supabase.rpc('transition_weekly_contest', {
