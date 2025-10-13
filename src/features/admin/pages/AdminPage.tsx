@@ -3779,6 +3779,12 @@ const AdminContent = () => {
             <TabsContent value="new-winner" className="space-y-6">
               {weeklyParticipants
                 .filter(p => p.final_rank === 1) // Show only winners
+                .sort((a, b) => {
+                  // Sort by week_interval descending (newest first)
+                  const intervalA = a.week_interval || '';
+                  const intervalB = b.week_interval || '';
+                  return intervalB.localeCompare(intervalA);
+                })
                 .map(participant => (
                   <WinnerContentManager 
                     key={participant.id}
