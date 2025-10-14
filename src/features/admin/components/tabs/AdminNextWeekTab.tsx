@@ -199,18 +199,31 @@ export function AdminNextWeekTab({
     return dates;
   }, []);
 
-  // Get participants with votes only
+  // Get participants with votes only - use votesData from cards
   const participantsWithVotes = useMemo(() => {
-    return Object.entries(participantWeeklyStats)
-      .map(([name, stats]) => ({
-        name,
-        stats,
-        totalLikes: Object.values(stats).reduce((sum, day) => sum + day.likes, 0),
-        totalDislikes: Object.values(stats).reduce((sum, day) => sum + day.dislikes, 0),
-      }))
+    return Object.entries(votesData)
+      .map(([name, stats]) => {
+        // Get weekly breakdown from participantWeeklyStats if available
+        const weeklyBreakdown = participantWeeklyStats[name] || {
+          mon: { likes: 0, dislikes: 0 },
+          tue: { likes: 0, dislikes: 0 },
+          wed: { likes: 0, dislikes: 0 },
+          thu: { likes: 0, dislikes: 0 },
+          fri: { likes: 0, dislikes: 0 },
+          sat: { likes: 0, dislikes: 0 },
+          sun: { likes: 0, dislikes: 0 },
+        };
+
+        return {
+          name,
+          stats: weeklyBreakdown,
+          totalLikes: stats.likes,  // Use totals from votesData (same as cards)
+          totalDislikes: stats.dislikes,  // Use totals from votesData (same as cards)
+        };
+      })
       .filter(p => p.totalLikes > 0 || p.totalDislikes > 0)
       .sort((a, b) => (b.totalLikes + b.totalDislikes) - (a.totalLikes + a.totalDislikes));
-  }, [participantWeeklyStats]);
+  }, [votesData, participantWeeklyStats]);
 
   const totalStats = useMemo(() => {
     const total = { like: 0, dislike: 0 };
