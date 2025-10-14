@@ -120,7 +120,7 @@ export function AdminNewApplicationsTab({
       if (app.admin_status === 'pending') {
         stats.pending[day]++;
       }
-      if (app.admin_status && ['pre next week', 'next week', 'next week on site'].includes(app.admin_status)) {
+      if (app.admin_status && ['pre next week', 'next week', 'next week on site', 'this week'].includes(app.admin_status)) {
         stats.approved[day]++;
       }
       if (app.admin_status === 'rejected') {
@@ -236,7 +236,7 @@ export function AdminNewApplicationsTab({
             console.log(`${match ? '✅' : '❌'} Pending status check: ${app.admin_status}`);
             return match;
           } else if (statusRowFilter === 'approved') {
-            const match = app.admin_status && ['pre next week', 'next week', 'next week on site'].includes(app.admin_status);
+            const match = app.admin_status && ['pre next week', 'next week', 'next week on site', 'this week'].includes(app.admin_status);
             console.log(`${match ? '✅' : '❌'} Approved status check: ${app.admin_status}`);
             return match;
           } else if (statusRowFilter === 'rejected') {
