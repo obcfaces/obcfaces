@@ -558,7 +558,8 @@ const ApplicationCardWithHistory = ({
                     </span>
                     <Copy 
                       className="h-3 w-3 flex-shrink-0 cursor-pointer text-muted-foreground hover:text-foreground" 
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
                         navigator.clipboard.writeText(appData.email || '');
                       }}
                     />
@@ -701,22 +702,69 @@ const ApplicationCardWithHistory = ({
               <div className="flex-1 p-2 flex flex-col justify-between">
                 <div>
                   <div className="flex items-center gap-1 mb-0.5">
-                    <Avatar className="h-5 w-5">
-                      <AvatarImage src={photo1 || ''} />
-                      <AvatarFallback className="text-[10px]">
-                        {firstName?.charAt(0) || 'U'}
-                      </AvatarFallback>
-                    </Avatar>
                     <span className="text-xs font-semibold">
-                      {firstName} {lastName}
+                      {appData.birth_year ? `${new Date().getFullYear() - parseInt(appData.birth_year)}, ` : ''}{firstName} {lastName}
                     </span>
                   </div>
+                  
+                  <div className="text-xs text-muted-foreground mb-1">
+                    {appData.city}, {appData.country}
+                  </div>
+
+                  {/* Email with copy icon */}
+                  {appData.email && (
+                    <div className="flex items-center gap-1 mb-1">
+                      <span className="text-xs text-muted-foreground truncate" title={appData.email}>
+                        {appData.email.substring(0, 10)}...
+                      </span>
+                      <Copy 
+                        className="h-3 w-3 flex-shrink-0 cursor-pointer text-muted-foreground hover:text-foreground" 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigator.clipboard.writeText(appData.email || '');
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  {/* Facebook link */}
+                  {(appData.facebook_url || appData.cached_facebook_url) && (
+                    <div className="mb-1">
+                      <a 
+                        href={appData.facebook_url || appData.cached_facebook_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-xs text-blue-600 hover:underline"
+                      >
+                        Facebook
+                      </a>
+                    </div>
+                  )}
+
+                  {/* Phone */}
+                  {(appData.phone?.number || appData.cached_phone?.number) && (
+                    <div className="text-xs text-muted-foreground mb-1">
+                      {appData.phone?.number ? (
+                        <>
+                          {appData.phone.country_code && `+${Country.getCountryByCode(appData.phone.country_code)?.phonecode || ''} `}
+                          {appData.phone.number}
+                        </>
+                      ) : (
+                        <>
+                          {appData.cached_phone.country_code && `+${Country.getCountryByCode(appData.cached_phone.country_code)?.phonecode || ''} `}
+                          {appData.cached_phone.number}
+                        </>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Expandable application data */}
                   <div 
                     className="text-[10px] text-muted-foreground cursor-pointer hover:text-foreground transition-colors flex items-center gap-1"
                     onClick={() => setExpandedId(expandedId === participant.id ? null : participant.id)}
                     title="Click to view full application data"
                   >
-                    <span>{appData.city}, {appData.country}</span>
+                    <span>More info</span>
                     {expandedId === participant.id ? (
                       <ChevronUp className="h-2.5 w-2.5" />
                     ) : (
@@ -724,61 +772,18 @@ const ApplicationCardWithHistory = ({
                     )}
                   </div>
                   
-                  {/* Expandable application data */}
                   {expandedId === participant.id && (
                     <div className="text-xs text-muted-foreground mt-1 max-h-32 md:max-h-40 overflow-y-auto overflow-x-hidden space-y-1 pr-1">
                       <div>
                         {Object.entries(appData).map(([key, value], index) => {
-                          if (key.includes('url') || key.includes('photo') || key === 'phone' || !value) return null;
+                          if (key.includes('url') || key.includes('photo') || key === 'phone' || key === 'email' || !value) return null;
                           return (
                             <span key={key}>
                               {String(value)}
-                              {index < Object.entries(appData).filter(([k, v]) => !k.includes('url') && !k.includes('photo') && k !== 'phone' && v).length - 1 ? ', ' : ''}
+                              {index < Object.entries(appData).filter(([k, v]) => !k.includes('url') && !k.includes('photo') && k !== 'phone' && k !== 'email' && v).length - 1 ? ', ' : ''}
                             </span>
                           );
                         })}
-                      </div>
-                      
-                      {/* Facebook Link */}
-                      <div className="pt-1">
-                        {appData.facebook_url ? (
-                          <a 
-                            href={appData.facebook_url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline break-all"
-                          >
-                            {appData.facebook_url}
-                          </a>
-                        ) : appData.cached_facebook_url ? (
-                          <a 
-                            href={appData.cached_facebook_url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-orange-600 hover:text-orange-800 dark:text-orange-400 dark:hover:text-orange-300 underline break-all"
-                          >
-                            save {appData.cached_facebook_url}
-                          </a>
-                        ) : (
-                          <span className="text-muted-foreground/60">no fb</span>
-                        )}
-                      </div>
-                      
-                      {/* Phone */}
-                      <div>
-                        {appData.phone?.number ? (
-                          <span>
-                            {appData.phone.country_code && `+${Country.getCountryByCode(appData.phone.country_code)?.phonecode || ''} `}
-                            {appData.phone.number}
-                          </span>
-                        ) : appData.cached_phone?.number ? (
-                          <span className="text-orange-600 dark:text-orange-400">
-                            save {appData.cached_phone.country_code && `+${Country.getCountryByCode(appData.cached_phone.country_code)?.phonecode || ''} `}
-                            {appData.cached_phone.number}
-                          </span>
-                        ) : (
-                          <span className="text-muted-foreground/60">no tel</span>
-                        )}
                       </div>
                     </div>
                   )}
