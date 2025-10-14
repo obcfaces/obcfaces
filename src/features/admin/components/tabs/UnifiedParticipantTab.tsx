@@ -88,51 +88,58 @@ export function UnifiedParticipantTab({
       weekIntervalFilter
     });
 
+    // STEP 1: Filter by country
     let filtered = participants.filter(p => {
       const country = p.application_data?.country || ('profiles' in p ? p.profiles?.country : undefined);
-      const matches = country === selectedCountry;
-      if (!matches && tabType === 'past') {
-        console.log(`[UNIFIED TAB PAST] Filtered out by country:`, {
-          name: `${p.application_data?.first_name} ${p.application_data?.last_name}`,
-          country,
-          selectedCountry
-        });
-      }
-      return matches;
+      return country === selectedCountry;
     });
     console.log(`[UNIFIED TAB ${tabType}] After country filter:`, filtered.length);
 
-    // Filter by status for THIS tab - only "this week"
+    // STEP 2: Filter by status for THIS tab
     if (tabType === 'this') {
       filtered = filtered.filter(p => p.admin_status === 'this week');
+      console.log(`[UNIFIED TAB THIS] After status='this week' filter:`, filtered.length);
     }
 
-    // Apply week interval filter for past tab - only show "past" status
+    // STEP 3: Filter by status 'past' for PAST tab
     if (tabType === 'past') {
-      console.log('[UNIFIED TAB PAST] Before status filter:', filtered.length);
-      filtered = filtered.filter(p => p.admin_status === 'past');
-      console.log('[UNIFIED TAB PAST] After status=past filter:', filtered.length);
+      const beforeStatus = filtered.length;
+      filtered = filtered.filter(p => {
+        const isPast = p.admin_status === 'past';
+        if (!isPast) {
+          console.log(`[UNIFIED TAB PAST] Not past status:`, {
+            name: `${p.application_data?.first_name} ${p.application_data?.last_name}`,
+            status: p.admin_status
+          });
+        }
+        return isPast;
+      });
+      console.log(`[UNIFIED TAB PAST] After status='past' filter: ${filtered.length} (was ${beforeStatus})`);
       
+      // STEP 4: Filter by week interval if not 'all'
       if (weekIntervalFilter !== 'all') {
-        console.log('[UNIFIED TAB PAST] Applying interval filter:', weekIntervalFilter);
         const beforeInterval = filtered.length;
         filtered = filtered.filter(p => {
-          const weekInterval = (p as any).week_interval;
-          const hasInterval = weekInterval === weekIntervalFilter;
-          if (!hasInterval) {
-            console.log('[UNIFIED TAB PAST] Filtered out by interval:', {
+          const participantInterval = (p as any).week_interval;
+          const matches = participantInterval === weekIntervalFilter;
+          
+          if (!matches) {
+            console.log(`[UNIFIED TAB PAST] Interval mismatch:`, {
               name: `${p.application_data?.first_name} ${p.application_data?.last_name}`,
-              interval: (p as any).week_interval,
-              expectedInterval: weekIntervalFilter
+              participantInterval,
+              filterInterval: weekIntervalFilter
             });
           }
-          return hasInterval;
+          
+          return matches;
         });
         console.log(`[UNIFIED TAB PAST] After interval filter: ${filtered.length} (was ${beforeInterval})`);
+      } else {
+        console.log(`[UNIFIED TAB PAST] No interval filter (showing all)`);
       }
     }
 
-    // Sort by rating for this and past tabs (only for WeeklyContestParticipant)
+    // STEP 5: Sort by rating for this and past tabs
     if (tabType === 'this' || tabType === 'past') {
       filtered.sort((a, b) => {
         const aRank = 'final_rank' in a ? a.final_rank : undefined;
@@ -153,6 +160,13 @@ export function UnifiedParticipantTab({
     }
 
     console.log(`[UNIFIED TAB ${tabType}] Final filtered count:`, filtered.length);
+    if (tabType === 'past' && filtered.length > 0) {
+      console.log(`[UNIFIED TAB PAST] Sample intervals:`, filtered.slice(0, 5).map(p => ({
+        name: `${p.application_data?.first_name} ${p.application_data?.last_name}`,
+        interval: (p as any).week_interval
+      })));
+    }
+    
     return filtered;
   }, [participants, selectedCountry, tabType, weekIntervalFilter]);
 
