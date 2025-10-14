@@ -87,6 +87,8 @@ export function UnifiedParticipantTab({
       return country === selectedCountry;
     });
 
+    console.log(`[PAST TAB DEBUG] tabType=${tabType}, weekIntervalFilter=${weekIntervalFilter}, total after country filter=${filtered.length}`);
+
     // Filter by status for THIS tab - only "this week"
     if (tabType === 'this') {
       filtered = filtered.filter(p => p.admin_status === 'this week');
@@ -94,9 +96,24 @@ export function UnifiedParticipantTab({
 
     // Apply week interval filter for past tab - only show "past" status
     if (tabType === 'past') {
+      console.log(`[PAST TAB DEBUG] Before past filter: ${filtered.length} participants`);
       filtered = filtered.filter(p => p.admin_status === 'past');
+      console.log(`[PAST TAB DEBUG] After past filter: ${filtered.length} participants with status=past`);
+      
       if (weekIntervalFilter !== 'all') {
-        filtered = filtered.filter(p => 'week_interval' in p && p.week_interval === weekIntervalFilter);
+        console.log(`[PAST TAB DEBUG] Applying interval filter: ${weekIntervalFilter}`);
+        const beforeIntervalFilter = filtered.length;
+        filtered = filtered.filter(p => {
+          const hasInterval = 'week_interval' in p;
+          const intervalMatches = hasInterval && p.week_interval === weekIntervalFilter;
+          if (!intervalMatches && hasInterval) {
+            console.log(`[PAST TAB DEBUG] Filtered out: interval="${p.week_interval}" vs filter="${weekIntervalFilter}"`);
+          }
+          return intervalMatches;
+        });
+        console.log(`[PAST TAB DEBUG] After interval filter: ${filtered.length} participants (was ${beforeIntervalFilter})`);
+      } else {
+        console.log(`[PAST TAB DEBUG] No interval filter applied (filter='all')`);
       }
     }
 
