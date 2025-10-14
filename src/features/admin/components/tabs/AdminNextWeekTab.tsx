@@ -1,16 +1,19 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Edit, Heart, Star, MoreVertical, History } from 'lucide-react';
+import { Edit, ThumbsUp, ThumbsDown, MoreVertical, History } from 'lucide-react';
 import { WeeklyContestParticipant } from '@/types/admin';
 import { LoadingSpinner } from '../LoadingSpinner';
 import { useAdminCountry } from '@/contexts/AdminCountryContext';
 import { useApplicationHistory } from '@/hooks/useApplicationHistory';
 import { ParticipantStatusHistoryModal } from '../ParticipantStatusHistoryModal';
+import { supabase } from '@/integrations/supabase/client';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface AdminNextWeekTabProps {
   participants: WeeklyContestParticipant[];
@@ -30,6 +33,8 @@ export function AdminNextWeekTab({
   loading = false,
 }: AdminNextWeekTabProps) {
   const { selectedCountry } = useAdminCountry();
+  const [filterType, setFilterType] = useState<'all' | 'like' | 'dislike'>('all');
+  const [votesStats, setVotesStats] = useState<Record<string, { like_count: number; dislike_count: number }>>({});
 
   const filteredParticipants = useMemo(() => {
     return participants.filter(p => {
@@ -37,6 +42,56 @@ export function AdminNextWeekTab({
       return country === selectedCountry;
     });
   }, [participants, selectedCountry]);
+
+  useEffect(() => {
+    const fetchVotesStats = async () => {
+      const { data, error } = await supabase
+        .from('next_week_votes')
+        .select('candidate_name, vote_type');
+
+      if (error || !data) return;
+
+      const stats: Record<string, { like_count: number; dislike_count: number }> = {};
+      
+      data.forEach(vote => {
+        if (!stats[vote.candidate_name]) {
+          stats[vote.candidate_name] = { like_count: 0, dislike_count: 0 };
+        }
+        if (vote.vote_type === 'like') {
+          stats[vote.candidate_name].like_count++;
+        } else if (vote.vote_type === 'dislike') {
+          stats[vote.candidate_name].dislike_count++;
+        }
+      });
+
+      setVotesStats(stats);
+    };
+
+    fetchVotesStats();
+  }, []);
+
+  const totalStats = useMemo(() => {
+    const total = { like: 0, dislike: 0 };
+    Object.values(votesStats).forEach(stat => {
+      total.like += stat.like_count;
+      total.dislike += stat.dislike_count;
+    });
+    return total;
+  }, [votesStats]);
+
+  const displayParticipants = useMemo(() => {
+    if (filterType === 'all') return filteredParticipants;
+    
+    return filteredParticipants.filter(p => {
+      const name = `${p.application_data?.first_name || ''} ${p.application_data?.last_name || ''}`.trim();
+      const stats = votesStats[name];
+      if (!stats) return false;
+      
+      if (filterType === 'like') return stats.like_count > 0;
+      if (filterType === 'dislike') return stats.dislike_count > 0;
+      return false;
+    });
+  }, [filteredParticipants, filterType, votesStats]);
 
   if (loading) {
     return <LoadingSpinner message="Loading next week participants..." />;
@@ -59,9 +114,51 @@ export function AdminNextWeekTab({
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Next Week ({filteredParticipants.length})</h2>
+      {/* Votes Statistics Table */}
+      <div className="mb-6 p-2 md:p-4 bg-muted rounded-lg">
+        <div className="overflow-x-auto -mx-1">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="text-left px-1 py-2 md:p-2 font-medium text-[10px] md:text-xs">Type</th>
+                <th className="text-center px-0.5 py-2 md:p-2 font-medium text-[10px] md:text-xs">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr 
+                className={`border-b border-border/50 cursor-pointer hover:bg-accent/50 ${filterType === 'like' ? 'bg-accent font-bold' : ''}`}
+                onClick={() => setFilterType(filterType === 'like' ? 'all' : 'like')}
+              >
+                <td className="text-left px-1 py-2 md:p-2 text-green-600 dark:text-green-500 text-[10px] md:text-xs">Like</td>
+                <td className="text-center px-0.5 py-2 md:p-2 text-green-600 dark:text-green-500 text-sm md:text-base font-semibold">{totalStats.like}</td>
+              </tr>
+              <tr 
+                className={`border-b border-border/50 cursor-pointer hover:bg-accent/50 ${filterType === 'dislike' ? 'bg-accent font-bold' : ''}`}
+                onClick={() => setFilterType(filterType === 'dislike' ? 'all' : 'dislike')}
+              >
+                <td className="text-left px-1 py-2 md:p-2 text-red-500 text-[10px] md:text-xs">Dislike</td>
+                <td className="text-center px-0.5 py-2 md:p-2 text-red-500 text-sm md:text-base font-semibold">{totalStats.dislike}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-      {filteredParticipants.map((participant) => (
+      <h2 className="text-2xl font-bold">
+        Next Week ({displayParticipants.length})
+        {filterType !== 'all' && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setFilterType('all')}
+            className="ml-2"
+          >
+            Clear filter
+          </Button>
+        )}
+      </h2>
+
+      {displayParticipants.map((participant) => (
         <ParticipantCardWithHistory 
           key={participant.id}
           participant={participant}
@@ -70,12 +167,13 @@ export function AdminNextWeekTab({
           onEdit={onEdit}
           onViewVoters={onViewVoters}
           getStatusBackgroundColor={getStatusBackgroundColor}
+          votesStats={votesStats}
         />
       ))}
 
-      {filteredParticipants.length === 0 && (
+      {displayParticipants.length === 0 && (
         <div className="text-center py-12 text-muted-foreground">
-          No participants for next week
+          {filterType === 'all' ? 'No participants for next week' : `No participants with ${filterType}s`}
         </div>
       )}
     </div>
@@ -90,9 +188,13 @@ const ParticipantCardWithHistory = ({
   onEdit,
   onViewVoters,
   getStatusBackgroundColor,
+  votesStats,
 }: any) => {
   const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);
   const [showStatusHistoryModal, setShowStatusHistoryModal] = useState(false);
+  const [showVotersModal, setShowVotersModal] = useState(false);
+  const [votersType, setVotersType] = useState<'like' | 'dislike'>('like');
+  const [voters, setVoters] = useState<any[]>([]);
   const { history } = useApplicationHistory(participant.id);
   
   const historyCount = history.length;
@@ -103,6 +205,36 @@ const ParticipantCardWithHistory = ({
   const photo2 = appData.photo_2_url || appData.photo2_url || '';
   const participantName = `${firstName} ${lastName}`;
   const submittedDate = participant.created_at ? new Date(participant.created_at) : null;
+
+  const stats = votesStats[participantName] || { like_count: 0, dislike_count: 0 };
+
+  const handleShowVoters = async (type: 'like' | 'dislike') => {
+    setVotersType(type);
+    
+    const { data, error } = await supabase
+      .from('next_week_votes')
+      .select(`
+        user_id,
+        vote_type,
+        created_at,
+        profiles:user_id (
+          display_name,
+          first_name,
+          last_name,
+          avatar_url
+        )
+      `)
+      .eq('candidate_name', participantName)
+      .eq('vote_type', type);
+
+    if (error) {
+      console.error('Error fetching voters:', error);
+      return;
+    }
+
+    setVoters(data || []);
+    setShowVotersModal(true);
+  };
 
   return (
     <>
@@ -221,18 +353,24 @@ const ParticipantCardWithHistory = ({
                   {appData.city}, {appData.country}
                 </div>
 
-                {/* Rating and Votes Display */}
+                {/* Like/Dislike Display */}
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="flex items-center gap-1">
-                    <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
-                    <span className="text-xs font-semibold">
-                      {Number(participant.average_rating || 0).toFixed(1)}
+                  <div 
+                    className="flex items-center gap-1 cursor-pointer hover:opacity-80"
+                    onClick={() => handleShowVoters('like')}
+                  >
+                    <ThumbsUp className="h-3 w-3 text-green-600 fill-green-600" />
+                    <span className="text-xs font-semibold text-green-600">
+                      {stats.like_count}
                     </span>
                   </div>
-                  <div className="flex items-center gap-1 cursor-pointer" onClick={() => onViewVoters(participantName)}>
-                    <Heart className="h-3 w-3 text-pink-500 fill-pink-500" />
-                    <span className="text-xs font-semibold">
-                      {participant.total_votes || 0}
+                  <div 
+                    className="flex items-center gap-1 cursor-pointer hover:opacity-80"
+                    onClick={() => handleShowVoters('dislike')}
+                  >
+                    <ThumbsDown className="h-3 w-3 text-red-500 fill-red-500" />
+                    <span className="text-xs font-semibold text-red-500">
+                      {stats.dislike_count}
                     </span>
                   </div>
                 </div>
@@ -302,8 +440,18 @@ const ParticipantCardWithHistory = ({
                 </div>
 
                 <div className="flex items-center gap-3 mb-1">
-                  <span className="text-[10px]">⭐ {Number(participant.average_rating || 0).toFixed(1)}</span>
-                  <span className="text-[10px]">❤️ {participant.total_votes || 0}</span>
+                  <span 
+                    className="text-[10px] cursor-pointer hover:opacity-80 text-green-600 font-semibold"
+                    onClick={() => handleShowVoters('like')}
+                  >
+                    👍 {stats.like_count}
+                  </span>
+                  <span 
+                    className="text-[10px] cursor-pointer hover:opacity-80 text-red-500 font-semibold"
+                    onClick={() => handleShowVoters('dislike')}
+                  >
+                    👎 {stats.dislike_count}
+                  </span>
                 </div>
 
                 <div className="flex items-center gap-1 mt-1">
@@ -343,6 +491,63 @@ const ParticipantCardWithHistory = ({
           onClose={() => setShowStatusHistoryModal(false)}
         />
       )}
+
+      {/* Voters Modal */}
+      <Dialog open={showVotersModal} onOpenChange={setShowVotersModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {votersType === 'like' ? (
+                <>
+                  <ThumbsUp className="h-5 w-5 text-green-600 fill-green-600" />
+                  <span>Likes ({stats.like_count})</span>
+                </>
+              ) : (
+                <>
+                  <ThumbsDown className="h-5 w-5 text-red-500 fill-red-500" />
+                  <span>Dislikes ({stats.dislike_count})</span>
+                </>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="max-h-[400px]">
+            <div className="space-y-2">
+              {voters.map((voter) => {
+                const profile = voter.profiles as any;
+                return (
+                  <div key={voter.user_id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={profile?.avatar_url} />
+                      <AvatarFallback>
+                        {(profile?.display_name || profile?.first_name || 'U')[0].toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="font-medium text-sm">
+                        {profile?.display_name || `${profile?.first_name} ${profile?.last_name}` || 'Unknown User'}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {new Date(voter.created_at).toLocaleDateString('en-GB', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              {voters.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  No {votersType}s yet
+                </div>
+              )}
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
