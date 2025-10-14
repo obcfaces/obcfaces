@@ -19,6 +19,7 @@ import { formatDateInCountry } from '@/utils/weekIntervals';
 
 interface AdminNewApplicationsTabProps {
   applications: ContestApplication[];
+  allApplications?: ContestApplication[]; // For statistics table calculation
   deletedApplications: ContestApplication[];
   showDeleted: boolean;
   onToggleDeleted: (show: boolean) => void;
@@ -33,6 +34,7 @@ interface AdminNewApplicationsTabProps {
 
 export function AdminNewApplicationsTab({
   applications,
+  allApplications,
   deletedApplications,
   showDeleted,
   onToggleDeleted,
@@ -104,7 +106,10 @@ export function AdminNewApplicationsTab({
 
     console.log('📊 Week range:', weekStartUtc.toISOString(), 'to', weekEndUtc.toISOString());
     
-    applications.forEach(app => {
+    // Use allApplications for statistics if provided, otherwise use applications
+    const appsForStats = allApplications || applications;
+    
+    appsForStats.forEach(app => {
       const country = app.application_data?.country;
       if (country !== selectedCountry) return;
 
