@@ -215,7 +215,7 @@ const ApplicationCardWithHistory = ({
 
   return (
     <div className="space-y-0">
-      <Card className={`overflow-hidden relative mx-0 rounded-lg h-[149px] ${participant.admin_status === 'rejected' ? 'bg-red-50 border-red-200' : ''} ${participant.deleted_at ? 'opacity-60' : ''}`}>
+      <Card className={`overflow-hidden relative rounded-lg h-[149px] mx-0 md:mx-0 ${participant.admin_status === 'rejected' ? 'bg-red-50 border-red-200' : ''} ${participant.deleted_at ? 'opacity-60' : ''}`}>
         <CardContent className="p-0">
           {/* Date/Time badge - left top corner */}
           {submittedDate && (
