@@ -67,6 +67,7 @@ export function AdminRegistrationsTab({
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
   const [expandedFingerprint, setExpandedFingerprint] = useState<string | null>(null);
+  const [expandedIpAddress, setExpandedIpAddress] = useState<string | null>(null);
 
   // Debug logging for data availability
   console.log('📊 AdminRegistrationsTab data check:', {
@@ -304,6 +305,29 @@ export function AdminRegistrationsTab({
     }
   };
 
+  const toggleIpExpand = (ipAddress: string, profileId: string) => {
+    if (expandedIpAddress === `${ipAddress}-${profileId}`) {
+      setExpandedIpAddress(null);
+    } else {
+      setExpandedIpAddress(`${ipAddress}-${profileId}`);
+    }
+  };
+
+  // Calculate IP counts
+  const ipCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    profiles.forEach(profile => {
+      if (profile.ip_address) {
+        counts.set(profile.ip_address, (counts.get(profile.ip_address) || 0) + 1);
+      }
+    });
+    return counts;
+  }, [profiles]);
+
+  const getProfilesWithIp = (ipAddress: string) => {
+    return profiles.filter(p => p.ip_address === ipAddress);
+  };
+
   // Show loading state
   if (loading) {
     return <LoadingSpinner message="Loading users..." />;
@@ -482,7 +506,7 @@ export function AdminRegistrationsTab({
           
           return (
             <div key={profile.id} className="space-y-2">
-              <Card className="p-4 relative hover:shadow-md transition-shadow">
+              <Card className="p-4 px-2 sm:px-4 relative hover:shadow-md transition-shadow">
                 {/* Date/time badge in top-left */}
                 <Badge 
                   variant="outline"
@@ -627,7 +651,7 @@ export function AdminRegistrationsTab({
                 </div>
                 
                 {/* Main content */}
-                <div className="mt-6">
+                <div className="mt-4">
                   <div className="flex items-start gap-2 mb-1">
                     <Avatar className="h-6 w-6 flex-shrink-0">
                       <AvatarImage src={profile.avatar_url || ''} />
@@ -704,8 +728,20 @@ export function AdminRegistrationsTab({
                   {/* IP Address */}
                   {profile.ip_address ? (
                     <div className={`text-xs ${ipColor}`}>
-                      IP: {profile.ip_address}
-                      {ipCount > 1 && ` (${ipCount})`}
+                      {ipCount >= 2 ? (
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            toggleIpExpand(profile.ip_address!, profile.id);
+                          }}
+                          className="hover:underline cursor-pointer"
+                        >
+                          IP: {profile.ip_address} ({ipCount})
+                        </button>
+                      ) : (
+                        <>IP: {profile.ip_address}</>
+                      )}
                       {(profile.country || profile.city) && (
                         <span className="text-muted-foreground font-normal ml-1">
                           📍 {profile.city ? `${profile.city}, ` : ''}{profile.country || 'Unknown Country'}
@@ -745,7 +781,7 @@ export function AdminRegistrationsTab({
                   )}
                   
                   {/* User Activity Icons (bottom right) */}
-                  <div className="absolute bottom-2 right-2 flex gap-2">
+                  <div className="absolute bottom-2 right-2 flex flex-col gap-2">
                     {/* Stars */}
                     <button
                       className="flex items-center gap-1 bg-background/90 px-2 py-1 rounded hover:bg-background shadow-sm border transition-colors cursor-pointer"
@@ -1008,6 +1044,96 @@ export function AdminRegistrationsTab({
                   </div>
                 </Card>
               )}
+
+              {/* Expanded IP address section */}
+              {profile.ip_address && expandedIpAddress === `${profile.ip_address}-${profile.id}` && (() => {
+                const profilesWithSameIp = getProfilesWithIp(profile.ip_address!).filter(p => p.id !== profile.id);
+                return profilesWithSameIp.length > 0 && (
+                  <Card className="p-4 bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-800">
+                    <h4 className="text-sm font-medium mb-3 text-purple-900 dark:text-purple-100">
+                      Users with same IP ({profile.ip_address}):
+                    </h4>
+                    
+                    <div className="space-y-4">
+                      {profilesWithSameIp.map(ipProfile => {
+                        const ipFullName = ipProfile.display_name || 
+                          `${ipProfile.first_name || ''} ${ipProfile.last_name || ''}`.trim() || 
+                          'Unknown';
+                        const ipEmail = (ipProfile as any).email || '';
+                        const ipVotingStats = userVotingStats[ipProfile.id];
+                        const ipActivityDate = new Date(ipProfile.created_at);
+                        
+                        return (
+                          <div key={ipProfile.id} className="p-3 bg-background rounded border">
+                            <div className="flex items-start gap-3">
+                              <Avatar className="h-10 w-10">
+                                <AvatarImage src={ipProfile.avatar_url || ''} />
+                                <AvatarFallback className="text-xs">
+                                  {ipProfile.display_name?.charAt(0) || ipProfile.first_name?.charAt(0) || 'U'}
+                                </AvatarFallback>
+                              </Avatar>
+                              
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="font-medium text-sm">{ipFullName}</span>
+                                  {ipProfile.auth_provider === 'google' && (
+                                    <Badge variant="outline" className="text-xs">G</Badge>
+                                  )}
+                                  {ipProfile.auth_provider === 'facebook' && (
+                                    <Badge variant="outline" className="text-xs">F</Badge>
+                                  )}
+                                </div>
+                                
+                                {ipEmail && (
+                                  <div className="text-xs text-muted-foreground mb-0.5">{ipEmail}</div>
+                                )}
+                                
+                                {ipProfile.fingerprint_id && (
+                                  <div className="text-xs text-blue-600 mb-0.5">
+                                    FP: {ipProfile.fingerprint_id.substring(0, 16)}...
+                                  </div>
+                                )}
+                                
+                                <div className="text-xs text-muted-foreground mb-0.5">
+                                  Registered: {ipActivityDate.toLocaleString('en-GB', {
+                                    timeZone: 'Asia/Manila',
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                  })}
+                                </div>
+                                
+                                {ipProfile.user_agent && (() => {
+                                  const { browser, device, os } = UAParser(ipProfile.user_agent);
+                                  return (
+                                    <div className="text-xs text-muted-foreground">
+                                      {device.type || 'Desktop'} | {os.name || 'Unknown OS'}
+                                    </div>
+                                  );
+                                })()}
+                                
+                                {/* Stats */}
+                                <div className="flex items-center gap-3 mt-2">
+                                  <div className="flex items-center gap-1">
+                                    <Star className="h-3 w-3 text-yellow-500" />
+                                    <span className="text-xs">{ipVotingStats?.total_votes_count || 0}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <Heart className="h-3 w-3 text-red-500" />
+                                    <span className="text-xs">{userActivityData?.[ipProfile.id]?.likes_given || 0}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </Card>
+                );
+              })()}
             </div>
           );
         })}
