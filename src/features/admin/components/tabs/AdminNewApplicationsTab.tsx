@@ -48,7 +48,8 @@ export function AdminNewApplicationsTab({
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [expandedHistory, setExpandedHistory] = useState<Set<string>>(new Set());
   const [dayFilter, setDayFilter] = useState<string | null>(null);
-  const [statusRowFilter, setStatusRowFilter] = useState<string | null>(null);
+  const [statusRowFilter, setStatusRowFilter] = useState<string | null>('pending');
+  const [adminStatusFilter, setAdminStatusFilter] = useState<ParticipantStatus | 'all'>('pending');
   const { selectedCountry } = useAdminCountry();
   
   // Filter by selected country
@@ -149,6 +150,12 @@ export function AdminNewApplicationsTab({
   const displayApplications = useMemo(() => {
     let apps = showDeleted ? filteredDeletedApplications : filteredApplications;
 
+    // Filter by admin status first
+    if (adminStatusFilter !== 'all') {
+      apps = apps.filter(app => app.admin_status === adminStatusFilter);
+    }
+
+    // Then filter by table cell click
     if (dayFilter || statusRowFilter) {
       apps = apps.filter(app => {
         const submittedAtUtc = new Date(app.submitted_at);
@@ -181,7 +188,7 @@ export function AdminNewApplicationsTab({
     }
 
     return apps;
-  }, [filteredApplications, filteredDeletedApplications, showDeleted, dayFilter, statusRowFilter]);
+  }, [filteredApplications, filteredDeletedApplications, showDeleted, dayFilter, statusRowFilter, adminStatusFilter]);
 
   // NOW we can have conditional returns after all hooks
   if (loading) {
@@ -289,7 +296,20 @@ export function AdminNewApplicationsTab({
       </div>
 
       <div className="flex items-center justify-between px-2 md:px-0">
-        <h2 className="text-2xl font-bold">New Applications</h2>
+        <Select value={adminStatusFilter} onValueChange={(value) => setAdminStatusFilter(value as ParticipantStatus | 'all')}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Status filter" />
+          </SelectTrigger>
+          <SelectContent className="bg-background z-50">
+            <SelectItem value="all">All</SelectItem>
+            <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="pre next week">Pre Next Week</SelectItem>
+            <SelectItem value="next week">Next Week</SelectItem>
+            <SelectItem value="this week">This Week</SelectItem>
+            <SelectItem value="past">Past</SelectItem>
+            <SelectItem value="rejected">Rejected</SelectItem>
+          </SelectContent>
+        </Select>
         <div className="flex items-center space-x-2">
           <Checkbox
             id="show-deleted-apps"
