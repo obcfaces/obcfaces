@@ -2207,9 +2207,10 @@ const AdminContent = () => {
       return true;
     });
 
-    // Keep admin_status as-is, no need to map to "status"
+    // Keep admin_status as-is, include both created_at and submitted_at
     const processedData = filteredData.map((app: any) => ({
       ...app,
+      created_at: app.created_at,
       submitted_at: app.submitted_at || app.created_at
     })) as any;
 
@@ -3269,7 +3270,7 @@ const AdminContent = () => {
             <TabsContent value="new-applications" className="space-y-4">
               <AdminNewApplicationsTab
                 loading={tabLoading['new-applications']}
-                applications={selectedNewAppDay ? (selectedNewAppDay.filter === 'all' ? allApplicationsByDate : contestApplications).filter(app => {
+                applications={(selectedNewAppDay ? (selectedNewAppDay.filter === 'all' ? allApplicationsByDate : contestApplications).filter(app => {
                   if (!app.submitted_at) return false;
                   
                   // Exclude duplicates: if this user_id already has an entry with a different status, hide this pending one
@@ -3331,8 +3332,14 @@ const AdminContent = () => {
                   }
                   
                   return false;
-                }) : contestApplications}
-                deletedApplications={deletedApplications}
+                }).map(app => ({
+                  ...app,
+                  created_at: app.created_at || app.submitted_at || new Date().toISOString()
+                })) : contestApplications)}
+                deletedApplications={deletedApplications.map((app: any) => ({
+                  ...app,
+                  created_at: app.created_at || app.submitted_at || new Date().toISOString()
+                }))}
                 showDeleted={showDeletedApplications}
                 onToggleDeleted={setShowDeletedApplications}
                 onViewPhotos={openPhotoModal}
