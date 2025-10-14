@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, startTransition } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -331,11 +331,13 @@ export function AdminNewApplicationsTab({
       setStatusRowFilter(null);
       console.log('🔄 Clearing filters');
     } else {
-      // Update all filters together using React's batching
-      setAdminStatusFilter('all');
-      setDayFilter(day);
-      setStatusRowFilter(statusRow);
-      console.log('✅ Set filters:', { day, statusRow, adminStatusFilter: 'all' });
+      // Use startTransition to ensure UI updates happen together
+      startTransition(() => {
+        setAdminStatusFilter('all');
+        setDayFilter(day);
+        setStatusRowFilter(statusRow);
+        console.log('✅ Set filters:', { day, statusRow, adminStatusFilter: 'all' });
+      });
     }
   };
 
