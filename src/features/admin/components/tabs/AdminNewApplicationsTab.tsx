@@ -461,10 +461,10 @@ const ApplicationCardWithHistory = ({
                       const dateB = history[b]?.changed_at || history[b]?.timestamp || '';
                       return dateB.localeCompare(dateA);
                     })[0];
-                  const changedBy = history[latestStatus]?.changed_by;
-                  return changedBy ? (
+                  const changedByEmail = history[latestStatus]?.changed_by_email;
+                  return changedByEmail && changedByEmail !== 'user' ? (
                     <span className="text-[10px] text-muted-foreground ml-1">
-                      {changedBy.substring(0, 4)}
+                      {changedByEmail.substring(0, 4)}
                     </span>
                   ) : null;
                 })()}
@@ -618,10 +618,10 @@ const ApplicationCardWithHistory = ({
                         const dateB = history[b]?.changed_at || history[b]?.timestamp || '';
                         return dateB.localeCompare(dateA);
                       })[0];
-                    const changedBy = history[latestStatus]?.changed_by;
-                    return changedBy ? (
+                    const changedByEmail = history[latestStatus]?.changed_by_email;
+                    return changedByEmail && changedByEmail !== 'user' ? (
                       <span className="text-[10px] text-muted-foreground ml-1">
-                        {changedBy.substring(0, 4)}
+                        {changedByEmail.substring(0, 4)}
                       </span>
                     ) : null;
                   })()}
