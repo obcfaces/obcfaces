@@ -43,29 +43,37 @@ export function AdminNextWeekTab({
     });
   }, [participants, selectedCountry]);
 
-  // Load votes data
+  // Load votes data - aggregated directly from database
   useEffect(() => {
     const loadVotes = async () => {
-      const { data, error } = await supabase
+      // Get all votes
+      const { data: allVotes, error } = await supabase
         .from('next_week_votes')
-        .select('candidate_name, vote_type, created_at');
+        .select('candidate_name, vote_type');
 
-      if (error || !data) {
-        console.error('Error loading votes:', error);
+      if (error) {
+        console.error('❌ Error loading votes:', error);
         return;
       }
 
-      console.log('📊 Total votes loaded:', data.length);
+      if (!allVotes) {
+        console.log('⚠️ No votes data');
+        return;
+      }
 
-      // Calculate stats - normalize names by removing multiple spaces
+      console.log('📊 RAW VOTES DATA:', allVotes.length, 'records');
+
+      // Calculate stats by counting each record
       const stats: Record<string, { likes: number; dislikes: number }> = {};
       
-      data.forEach(vote => {
-        // Normalize: trim and replace multiple spaces with single space
+      allVotes.forEach(vote => {
+        // Normalize name
         const name = vote.candidate_name.trim().replace(/\s+/g, ' ');
+        
         if (!stats[name]) {
           stats[name] = { likes: 0, dislikes: 0 };
         }
+        
         if (vote.vote_type === 'like') {
           stats[name].likes++;
         } else if (vote.vote_type === 'dislike') {
@@ -73,7 +81,7 @@ export function AdminNextWeekTab({
         }
       });
 
-      console.log('📊 Vote stats by name:', stats);
+      console.log('📊 CALCULATED VOTE STATS:', stats);
       setVotesData(stats);
     };
 
