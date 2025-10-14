@@ -34,7 +34,9 @@ export function AdminNextWeekTab({
 }: AdminNextWeekTabProps) {
   const { selectedCountry } = useAdminCountry();
   const [filterType, setFilterType] = useState<'all' | 'like' | 'dislike'>('all');
+  const [filterDay, setFilterDay] = useState<string | null>(null);
   const [votesStats, setVotesStats] = useState<Record<string, { like_count: number; dislike_count: number }>>({});
+  const [allVotesData, setAllVotesData] = useState<any[]>([]);
 
   const filteredParticipants = useMemo(() => {
     return participants.filter(p => {
@@ -47,9 +49,11 @@ export function AdminNextWeekTab({
     const fetchVotesStats = async () => {
       const { data, error } = await supabase
         .from('next_week_votes')
-        .select('candidate_name, vote_type');
+        .select('*');
 
       if (error || !data) return;
+
+      setAllVotesData(data);
 
       const stats: Record<string, { like_count: number; dislike_count: number }> = {};
       
@@ -70,6 +74,71 @@ export function AdminNextWeekTab({
     fetchVotesStats();
   }, []);
 
+  // Calculate weekly statistics by day
+  const weeklyStats = useMemo(() => {
+    const stats = {
+      like: { mon: 0, tue: 0, wed: 0, thu: 0, fri: 0, sat: 0, sun: 0 },
+      dislike: { mon: 0, tue: 0, wed: 0, thu: 0, fri: 0, sat: 0, sun: 0 },
+    };
+
+    const nowUtc = new Date();
+    const currentDayOfWeek = nowUtc.getUTCDay();
+    const daysFromMonday = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+    const weekStartUtc = new Date(Date.UTC(
+      nowUtc.getUTCFullYear(),
+      nowUtc.getUTCMonth(),
+      nowUtc.getUTCDate() - daysFromMonday,
+      0, 0, 0, 0
+    ));
+    
+    const weekEndUtc = new Date(weekStartUtc);
+    weekEndUtc.setUTCDate(weekStartUtc.getUTCDate() + 6);
+    weekEndUtc.setUTCHours(23, 59, 59, 999);
+
+    allVotesData.forEach(vote => {
+      const createdAtUtc = new Date(vote.created_at);
+      
+      if (createdAtUtc < weekStartUtc || createdAtUtc > weekEndUtc) {
+        return;
+      }
+
+      const dayOfWeek = createdAtUtc.getUTCDay();
+      const dayMap: { [key: number]: keyof typeof stats.like } = {
+        1: 'mon', 2: 'tue', 3: 'wed', 4: 'thu', 5: 'fri', 6: 'sat', 0: 'sun'
+      };
+      const day = dayMap[dayOfWeek];
+
+      if (vote.vote_type === 'like') {
+        stats.like[day]++;
+      } else if (vote.vote_type === 'dislike') {
+        stats.dislike[day]++;
+      }
+    });
+
+    return stats;
+  }, [allVotesData]);
+
+  // Get current week dates for table headers
+  const weekDates = useMemo(() => {
+    const nowUtc = new Date();
+    const currentDayOfWeek = nowUtc.getUTCDay();
+    const daysFromMonday = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+    const monday = new Date(Date.UTC(
+      nowUtc.getUTCFullYear(),
+      nowUtc.getUTCMonth(),
+      nowUtc.getUTCDate() - daysFromMonday
+    ));
+
+    const dates: Record<string, string> = {};
+    (['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const).forEach((day, index) => {
+      const date = new Date(monday);
+      date.setUTCDate(monday.getUTCDate() + index);
+      dates[day] = `${date.getUTCDate()}/${date.getUTCMonth() + 1}`;
+    });
+
+    return dates;
+  }, []);
+
   const totalStats = useMemo(() => {
     const total = { like: 0, dislike: 0 };
     Object.values(votesStats).forEach(stat => {
@@ -80,18 +149,66 @@ export function AdminNextWeekTab({
   }, [votesStats]);
 
   const displayParticipants = useMemo(() => {
-    if (filterType === 'all') return filteredParticipants;
-    
-    return filteredParticipants.filter(p => {
-      const name = `${p.application_data?.first_name || ''} ${p.application_data?.last_name || ''}`.trim();
-      const stats = votesStats[name];
-      if (!stats) return false;
-      
-      if (filterType === 'like') return stats.like_count > 0;
-      if (filterType === 'dislike') return stats.dislike_count > 0;
-      return false;
-    });
-  }, [filteredParticipants, filterType, votesStats]);
+    let result = filteredParticipants;
+
+    // Filter by vote type
+    if (filterType !== 'all') {
+      result = result.filter(p => {
+        const name = `${p.application_data?.first_name || ''} ${p.application_data?.last_name || ''}`.trim();
+        const stats = votesStats[name];
+        if (!stats) return false;
+        
+        if (filterType === 'like') return stats.like_count > 0;
+        if (filterType === 'dislike') return stats.dislike_count > 0;
+        return false;
+      });
+    }
+
+    // Filter by day
+    if (filterDay && filterType !== 'all') {
+      result = result.filter(p => {
+        const name = `${p.application_data?.first_name || ''} ${p.application_data?.last_name || ''}`.trim();
+        
+        const nowUtc = new Date();
+        const currentDayOfWeek = nowUtc.getUTCDay();
+        const daysFromMonday = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+        const weekStartUtc = new Date(Date.UTC(
+          nowUtc.getUTCFullYear(),
+          nowUtc.getUTCMonth(),
+          nowUtc.getUTCDate() - daysFromMonday,
+          0, 0, 0, 0
+        ));
+
+        const hasVoteOnDay = allVotesData.some(vote => {
+          if (vote.candidate_name !== name) return false;
+          if (vote.vote_type !== filterType) return false;
+
+          const createdAtUtc = new Date(vote.created_at);
+          const dayOfWeek = createdAtUtc.getUTCDay();
+          const dayMap: { [key: number]: string } = {
+            1: 'mon', 2: 'tue', 3: 'wed', 4: 'thu', 5: 'fri', 6: 'sat', 0: 'sun'
+          };
+          const voteDay = dayMap[dayOfWeek];
+
+          return voteDay === filterDay;
+        });
+
+        return hasVoteOnDay;
+      });
+    }
+
+    return result;
+  }, [filteredParticipants, filterType, filterDay, votesStats, allVotesData]);
+
+  const handleCellClick = (day: string, type: 'like' | 'dislike') => {
+    if (filterDay === day && filterType === type) {
+      setFilterDay(null);
+      setFilterType('all');
+    } else {
+      setFilterDay(day);
+      setFilterType(type);
+    }
+  };
 
   if (loading) {
     return <LoadingSpinner message="Loading next week participants..." />;
@@ -121,23 +238,48 @@ export function AdminNextWeekTab({
             <thead>
               <tr className="border-b border-border">
                 <th className="text-left px-1 py-2 md:p-2 font-medium text-[10px] md:text-xs">Type</th>
-                <th className="text-center px-0.5 py-2 md:p-2 font-medium text-[10px] md:text-xs">Total</th>
+                {(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const).map((dayName, idx) => (
+                  <th key={dayName} className="text-center px-0.5 py-2 md:p-2 font-medium text-[10px] md:text-xs">
+                    <div className="leading-tight">{dayName}</div>
+                    <div className="text-[8px] md:text-[10px] text-muted-foreground font-normal">
+                      {weekDates[(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const)[idx]]}
+                    </div>
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              <tr 
-                className={`border-b border-border/50 cursor-pointer hover:bg-accent/50 ${filterType === 'like' ? 'bg-accent font-bold' : ''}`}
-                onClick={() => setFilterType(filterType === 'like' ? 'all' : 'like')}
-              >
+              <tr className="border-b border-border/50">
                 <td className="text-left px-1 py-2 md:p-2 text-green-600 dark:text-green-500 text-[10px] md:text-xs">Like</td>
-                <td className="text-center px-0.5 py-2 md:p-2 text-green-600 dark:text-green-500 text-sm md:text-base font-semibold">{totalStats.like}</td>
+                {(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const).map(day => {
+                  const count = weeklyStats.like[day];
+                  const isActive = filterDay === day && filterType === 'like';
+                  return (
+                    <td 
+                      key={day}
+                      className={`text-center px-0.5 py-2 md:p-2 text-green-600 dark:text-green-500 cursor-pointer hover:bg-accent/50 ${isActive ? 'bg-accent font-bold' : ''} text-sm md:text-base font-semibold`}
+                      onClick={() => handleCellClick(day, 'like')}
+                    >
+                      {count}
+                    </td>
+                  );
+                })}
               </tr>
-              <tr 
-                className={`border-b border-border/50 cursor-pointer hover:bg-accent/50 ${filterType === 'dislike' ? 'bg-accent font-bold' : ''}`}
-                onClick={() => setFilterType(filterType === 'dislike' ? 'all' : 'dislike')}
-              >
+              <tr className="border-b border-border/50">
                 <td className="text-left px-1 py-2 md:p-2 text-red-500 text-[10px] md:text-xs">Dislike</td>
-                <td className="text-center px-0.5 py-2 md:p-2 text-red-500 text-sm md:text-base font-semibold">{totalStats.dislike}</td>
+                {(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const).map(day => {
+                  const count = weeklyStats.dislike[day];
+                  const isActive = filterDay === day && filterType === 'dislike';
+                  return (
+                    <td 
+                      key={day}
+                      className={`text-center px-0.5 py-2 md:p-2 text-red-500 cursor-pointer hover:bg-accent/50 ${isActive ? 'bg-accent font-bold' : ''} text-sm md:text-base font-semibold`}
+                      onClick={() => handleCellClick(day, 'dislike')}
+                    >
+                      {count}
+                    </td>
+                  );
+                })}
               </tr>
             </tbody>
           </table>
@@ -146,11 +288,14 @@ export function AdminNextWeekTab({
 
       <h2 className="text-2xl font-bold">
         Next Week ({displayParticipants.length})
-        {filterType !== 'all' && (
+        {(filterType !== 'all' || filterDay) && (
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={() => setFilterType('all')}
+            onClick={() => {
+              setFilterType('all');
+              setFilterDay(null);
+            }}
             className="ml-2"
           >
             Clear filter
