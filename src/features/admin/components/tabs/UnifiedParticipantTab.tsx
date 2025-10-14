@@ -82,7 +82,7 @@ export function UnifiedParticipantTab({
   }, [tabType, availableIntervals, FIXED_WEEK_INTERVALS]);
 
   const filteredParticipants = useMemo(() => {
-    console.log(`[UNIFIED TAB ${tabType}] Starting filter:`, {
+    console.log(`🔴🔴🔴 [NEW PAST TAB LOGIC] ${tabType} - Starting filter 🔴🔴🔴`, {
       totalParticipants: participants.length,
       selectedCountry,
       weekIntervalFilter
