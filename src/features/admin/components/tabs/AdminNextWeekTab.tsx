@@ -356,28 +356,43 @@ const ParticipantCardWithHistory = ({
   const handleShowVoters = async (type: 'like' | 'dislike') => {
     setVotersType(type);
     
-    const { data, error } = await supabase
+    // Get votes first
+    const { data: votesData, error: votesError } = await supabase
       .from('next_week_votes')
-      .select(`
-        user_id,
-        vote_type,
-        created_at,
-        profiles:user_id (
-          display_name,
-          first_name,
-          last_name,
-          avatar_url
-        )
-      `)
+      .select('user_id, vote_type, created_at')
       .eq('candidate_name', participantName)
       .eq('vote_type', type);
 
-    if (error) {
-      console.error('Error fetching voters:', error);
+    if (votesError) {
+      console.error('Error fetching voters:', votesError);
       return;
     }
 
-    setVoters(data || []);
+    if (!votesData || votesData.length === 0) {
+      setVoters([]);
+      setShowVotersModal(true);
+      return;
+    }
+
+    // Get user profiles separately
+    const userIds = votesData.map(v => v.user_id);
+    const { data: profilesData, error: profilesError } = await supabase
+      .from('profiles')
+      .select('id, display_name, first_name, last_name, avatar_url')
+      .in('id', userIds);
+
+    if (profilesError) {
+      console.error('Error fetching profiles:', profilesError);
+      setVoters(votesData.map(v => ({ ...v, profiles: null })));
+    } else {
+      // Merge votes with profiles
+      const votersWithProfiles = votesData.map(vote => ({
+        ...vote,
+        profiles: profilesData?.find(p => p.id === vote.user_id) || null
+      }));
+      setVoters(votersWithProfiles);
+    }
+
     setShowVotersModal(true);
   };
 
