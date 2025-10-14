@@ -47,6 +47,8 @@ export function AdminNewApplicationsTab({
   // ALL HOOKS MUST COME BEFORE ANY CONDITIONAL RETURNS
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [expandedHistory, setExpandedHistory] = useState<Set<string>>(new Set());
+  const [dayFilter, setDayFilter] = useState<string | null>(null);
+  const [statusRowFilter, setStatusRowFilter] = useState<string | null>(null);
   const { selectedCountry } = useAdminCountry();
   
   // Filter by selected country
@@ -64,7 +66,122 @@ export function AdminNewApplicationsTab({
     });
   }, [deletedApplications, selectedCountry]);
 
-  const displayApplications = showDeleted ? filteredDeletedApplications : filteredApplications;
+  // Calculate weekly statistics for current day
+  const weeklyStats = useMemo(() => {
+    const stats = {
+      all: { mon: 0, tue: 0, wed: 0, thu: 0, fri: 0, sat: 0, sun: 0 },
+      pending: { mon: 0, tue: 0, wed: 0, thu: 0, fri: 0, sat: 0, sun: 0 },
+      approved: { mon: 0, tue: 0, wed: 0, thu: 0, fri: 0, sat: 0, sun: 0 },
+      rejected: { mon: 0, tue: 0, wed: 0, thu: 0, fri: 0, sat: 0, sun: 0 },
+    };
+
+    // Get current week's Monday
+    const nowUtc = new Date();
+    const currentDayOfWeek = nowUtc.getUTCDay();
+    const daysFromMonday = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+    const weekStartUtc = new Date(Date.UTC(
+      nowUtc.getUTCFullYear(),
+      nowUtc.getUTCMonth(),
+      nowUtc.getUTCDate() - daysFromMonday,
+      0, 0, 0, 0
+    ));
+    
+    const weekEndUtc = new Date(weekStartUtc);
+    weekEndUtc.setUTCDate(weekStartUtc.getUTCDate() + 6);
+    weekEndUtc.setUTCHours(23, 59, 59, 999);
+
+    applications.forEach(app => {
+      const country = app.application_data?.country;
+      if (country !== selectedCountry) return;
+
+      const submittedAtUtc = new Date(app.submitted_at);
+
+      // Only count from current week
+      if (submittedAtUtc < weekStartUtc || submittedAtUtc > weekEndUtc) {
+        return;
+      }
+
+      const dayOfWeek = submittedAtUtc.getUTCDay();
+      const dayMap: { [key: number]: keyof typeof stats.all } = {
+        1: 'mon', 2: 'tue', 3: 'wed', 4: 'thu', 5: 'fri', 6: 'sat', 0: 'sun'
+      };
+      const day = dayMap[dayOfWeek];
+
+      stats.all[day]++;
+
+      if (app.admin_status === 'pending') {
+        stats.pending[day]++;
+      }
+      if (app.admin_status && ['pre next week', 'next week', 'next week on site'].includes(app.admin_status)) {
+        stats.approved[day]++;
+      }
+      if (app.admin_status === 'rejected') {
+        stats.rejected[day]++;
+      }
+    });
+
+    return stats;
+  }, [applications, selectedCountry]);
+
+  // Get current week dates for table headers
+  const weekDates = useMemo(() => {
+    const nowUtc = new Date();
+    const currentDayOfWeek = nowUtc.getUTCDay();
+    const daysFromMonday = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+    const monday = new Date(Date.UTC(
+      nowUtc.getUTCFullYear(),
+      nowUtc.getUTCMonth(),
+      nowUtc.getUTCDate() - daysFromMonday
+    ));
+
+    return {
+      mon: `${String(monday.getUTCDate()).padStart(2, '0')}/${String(monday.getUTCMonth() + 1).padStart(2, '0')}`,
+      tue: (() => { const d = new Date(monday); d.setUTCDate(monday.getUTCDate() + 1); return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}`; })(),
+      wed: (() => { const d = new Date(monday); d.setUTCDate(monday.getUTCDate() + 2); return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}`; })(),
+      thu: (() => { const d = new Date(monday); d.setUTCDate(monday.getUTCDate() + 3); return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}`; })(),
+      fri: (() => { const d = new Date(monday); d.setUTCDate(monday.getUTCDate() + 4); return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}`; })(),
+      sat: (() => { const d = new Date(monday); d.setUTCDate(monday.getUTCDate() + 5); return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}`; })(),
+      sun: (() => { const d = new Date(monday); d.setUTCDate(monday.getUTCDate() + 6); return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}`; })(),
+    };
+  }, []);
+
+  // Filter by day and status row
+  const displayApplications = useMemo(() => {
+    let apps = showDeleted ? filteredDeletedApplications : filteredApplications;
+
+    if (dayFilter || statusRowFilter) {
+      apps = apps.filter(app => {
+        const submittedAtUtc = new Date(app.submitted_at);
+        const dayOfWeek = submittedAtUtc.getUTCDay();
+        const dayMap: { [key: number]: string } = {
+          1: 'mon', 2: 'tue', 3: 'wed', 4: 'thu', 5: 'fri', 6: 'sat', 0: 'sun'
+        };
+        const day = dayMap[dayOfWeek];
+
+        // Day filter
+        if (dayFilter && day !== dayFilter) {
+          return false;
+        }
+
+        // Status row filter
+        if (statusRowFilter) {
+          if (statusRowFilter === 'all') {
+            return true;
+          } else if (statusRowFilter === 'pending') {
+            return app.admin_status === 'pending';
+          } else if (statusRowFilter === 'approved') {
+            return app.admin_status && ['pre next week', 'next week', 'next week on site'].includes(app.admin_status);
+          } else if (statusRowFilter === 'rejected') {
+            return app.admin_status === 'rejected';
+          }
+        }
+
+        return true;
+      });
+    }
+
+    return apps;
+  }, [filteredApplications, filteredDeletedApplications, showDeleted, dayFilter, statusRowFilter]);
 
   // NOW we can have conditional returns after all hooks
   if (loading) {
@@ -96,8 +213,81 @@ export function AdminNewApplicationsTab({
     setExpandedHistory(newSet);
   };
 
+  const handleCellClick = (day: string, statusRow: string) => {
+    // If clicking the same cell, clear filters
+    if (dayFilter === day && statusRowFilter === statusRow) {
+      setDayFilter(null);
+      setStatusRowFilter(null);
+    } else {
+      setDayFilter(day);
+      setStatusRowFilter(statusRow);
+    }
+  };
+
   return (
     <div className="space-y-4 -mx-2 md:mx-0">
+      {/* Weekly Statistics Table */}
+      <div className="mb-6 p-4 bg-muted rounded-lg">
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="text-left p-2 font-medium">Type</th>
+                {(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const).map((dayName, idx) => (
+                  <th key={dayName} className="text-center p-2 font-medium">
+                    {dayName}
+                    <div className="text-[10px] text-muted-foreground font-normal">
+                      {weekDates[(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const)[idx]]}
+                    </div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { label: 'All', key: 'all', className: '' },
+                { label: 'Pending', key: 'pending', className: '' },
+                { label: 'Approved', key: 'approved', className: '' },
+                { label: 'Rejected', key: 'rejected', className: 'text-red-500' },
+              ].map(row => (
+                <tr key={row.key} className="border-b border-border/50">
+                  <td className={`text-left p-2 ${row.className}`}>{row.label}</td>
+                  {(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const).map(day => {
+                    const count = weeklyStats[row.key as keyof typeof weeklyStats][day];
+                    const isActive = dayFilter === day && statusRowFilter === row.key;
+                    return (
+                      <td 
+                        key={day} 
+                        className={`text-center p-2 ${row.className} cursor-pointer hover:bg-accent/50 ${isActive ? 'bg-accent font-bold' : ''}`}
+                        onClick={() => handleCellClick(day, row.key)}
+                      >
+                        {count}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {(dayFilter || statusRowFilter) && (
+          <div className="mt-2 text-xs text-muted-foreground">
+            Active filter: {statusRowFilter} on {dayFilter}
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="ml-2 h-6 px-2 text-xs"
+              onClick={() => {
+                setDayFilter(null);
+                setStatusRowFilter(null);
+              }}
+            >
+              Clear
+            </Button>
+          </div>
+        )}
+      </div>
+
       <div className="flex items-center justify-between px-2 md:px-0">
         <h2 className="text-2xl font-bold">New Applications</h2>
         <div className="flex items-center space-x-2">
