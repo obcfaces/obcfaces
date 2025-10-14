@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,6 +9,7 @@ import { WeeklyContestParticipant } from '@/types/admin';
 import { LoadingSpinner } from '../LoadingSpinner';
 import { useAdminCountry } from '@/contexts/AdminCountryContext';
 import { formatDateInCountry } from '@/utils/weekIntervals';
+import { useApplicationHistory } from '@/hooks/useApplicationHistory';
 
 interface AdminPreNextWeekTabProps {
   participants: WeeklyContestParticipant[];
@@ -67,18 +68,99 @@ export function AdminPreNextWeekTab({
         const photo2 = appData.photo_2_url || appData.photo2_url || '';
 
         return (
-          <Card key={participant.id} className="overflow-hidden relative h-[149px]">
-            <CardContent className="p-0">
-              {/* Edit button in bottom left corner */}
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => onEdit(participant)}
-                className="absolute bottom-0 left-0 z-20 p-1 m-0 rounded-none rounded-tr-md border-0 border-t border-r bg-background/90 hover:bg-background"
-                title="Edit Application"
-              >
-                <Edit className="w-4 h-4" />
-              </Button>
+          <ParticipantCardWithHistory
+            key={participant.id}
+            participant={participant}
+            appData={appData}
+            firstName={firstName}
+            lastName={lastName}
+            photo1={photo1}
+            photo2={photo2}
+            onViewPhotos={onViewPhotos}
+            onEdit={onEdit}
+            onStatusChange={onStatusChange}
+            onStatusHistory={onStatusHistory}
+            getStatusBackgroundColor={getStatusBackgroundColor}
+          />
+        );
+      })}
+
+      {participants.length === 0 && (
+        <div className="text-center py-12 text-muted-foreground">
+          No participants in pre next week
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Separate component with history
+const ParticipantCardWithHistory = ({
+  participant,
+  appData,
+  firstName,
+  lastName,
+  photo1,
+  photo2,
+  onViewPhotos,
+  onEdit,
+  onStatusChange,
+  onStatusHistory,
+  getStatusBackgroundColor,
+}: any) => {
+  const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);
+  const { history } = useApplicationHistory(participant.id);
+  const historyCount = history.length;
+
+  // Get submitted date
+  const submittedDate = participant.created_at 
+    ? new Date(participant.created_at) 
+    : participant.submitted_at 
+    ? new Date(participant.submitted_at) 
+    : null;
+
+  return (
+    <div className="space-y-0">
+      <Card className={`overflow-hidden relative rounded-none md:rounded-lg h-[149px]`}>
+        <CardContent className="p-0">
+          {/* Date/Time badge - left top corner */}
+          {submittedDate && (
+            <Badge 
+              variant="outline" 
+              className="absolute top-0 left-0 z-20 text-xs rounded-none rounded-br-md font-normal bg-muted/90 border-border"
+            >
+              {submittedDate.toLocaleDateString('en-GB', { 
+                day: 'numeric', 
+                month: 'short' 
+              })} {submittedDate.toLocaleTimeString('en-GB', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+              })}
+            </Badge>
+          )}
+
+          {/* History badge - right of edit button */}
+          {historyCount > 0 && (
+            <div
+              className="absolute bottom-0 left-8 z-20 bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold cursor-pointer hover:bg-primary/90 shadow-lg transition-all border-2 border-background"
+              onClick={() => setIsHistoryExpanded(!isHistoryExpanded)}
+              title={`${historyCount} version${historyCount > 1 ? 's' : ''} - click to expand versions`}
+            >
+              {historyCount}
+            </div>
+          )}
+
+          {/* Edit button in bottom left corner */}
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => onEdit(participant)}
+            className="absolute bottom-0 left-0 z-20 p-1 m-0 rounded-none rounded-tr-md border-0 border-t border-r bg-background/90 hover:bg-background"
+            title="Edit Application"
+          >
+            <Edit className="w-4 h-4" />
+          </Button>
 
               {/* Desktop layout */}
               <div className="hidden md:flex">
@@ -223,14 +305,6 @@ export function AdminPreNextWeekTab({
               </div>
             </CardContent>
           </Card>
-        );
-      })}
-
-      {participants.length === 0 && (
-        <div className="text-center py-12 text-muted-foreground">
-          No participants in pre next week
-        </div>
-      )}
     </div>
   );
-}
+};
