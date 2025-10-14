@@ -3335,7 +3335,10 @@ const AdminContent = () => {
                 }).map(app => ({
                   ...app,
                   created_at: app.created_at || app.submitted_at || new Date().toISOString()
-                })) : allApplicationsByDate)}
+                })) : allApplicationsByDate.map((app: any) => ({
+                  ...app,
+                  created_at: app.created_at || app.submitted_at || new Date().toISOString()
+                })))}
                 deletedApplications={deletedApplications.map((app: any) => ({
                   ...app,
                   created_at: app.created_at || app.submitted_at || new Date().toISOString()
