@@ -355,12 +355,12 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     }
 
     // For past week sections (weekOffset < 0), show participants for all users
-    if (weekOffset === -1) {
-      console.log('Processing 1 WEEK AGO section (weekOffset === -1) for all users');
+    if (weekOffset < 0) {
+      console.log(`🟣 Processing PAST WEEK section (weekOffset === ${weekOffset}) for all users`);
       
       // If there are participants, process them
       if (actualParticipants && actualParticipants.length > 0) {
-        console.log('Processing 1 WEEK AGO participants:', actualParticipants.length);
+        console.log(`🟣 Processing PAST WEEK participants: ${actualParticipants.length}`);
         
         const contestantsWithRatings = await Promise.all(
           actualParticipants.map(async (contestant) => {
