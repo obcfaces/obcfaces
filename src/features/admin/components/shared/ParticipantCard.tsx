@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Edit, Heart, Star, Trophy, MoreVertical, History, Trash2 } from 'lucide-react';
+import { Edit, Heart, Star, Trophy, MoreVertical, History, Trash2, Copy } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 interface ParticipantCardProps {
@@ -160,13 +160,47 @@ export function ParticipantCard({
           <div className="w-[50ch] flex-shrink-0 flex-1 min-w-0 p-4">
             <div className="flex items-center gap-2 mb-1">
               <span className="text-xs font-semibold whitespace-nowrap">
-                {age} {firstName} {lastName}
+                {age}, {firstName} {lastName}
               </span>
             </div>
 
-            <div className="text-xs text-muted-foreground mb-1">
-              {appData.city} {appData.state} {appData.country}
+            <div className="text-sm mb-1">
+              {appData.city} {appData.state && `, ${appData.state}`} {appData.country && `, ${appData.country}`}
             </div>
+
+            {appData.email && (
+              <div className="flex items-center gap-1 mb-1 text-xs text-muted-foreground">
+                <span>{appData.email.slice(0, 10)}...</span>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(appData.email);
+                  }}
+                  className="hover:text-foreground transition-colors"
+                  title="Copy email"
+                >
+                  <Copy className="h-3 w-3" />
+                </button>
+              </div>
+            )}
+
+            {appData.facebook && (
+              <div className="mb-1 text-xs">
+                <a 
+                  href={appData.facebook} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline"
+                >
+                  Facebook
+                </a>
+              </div>
+            )}
+
+            {appData.phone && (
+              <div className="mb-1 text-xs text-muted-foreground">
+                {appData.phone}
+              </div>
+            )}
 
             {showStats && (
               <div className="flex items-center gap-3 mb-2">
