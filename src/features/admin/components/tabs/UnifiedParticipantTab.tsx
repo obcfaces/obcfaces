@@ -82,10 +82,25 @@ export function UnifiedParticipantTab({
   }, [tabType, availableIntervals, FIXED_WEEK_INTERVALS]);
 
   const filteredParticipants = useMemo(() => {
+    console.log(`[UNIFIED TAB ${tabType}] Starting filter:`, {
+      totalParticipants: participants.length,
+      selectedCountry,
+      weekIntervalFilter
+    });
+
     let filtered = participants.filter(p => {
       const country = p.application_data?.country || ('profiles' in p ? p.profiles?.country : undefined);
-      return country === selectedCountry;
+      const matches = country === selectedCountry;
+      if (!matches && tabType === 'past') {
+        console.log(`[UNIFIED TAB PAST] Filtered out by country:`, {
+          name: `${p.application_data?.first_name} ${p.application_data?.last_name}`,
+          country,
+          selectedCountry
+        });
+      }
+      return matches;
     });
+    console.log(`[UNIFIED TAB ${tabType}] After country filter:`, filtered.length);
 
     // Filter by status for THIS tab - only "this week"
     if (tabType === 'this') {
@@ -94,9 +109,26 @@ export function UnifiedParticipantTab({
 
     // Apply week interval filter for past tab - only show "past" status
     if (tabType === 'past') {
+      console.log('[UNIFIED TAB PAST] Before status filter:', filtered.length);
       filtered = filtered.filter(p => p.admin_status === 'past');
+      console.log('[UNIFIED TAB PAST] After status=past filter:', filtered.length);
+      
       if (weekIntervalFilter !== 'all') {
-        filtered = filtered.filter(p => 'week_interval' in p && p.week_interval === weekIntervalFilter);
+        console.log('[UNIFIED TAB PAST] Applying interval filter:', weekIntervalFilter);
+        const beforeInterval = filtered.length;
+        filtered = filtered.filter(p => {
+          const weekInterval = (p as any).week_interval;
+          const hasInterval = weekInterval === weekIntervalFilter;
+          if (!hasInterval) {
+            console.log('[UNIFIED TAB PAST] Filtered out by interval:', {
+              name: `${p.application_data?.first_name} ${p.application_data?.last_name}`,
+              interval: (p as any).week_interval,
+              expectedInterval: weekIntervalFilter
+            });
+          }
+          return hasInterval;
+        });
+        console.log(`[UNIFIED TAB PAST] After interval filter: ${filtered.length} (was ${beforeInterval})`);
       }
     }
 
@@ -120,6 +152,7 @@ export function UnifiedParticipantTab({
       });
     }
 
+    console.log(`[UNIFIED TAB ${tabType}] Final filtered count:`, filtered.length);
     return filtered;
   }, [participants, selectedCountry, tabType, weekIntervalFilter]);
 
