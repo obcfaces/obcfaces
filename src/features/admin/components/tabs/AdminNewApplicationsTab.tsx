@@ -345,16 +345,16 @@ export function AdminNewApplicationsTab({
   return (
     <div className="space-y-4 -mx-2 md:mx-0">
       {/* Weekly Statistics Table */}
-      <div className="mb-6 p-4 bg-muted rounded-lg">
-        <div className="overflow-x-auto">
+      <div className="mb-6 p-2 md:p-4 bg-muted rounded-lg">
+        <div className="overflow-x-auto -mx-1">
           <table className="w-full text-xs">
             <thead>
               <tr className="border-b border-border">
-                <th className="text-left p-2 font-medium">Type</th>
+                <th className="text-left px-1 py-2 md:p-2 font-medium text-[10px] md:text-xs">Type</th>
                 {(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const).map((dayName, idx) => (
-                  <th key={dayName} className="text-center p-2 font-medium">
-                    {dayName}
-                    <div className="text-[10px] text-muted-foreground font-normal">
+                  <th key={dayName} className="text-center px-0.5 py-2 md:p-2 font-medium text-[10px] md:text-xs">
+                    <div className="leading-tight">{dayName}</div>
+                    <div className="text-[8px] md:text-[10px] text-muted-foreground font-normal">
                       {weekDates[(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const)[idx]]}
                     </div>
                   </th>
@@ -369,14 +369,14 @@ export function AdminNewApplicationsTab({
                 { label: 'Rejected', key: 'rejected', className: 'text-red-500' },
               ].map(row => (
                 <tr key={row.key} className="border-b border-border/50">
-                  <td className={`text-left p-2 ${row.className}`}>{row.label}</td>
+                  <td className={`text-left px-1 py-2 md:p-2 ${row.className} text-[10px] md:text-xs`}>{row.label}</td>
                   {(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const).map(day => {
                     const count = weeklyStats[row.key as keyof typeof weeklyStats][day];
                     const isActive = filters.day === day && filters.statusRow === row.key;
                     return (
                       <td 
                         key={day} 
-                        className={`text-center p-2 ${row.className} cursor-pointer hover:bg-accent/50 ${isActive ? 'bg-accent font-bold' : ''}`}
+                        className={`text-center px-0.5 py-2 md:p-2 ${row.className} cursor-pointer hover:bg-accent/50 ${isActive ? 'bg-accent font-bold' : ''} text-[10px] md:text-xs`}
                         onClick={() => handleCellClick(day, row.key)}
                       >
                         {count}
