@@ -3640,7 +3640,7 @@ const AdminContent = () => {
             <TabsContent value="new-past">
               <AdminPastWeekTab
                 loading={tabLoading['new-past']}
-                participants={weeklyParticipants}
+                participants={pastWeekParticipants}
                 weekFilters={getDynamicPastWeekFilters}
                 selectedWeekFilter={pastWeekFilter}
                 onWeekFilterChange={setPastWeekFilter}
