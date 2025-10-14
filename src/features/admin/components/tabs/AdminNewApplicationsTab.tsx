@@ -513,11 +513,11 @@ const ApplicationCardWithHistory = ({
     <div className="space-y-0">
       <Card className={`overflow-hidden relative rounded-none md:rounded-lg h-[149px] ${participant.admin_status === 'rejected' ? 'bg-red-50 border-red-200' : ''} ${participant.deleted_at ? 'opacity-60' : ''}`}>
         <CardContent className="p-0">
-          {/* Date/Time badge - left top corner */}
+          {/* Date/Time badge - left top corner - SMALLER */}
           {submittedDate && (
             <Badge 
               variant="outline" 
-              className="absolute top-0 left-0 z-20 text-xs rounded-none rounded-br-md font-normal bg-muted/90 border-border"
+              className="absolute top-0 left-0 z-20 text-[10px] rounded-none rounded-br-md font-normal bg-muted/90 border-border px-1.5 py-0 h-5"
             >
               {submittedDate.toLocaleDateString('en-GB', { 
                 day: 'numeric', 
@@ -530,15 +530,17 @@ const ApplicationCardWithHistory = ({
             </Badge>
           )}
 
-          {/* History badge - right of edit button */}
+          {/* History badge - same style as edit button */}
           {historyCount > 0 && (
-            <div
-              className="absolute bottom-0 left-8 z-20 bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold cursor-pointer hover:bg-primary/90 shadow-lg transition-all border-2 border-background"
+            <Button
+              size="sm"
+              variant="outline"
               onClick={() => setIsHistoryExpanded(!isHistoryExpanded)}
-              title={`${historyCount} version${historyCount > 1 ? 's' : ''} - click to expand versions`}
+              className="absolute bottom-0 left-6 z-20 p-0.5 m-0 rounded-none rounded-tr-md border-0 border-t border-r bg-background/90 hover:bg-background w-5 h-5 flex items-center justify-center"
+              title={`${historyCount} version${historyCount > 1 ? 's' : ''}`}
             >
-              {historyCount}
-            </div>
+              <span className="text-[10px] font-bold">{historyCount}</span>
+            </Button>
           )}
 
           {/* Three dots menu - top right corner */}
@@ -548,9 +550,9 @@ const ApplicationCardWithHistory = ({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 w-8 p-0 rounded-none rounded-bl-md hover:bg-background/90 bg-background/80"
+                  className="h-5 w-5 p-0 rounded-none rounded-bl-md hover:bg-background/90 bg-background/80"
                 >
-                  <MoreVertical className="h-4 w-4" />
+                  <MoreVertical className="h-3 w-3" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="z-[9999]">
@@ -577,15 +579,15 @@ const ApplicationCardWithHistory = ({
             </DropdownMenu>
           </div>
 
-          {/* Edit button in bottom left corner */}
+          {/* Edit button in bottom left corner - SMALLER */}
           <Button
             size="sm"
             variant="outline"
             onClick={() => onEdit(participant)}
-            className="absolute bottom-0 left-0 z-20 p-1 m-0 rounded-none rounded-tr-md border-0 border-t border-r bg-background/90 hover:bg-background"
+            className="absolute bottom-0 left-0 z-20 p-0.5 m-0 rounded-none rounded-tr-md border-0 border-t border-r bg-background/90 hover:bg-background w-5 h-5"
             title="Edit Application"
           >
-            <Edit className="w-4 h-4" />
+            <Edit className="w-3 h-3" />
           </Button>
           
           {/* Desktop/Tablet layout - same style as mobile */}
