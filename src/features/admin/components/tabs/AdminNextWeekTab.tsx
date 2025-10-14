@@ -51,8 +51,12 @@ export function AdminNextWeekTab({
         .from('next_week_votes')
         .select('*');
 
-      if (error || !data) return;
+      if (error || !data) {
+        console.error('Error fetching votes:', error);
+        return;
+      }
 
+      console.log('Total votes fetched:', data.length);
       setAllVotesData(data);
 
       const stats: Record<string, { like_count: number; dislike_count: number }> = {};
@@ -72,6 +76,9 @@ export function AdminNextWeekTab({
       });
 
       console.log('Votes stats calculated:', stats);
+      console.log('Stats for "Rhyza Mae Jabil":', stats['Rhyza Mae Jabil']);
+      console.log('Stats for "Mycel Jera":', stats['Mycel Jera']);
+      console.log('Stats for "Jasmine Limpag":', stats['Jasmine Limpag']);
       setVotesStats(stats);
     };
 
