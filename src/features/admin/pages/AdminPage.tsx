@@ -3269,6 +3269,10 @@ const AdminContent = () => {
             {/* New Refactored Tab Contents */}
             <TabsContent value="new-applications" className="space-y-4">
               <AdminNewApplicationsTab
+                allApplications={allApplicationsByDate.map((app: any) => ({
+                  ...app,
+                  created_at: app.created_at || app.submitted_at || new Date().toISOString()
+                }))}
                 loading={tabLoading['new-applications']}
                 applications={(selectedNewAppDay ? allApplicationsByDate.filter(app => {
                   if (!app.submitted_at) return false;
