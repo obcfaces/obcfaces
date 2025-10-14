@@ -3337,7 +3337,7 @@ const AdminContent = () => {
                 }).map(app => ({
                   ...app,
                   created_at: app.created_at || app.submitted_at || new Date().toISOString()
-                })) : contestApplications.map((app: any) => ({
+                })) : allApplicationsByDate.map((app: any) => ({
                   ...app,
                   created_at: app.created_at || app.submitted_at || new Date().toISOString()
                 })))}
