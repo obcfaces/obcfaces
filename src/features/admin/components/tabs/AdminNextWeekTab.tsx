@@ -103,19 +103,28 @@ export function AdminNextWeekTab({
     sun: { likes: number; dislikes: number };
   }>>({});
 
-  // Load weekly votes and calculate stats
+  // Load weekly votes - same approach as votesData
   useEffect(() => {
     const loadWeeklyStats = async () => {
-      const { data, error } = await supabase
+      // Get likes
+      const { data: likesData, error: likesError } = await supabase
         .from('next_week_votes')
-        .select('candidate_name, vote_type, created_at');
+        .select('candidate_name, created_at')
+        .eq('vote_type', 'like');
 
-      if (error || !data) {
-        console.error('Error loading weekly votes:', error);
+      // Get dislikes
+      const { data: dislikesData, error: dislikesError } = await supabase
+        .from('next_week_votes')
+        .select('candidate_name, created_at')
+        .eq('vote_type', 'dislike');
+
+      if (likesError || dislikesError) {
+        console.error('❌ Error loading weekly votes:', likesError || dislikesError);
         return;
       }
 
-      console.log('📅 Weekly votes loaded:', data.length);
+      console.log('📅 Weekly likes loaded:', likesData?.length);
+      console.log('📅 Weekly dislikes loaded:', dislikesData?.length);
 
       const stats: Record<string, {
         mon: { likes: number; dislikes: number };
@@ -141,11 +150,10 @@ export function AdminNextWeekTab({
       sunday.setUTCDate(monday.getUTCDate() + 6);
       sunday.setUTCHours(23, 59, 59, 999);
 
-      // Count each vote record
-      data.forEach(vote => {
+      // Count likes
+      likesData?.forEach(vote => {
         const voteDate = new Date(vote.created_at);
         
-        // Check if vote is in current week
         if (voteDate >= monday && voteDate <= sunday) {
           const dayIndex = voteDate.getUTCDay();
           const dayKey = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][dayIndex] as 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
@@ -163,11 +171,32 @@ export function AdminNextWeekTab({
             };
           }
           
-          if (vote.vote_type === 'like') {
-            stats[name][dayKey].likes++;
-          } else if (vote.vote_type === 'dislike') {
-            stats[name][dayKey].dislikes++;
+          stats[name][dayKey].likes++;
+        }
+      });
+
+      // Count dislikes
+      dislikesData?.forEach(vote => {
+        const voteDate = new Date(vote.created_at);
+        
+        if (voteDate >= monday && voteDate <= sunday) {
+          const dayIndex = voteDate.getUTCDay();
+          const dayKey = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][dayIndex] as 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
+          const name = vote.candidate_name.trim().replace(/\s+/g, ' ');
+
+          if (!stats[name]) {
+            stats[name] = {
+              mon: { likes: 0, dislikes: 0 },
+              tue: { likes: 0, dislikes: 0 },
+              wed: { likes: 0, dislikes: 0 },
+              thu: { likes: 0, dislikes: 0 },
+              fri: { likes: 0, dislikes: 0 },
+              sat: { likes: 0, dislikes: 0 },
+              sun: { likes: 0, dislikes: 0 },
+            };
           }
+          
+          stats[name][dayKey].dislikes++;
         }
       });
 
