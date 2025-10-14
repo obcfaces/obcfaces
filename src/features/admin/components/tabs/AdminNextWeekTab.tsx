@@ -200,8 +200,20 @@ export function AdminNextWeekTab({
   }, []);
 
   // Get participants with votes only - use votesData from cards
+  // Only show participants that are in filteredParticipants (status "next week")
   const participantsWithVotes = useMemo(() => {
+    // Create a set of names from filtered participants
+    const filteredNames = new Set(
+      filteredParticipants.map(p => {
+        const appData = p.application_data || {};
+        const firstName = appData.first_name || '';
+        const lastName = appData.last_name || '';
+        return `${firstName} ${lastName}`.trim().replace(/\s+/g, ' ');
+      })
+    );
+
     return Object.entries(votesData)
+      .filter(([name]) => filteredNames.has(name)) // Only participants with "next week" status
       .map(([name, stats]) => {
         // Get weekly breakdown from participantWeeklyStats if available
         const weeklyBreakdown = participantWeeklyStats[name] || {
@@ -221,9 +233,8 @@ export function AdminNextWeekTab({
           totalDislikes: stats.dislikes,  // Use totals from votesData (same as cards)
         };
       })
-      .filter(p => p.totalLikes > 0 || p.totalDislikes > 0)
       .sort((a, b) => (b.totalLikes + b.totalDislikes) - (a.totalLikes + a.totalDislikes));
-  }, [votesData, participantWeeklyStats]);
+  }, [votesData, participantWeeklyStats, filteredParticipants]);
 
   const totalStats = useMemo(() => {
     const total = { like: 0, dislike: 0 };
