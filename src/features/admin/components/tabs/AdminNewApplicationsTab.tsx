@@ -172,9 +172,9 @@ export function AdminNewApplicationsTab({
       console.log(`✂️ Filtered by admin status ${adminStatusFilter}: ${apps.length} apps remaining`);
     }
 
-    // Then filter by table cell click with EXACT date matching
+    // Then filter by table cell click - FILTER BY REGISTRATION DATE (submitted_at)
     if (dayFilter || statusRowFilter) {
-      console.log('📅 Applying table filters...');
+      console.log('📅 Applying table filters (by registration date)...');
       
       // Get current week boundaries
       const nowUtc = new Date();
@@ -194,10 +194,19 @@ export function AdminNewApplicationsTab({
       console.log('📆 Week range:', { weekStartUtc, weekEndUtc });
 
       apps = apps.filter(app => {
+        // USE SUBMITTED_AT FOR REGISTRATION DATE
         const submittedAtUtc = new Date(app.submitted_at);
+        
+        console.log(`🔎 Checking app:`, {
+          name: `${app.application_data?.first_name} ${app.application_data?.last_name}`,
+          submitted_at: app.submitted_at,
+          submittedAtUtc,
+          admin_status: app.admin_status
+        });
         
         // MUST be in current week
         if (submittedAtUtc < weekStartUtc || submittedAtUtc > weekEndUtc) {
+          console.log(`❌ Not in current week`);
           return false;
         }
 
@@ -207,24 +216,35 @@ export function AdminNewApplicationsTab({
         };
         const day = dayMap[dayOfWeek];
 
+        console.log(`📅 Registered on: ${day}`);
+
         // Day filter
         if (dayFilter && day !== dayFilter) {
+          console.log(`❌ Day mismatch: expected ${dayFilter}, got ${day}`);
           return false;
         }
 
         // Status row filter
         if (statusRowFilter) {
           if (statusRowFilter === 'all') {
+            console.log(`✅ Match (all)`);
             return true;
           } else if (statusRowFilter === 'pending') {
-            return app.admin_status === 'pending';
+            const match = app.admin_status === 'pending';
+            console.log(`${match ? '✅' : '❌'} Pending status check: ${app.admin_status}`);
+            return match;
           } else if (statusRowFilter === 'approved') {
-            return app.admin_status && ['pre next week', 'next week', 'next week on site'].includes(app.admin_status);
+            const match = app.admin_status && ['pre next week', 'next week', 'next week on site'].includes(app.admin_status);
+            console.log(`${match ? '✅' : '❌'} Approved status check: ${app.admin_status}`);
+            return match;
           } else if (statusRowFilter === 'rejected') {
-            return app.admin_status === 'rejected';
+            const match = app.admin_status === 'rejected';
+            console.log(`${match ? '✅' : '❌'} Rejected status check: ${app.admin_status}`);
+            return match;
           }
         }
 
+        console.log(`✅ Match (no specific status filter)`);
         return true;
       });
       
