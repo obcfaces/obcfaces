@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useEffect, startTransition } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { flushSync } from 'react-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -331,13 +332,13 @@ export function AdminNewApplicationsTab({
       setStatusRowFilter(null);
       console.log('🔄 Clearing filters');
     } else {
-      // Use startTransition to ensure UI updates happen together
-      startTransition(() => {
+      // Use flushSync to synchronously update all states together
+      flushSync(() => {
         setAdminStatusFilter('all');
         setDayFilter(day);
         setStatusRowFilter(statusRow);
-        console.log('✅ Set filters:', { day, statusRow, adminStatusFilter: 'all' });
       });
+      console.log('✅ Set filters:', { day, statusRow, adminStatusFilter: 'all' });
     }
   };
 
