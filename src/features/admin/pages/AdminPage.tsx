@@ -3270,9 +3270,6 @@ const AdminContent = () => {
               {/* Daily Statistics Table */}
               <div className="mb-4 p-3 bg-muted rounded-lg">
                 <div className="text-sm text-muted-foreground space-y-2">
-                  <div className="text-xs">
-                    applications: {dailyApplicationStats.reduce((sum, stat) => sum + (stat.total_applications || 0), 0)}
-                  </div>
                   <div className="grid grid-cols-7 gap-1 text-xs">
                     {dailyApplicationStats.map((stat, index) => {
                       // Format date as DD/MM
