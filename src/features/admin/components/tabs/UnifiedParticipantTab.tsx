@@ -673,13 +673,13 @@ const ParticipantCardWithHistory = ({
                     await onStatusChange(updatedParticipant, participant.admin_status || 'past');
                   }}
                 >
-                  <SelectTrigger className="h-6 text-[10px] px-2 bg-muted/50 whitespace-nowrap min-w-[110px]">
+                  <SelectTrigger className="w-[115px] h-6 text-[10px]">
                     <SelectValue placeholder="Select week" />
                   </SelectTrigger>
                   <SelectContent className="z-[9999]">
                     {intervalOptions.map((interval) => (
                       <SelectItem key={interval.value} value={interval.value} className="text-[10px]">
-                        {interval.label} ({interval.count})
+                        {interval.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -845,13 +845,13 @@ const ParticipantCardWithHistory = ({
                     await onStatusChange(updatedParticipant, participant.admin_status || 'past');
                   }}
                 >
-                  <SelectTrigger className="text-[10px] h-5 px-1.5 bg-muted/50 whitespace-nowrap min-w-[100px]">
+                  <SelectTrigger className="w-[115px] text-[10px] h-5">
                     <SelectValue placeholder="Select week" />
                   </SelectTrigger>
                   <SelectContent className="z-[9999]">
                     {intervalOptions.map((interval) => (
                       <SelectItem key={interval.value} value={interval.value} className="text-[10px]">
-                        {interval.label} ({interval.count})
+                        {interval.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
