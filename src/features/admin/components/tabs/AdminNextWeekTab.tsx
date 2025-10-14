@@ -58,14 +58,16 @@ export function AdminNextWeekTab({
       const stats: Record<string, { like_count: number; dislike_count: number }> = {};
       
       // Count each vote record as 1 vote (each record represents one user's vote)
+      // Normalize candidate names to handle extra spaces
       data.forEach(vote => {
-        if (!stats[vote.candidate_name]) {
-          stats[vote.candidate_name] = { like_count: 0, dislike_count: 0 };
+        const normalizedName = vote.candidate_name.replace(/\s+/g, ' ').trim();
+        if (!stats[normalizedName]) {
+          stats[normalizedName] = { like_count: 0, dislike_count: 0 };
         }
         if (vote.vote_type === 'like') {
-          stats[vote.candidate_name].like_count += 1;
+          stats[normalizedName].like_count += 1;
         } else if (vote.vote_type === 'dislike') {
-          stats[vote.candidate_name].dislike_count += 1;
+          stats[normalizedName].dislike_count += 1;
         }
       });
 
@@ -156,7 +158,7 @@ export function AdminNextWeekTab({
     // Filter by vote type
     if (filterType !== 'all') {
       result = result.filter(p => {
-        const name = `${p.application_data?.first_name || ''} ${p.application_data?.last_name || ''}`.trim();
+        const name = `${p.application_data?.first_name || ''} ${p.application_data?.last_name || ''}`.replace(/\s+/g, ' ').trim();
         const stats = votesStats[name];
         if (!stats) return false;
         
@@ -169,7 +171,7 @@ export function AdminNextWeekTab({
     // Filter by day
     if (filterDay && filterType !== 'all') {
       result = result.filter(p => {
-        const name = `${p.application_data?.first_name || ''} ${p.application_data?.last_name || ''}`.trim();
+        const name = `${p.application_data?.first_name || ''} ${p.application_data?.last_name || ''}`.replace(/\s+/g, ' ').trim();
         
         const nowUtc = new Date();
         const currentDayOfWeek = nowUtc.getUTCDay();
@@ -182,7 +184,8 @@ export function AdminNextWeekTab({
         ));
 
         const hasVoteOnDay = allVotesData.some(vote => {
-          if (vote.candidate_name !== name) return false;
+          const normalizedVoteName = vote.candidate_name.replace(/\s+/g, ' ').trim();
+          if (normalizedVoteName !== name) return false;
           if (vote.vote_type !== filterType) return false;
 
           const createdAtUtc = new Date(vote.created_at);
@@ -350,7 +353,8 @@ const ParticipantCardWithHistory = ({
   const lastName = appData.last_name || '';
   const photo1 = appData.photo_1_url || appData.photo1_url || '';
   const photo2 = appData.photo_2_url || appData.photo2_url || '';
-  const participantName = `${firstName} ${lastName}`;
+  // Normalize name to match database format (trim and normalize spaces)
+  const participantName = `${firstName} ${lastName}`.replace(/\s+/g, ' ').trim();
   const submittedDate = participant.created_at ? new Date(participant.created_at) : null;
 
   const stats = votesStats[participantName] || { like_count: 0, dislike_count: 0 };
