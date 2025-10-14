@@ -97,12 +97,29 @@ export function AdminNewApplicationsTab({
     weekEndUtc.setUTCDate(weekStartUtc.getUTCDate() + 6);
     weekEndUtc.setUTCHours(23, 59, 59, 999);
 
+    console.log('📊 Week range:', weekStartUtc.toISOString(), 'to', weekEndUtc.toISOString());
+    
     applications.forEach(app => {
       const country = app.application_data?.country;
       if (country !== selectedCountry) return;
 
       // USE CREATED_AT FOR REGISTRATION DATE (not submitted_at which can be updated)
       const createdAtUtc = new Date(app.created_at || app.submitted_at);
+
+      // Debug log for applications created today
+      const isToday = createdAtUtc.toISOString().startsWith('2025-10-14') || 
+                      createdAtUtc.toISOString().startsWith('2025-10-13');
+      if (isToday) {
+        console.log('📅 Application created today/yesterday:', {
+          id: app.id,
+          created_at: app.created_at,
+          createdAtUtc: createdAtUtc.toISOString(),
+          status: app.admin_status,
+          weekStart: weekStartUtc.toISOString(),
+          weekEnd: weekEndUtc.toISOString(),
+          inRange: createdAtUtc >= weekStartUtc && createdAtUtc <= weekEndUtc
+        });
+      }
 
       // Only count from current week
       if (createdAtUtc < weekStartUtc || createdAtUtc > weekEndUtc) {
@@ -127,6 +144,8 @@ export function AdminNewApplicationsTab({
         stats.rejected[day]++;
       }
     });
+    
+    console.log('📊 Statistics calculated:', stats);
 
     return stats;
   }, [applications, selectedCountry]);
