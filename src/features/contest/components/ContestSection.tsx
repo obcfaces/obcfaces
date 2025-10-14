@@ -195,7 +195,20 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       }
       
       // Use the newly loaded participants data
+      console.log(`🟢 [CONTEST SECTION] Before getContestantsSync:`, {
+        participantsDataLength: participantsData.length,
+        title,
+        weekOffset
+      });
+      
       const contestantsData = await getContestantsSync(participantsData, userRatingsMap);
+      
+      console.log(`🟢 [CONTEST SECTION] After getContestantsSync:`, {
+        contestantsDataLength: contestantsData?.length || 0,
+        title,
+        weekOffset
+      });
+      
       setContestants(contestantsData || []);
       setIsLoading(false);
     };
