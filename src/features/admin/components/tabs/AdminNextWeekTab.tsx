@@ -100,7 +100,7 @@ export function AdminNextWeekTab({
     const loadWeeklyVotes = async () => {
       const { data, error } = await supabase
         .from('next_week_votes')
-        .select('vote_type, created_at');
+        .select('candidate_name, vote_type, created_at');
 
       if (error || !data) {
         console.error('Error loading weekly votes:', error);
@@ -113,12 +113,17 @@ export function AdminNextWeekTab({
     loadWeeklyVotes();
   }, []);
 
-  // Calculate weekly statistics
-  const weeklyStats = useMemo(() => {
-    const stats = {
-      like: { mon: 0, tue: 0, wed: 0, thu: 0, fri: 0, sat: 0, sun: 0 },
-      dislike: { mon: 0, tue: 0, wed: 0, thu: 0, fri: 0, sat: 0, sun: 0 },
-    };
+  // Calculate weekly statistics by participant and day
+  const participantWeeklyStats = useMemo(() => {
+    const stats: Record<string, {
+      mon: { likes: number; dislikes: number };
+      tue: { likes: number; dislikes: number };
+      wed: { likes: number; dislikes: number };
+      thu: { likes: number; dislikes: number };
+      fri: { likes: number; dislikes: number };
+      sat: { likes: number; dislikes: number };
+      sun: { likes: number; dislikes: number };
+    }> = {};
 
     // Get current week boundaries
     const now = new Date();
@@ -134,19 +139,32 @@ export function AdminNextWeekTab({
     sunday.setUTCDate(monday.getUTCDate() + 6);
     sunday.setUTCHours(23, 59, 59, 999);
 
-    // Count votes per day
+    // Count votes per participant per day
     weeklyVotes.forEach(vote => {
       const voteDate = new Date(vote.created_at);
       
       // Check if vote is in current week
       if (voteDate >= monday && voteDate <= sunday) {
         const dayIndex = voteDate.getUTCDay();
-        const dayKey = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][dayIndex];
+        const dayKey = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][dayIndex] as 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
+        const name = vote.candidate_name.trim().replace(/\s+/g, ' ');
+
+        if (!stats[name]) {
+          stats[name] = {
+            mon: { likes: 0, dislikes: 0 },
+            tue: { likes: 0, dislikes: 0 },
+            wed: { likes: 0, dislikes: 0 },
+            thu: { likes: 0, dislikes: 0 },
+            fri: { likes: 0, dislikes: 0 },
+            sat: { likes: 0, dislikes: 0 },
+            sun: { likes: 0, dislikes: 0 },
+          };
+        }
         
         if (vote.vote_type === 'like') {
-          stats.like[dayKey as keyof typeof stats.like]++;
+          stats[name][dayKey].likes++;
         } else if (vote.vote_type === 'dislike') {
-          stats.dislike[dayKey as keyof typeof stats.dislike]++;
+          stats[name][dayKey].dislikes++;
         }
       }
     });
@@ -174,6 +192,19 @@ export function AdminNextWeekTab({
 
     return dates;
   }, []);
+
+  // Get participants with votes only
+  const participantsWithVotes = useMemo(() => {
+    return Object.entries(participantWeeklyStats)
+      .map(([name, stats]) => ({
+        name,
+        stats,
+        totalLikes: Object.values(stats).reduce((sum, day) => sum + day.likes, 0),
+        totalDislikes: Object.values(stats).reduce((sum, day) => sum + day.dislikes, 0),
+      }))
+      .filter(p => p.totalLikes > 0 || p.totalDislikes > 0)
+      .sort((a, b) => (b.totalLikes + b.totalDislikes) - (a.totalLikes + a.totalDislikes));
+  }, [participantWeeklyStats]);
 
   const totalStats = useMemo(() => {
     const total = { like: 0, dislike: 0 };
@@ -229,7 +260,7 @@ export function AdminNextWeekTab({
           <table className="w-full text-xs">
             <thead>
               <tr className="border-b border-border">
-                <th className="text-left px-1 py-2 md:p-2 font-medium text-[10px] md:text-xs">Type</th>
+                <th className="text-left px-1 py-2 md:p-2 font-medium text-[10px] md:text-xs sticky left-0 bg-muted z-10">Name</th>
                 {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((dayName, idx) => (
                   <th key={dayName} className="text-center px-0.5 py-2 md:p-2 font-medium text-[10px] md:text-xs">
                     <div className="leading-tight">{dayName}</div>
@@ -238,37 +269,55 @@ export function AdminNextWeekTab({
                     </div>
                   </th>
                 ))}
+                <th className="text-center px-1 py-2 md:p-2 font-medium text-[10px] md:text-xs">Total</th>
               </tr>
             </thead>
             <tbody>
-              <tr className="border-b border-border/50">
-                <td className="text-left px-1 py-2 md:p-2 text-green-600 dark:text-green-500 text-[10px] md:text-xs">Like</td>
-                {['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].map(day => {
-                  const count = weeklyStats.like[day as keyof typeof weeklyStats.like];
-                  return (
-                    <td 
-                      key={day}
-                      className="text-center px-0.5 py-2 md:p-2 text-green-600 dark:text-green-500 text-sm md:text-base font-semibold"
-                    >
-                      {count}
-                    </td>
-                  );
-                })}
-              </tr>
-              <tr className="border-b border-border/50">
-                <td className="text-left px-1 py-2 md:p-2 text-red-500 text-[10px] md:text-xs">Dislike</td>
-                {['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].map(day => {
-                  const count = weeklyStats.dislike[day as keyof typeof weeklyStats.dislike];
-                  return (
-                    <td 
-                      key={day}
-                      className="text-center px-0.5 py-2 md:p-2 text-red-500 text-sm md:text-base font-semibold"
-                    >
-                      {count}
-                    </td>
-                  );
-                })}
-              </tr>
+              {participantsWithVotes.map((participant) => (
+                <tr key={participant.name} className="border-b border-border/50 hover:bg-accent/50">
+                  <td className="text-left px-1 py-2 md:p-2 text-[10px] md:text-xs font-medium sticky left-0 bg-muted z-10">
+                    {participant.name}
+                  </td>
+                  {['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].map(day => {
+                    const dayStats = participant.stats[day as keyof typeof participant.stats];
+                    return (
+                      <td key={day} className="text-center px-0.5 py-1 md:p-2">
+                        {(dayStats.likes > 0 || dayStats.dislikes > 0) && (
+                          <div className="flex flex-col gap-0.5">
+                            {dayStats.likes > 0 && (
+                              <span className="text-green-600 dark:text-green-500 text-[10px] md:text-xs font-semibold">
+                                +{dayStats.likes}
+                              </span>
+                            )}
+                            {dayStats.dislikes > 0 && (
+                              <span className="text-red-500 text-[10px] md:text-xs font-semibold">
+                                -{dayStats.dislikes}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </td>
+                    );
+                  })}
+                  <td className="text-center px-1 py-2 md:p-2">
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-green-600 dark:text-green-500 text-xs md:text-sm font-bold">
+                        +{participant.totalLikes}
+                      </span>
+                      <span className="text-red-500 text-xs md:text-sm font-bold">
+                        -{participant.totalDislikes}
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {participantsWithVotes.length === 0 && (
+                <tr>
+                  <td colSpan={9} className="text-center py-8 text-muted-foreground">
+                    No votes yet
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
