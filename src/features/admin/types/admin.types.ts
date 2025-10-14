@@ -85,6 +85,7 @@ export interface ContestApplication {
   id: string;
   user_id: string;
   application_data: any;
+  created_at: string;
   submitted_at: string;
   reviewed_at?: string;
   reviewed_by?: string;

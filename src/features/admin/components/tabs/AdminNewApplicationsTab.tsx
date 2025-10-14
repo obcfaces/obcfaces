@@ -101,14 +101,15 @@ export function AdminNewApplicationsTab({
       const country = app.application_data?.country;
       if (country !== selectedCountry) return;
 
-      const submittedAtUtc = new Date(app.submitted_at);
+      // USE CREATED_AT FOR REGISTRATION DATE (not submitted_at which can be updated)
+      const createdAtUtc = new Date(app.created_at || app.submitted_at);
 
       // Only count from current week
-      if (submittedAtUtc < weekStartUtc || submittedAtUtc > weekEndUtc) {
+      if (createdAtUtc < weekStartUtc || createdAtUtc > weekEndUtc) {
         return;
       }
 
-      const dayOfWeek = submittedAtUtc.getUTCDay();
+      const dayOfWeek = createdAtUtc.getUTCDay();
       const dayMap: { [key: number]: keyof typeof stats.all } = {
         1: 'mon', 2: 'tue', 3: 'wed', 4: 'thu', 5: 'fri', 6: 'sat', 0: 'sun'
       };
@@ -194,23 +195,24 @@ export function AdminNewApplicationsTab({
       console.log('📆 Week range:', { weekStartUtc, weekEndUtc });
 
       apps = apps.filter(app => {
-        // USE SUBMITTED_AT FOR REGISTRATION DATE
-        const submittedAtUtc = new Date(app.submitted_at);
+        // USE CREATED_AT FOR REGISTRATION DATE (not submitted_at which can be updated)
+        const createdAtUtc = new Date(app.created_at || app.submitted_at);
         
         console.log(`🔎 Checking app:`, {
           name: `${app.application_data?.first_name} ${app.application_data?.last_name}`,
+          created_at: app.created_at,
           submitted_at: app.submitted_at,
-          submittedAtUtc,
+          createdAtUtc,
           admin_status: app.admin_status
         });
         
         // MUST be in current week
-        if (submittedAtUtc < weekStartUtc || submittedAtUtc > weekEndUtc) {
+        if (createdAtUtc < weekStartUtc || createdAtUtc > weekEndUtc) {
           console.log(`❌ Not in current week`);
           return false;
         }
 
-        const dayOfWeek = submittedAtUtc.getUTCDay();
+        const dayOfWeek = createdAtUtc.getUTCDay();
         const dayMap: { [key: number]: string } = {
           1: 'mon', 2: 'tue', 3: 'wed', 4: 'thu', 5: 'fri', 6: 'sat', 0: 'sun'
         };
