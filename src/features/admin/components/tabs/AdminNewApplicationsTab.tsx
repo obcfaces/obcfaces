@@ -218,6 +218,10 @@ export function AdminNewApplicationsTab({
 
       console.log('📆 Week range:', { weekStartUtc, weekEndUtc });
 
+      // Count how many apps we're filtering
+      const totalBeforeFilter = apps.length;
+      console.log(`🔍 Starting to filter ${totalBeforeFilter} apps for day=${dayFilter}, statusRow=${statusRowFilter}`);
+      
       apps = apps.filter(app => {
         // USE CREATED_AT FOR REGISTRATION DATE (not submitted_at which can be updated)
         const createdAtUtc = new Date(app.created_at || app.submitted_at);
@@ -226,13 +230,15 @@ export function AdminNewApplicationsTab({
           name: `${app.application_data?.first_name} ${app.application_data?.last_name}`,
           created_at: app.created_at,
           submitted_at: app.submitted_at,
-          createdAtUtc,
-          admin_status: app.admin_status
+          createdAtUtc: createdAtUtc.toISOString(),
+          admin_status: app.admin_status,
+          weekStart: weekStartUtc.toISOString(),
+          weekEnd: weekEndUtc.toISOString()
         });
         
         // MUST be in current week
         if (createdAtUtc < weekStartUtc || createdAtUtc > weekEndUtc) {
-          console.log(`❌ Not in current week`);
+          console.log(`❌ Not in current week (created ${createdAtUtc.toISOString()}, week ${weekStartUtc.toISOString()} - ${weekEndUtc.toISOString()})`);
           return false;
         }
 
