@@ -43,45 +43,50 @@ export function AdminNextWeekTab({
     });
   }, [participants, selectedCountry]);
 
-  // Load votes data - aggregated directly from database
+  // Load votes data - use aggregated query
   useEffect(() => {
     const loadVotes = async () => {
-      // Get all votes
-      const { data: allVotes, error } = await supabase
+      // Get aggregated vote counts grouped by candidate and vote type
+      const { data: likesData, error: likesError } = await supabase
         .from('next_week_votes')
-        .select('candidate_name, vote_type');
+        .select('candidate_name, vote_type')
+        .eq('vote_type', 'like');
 
-      if (error) {
-        console.error('❌ Error loading votes:', error);
+      const { data: dislikesData, error: dislikesError } = await supabase
+        .from('next_week_votes')
+        .select('candidate_name, vote_type')
+        .eq('vote_type', 'dislike');
+
+      if (likesError || dislikesError) {
+        console.error('❌ Error loading votes:', likesError || dislikesError);
         return;
       }
 
-      if (!allVotes) {
-        console.log('⚠️ No votes data');
-        return;
-      }
+      console.log('📊 Likes data:', likesData?.length, 'records');
+      console.log('📊 Dislikes data:', dislikesData?.length, 'records');
 
-      console.log('📊 RAW VOTES DATA:', allVotes.length, 'records');
-
-      // Calculate stats by counting each record
+      // Calculate stats
       const stats: Record<string, { likes: number; dislikes: number }> = {};
-      
-      allVotes.forEach(vote => {
-        // Normalize name
+
+      // Count likes
+      likesData?.forEach(vote => {
         const name = vote.candidate_name.trim().replace(/\s+/g, ' ');
-        
         if (!stats[name]) {
           stats[name] = { likes: 0, dislikes: 0 };
         }
-        
-        if (vote.vote_type === 'like') {
-          stats[name].likes++;
-        } else if (vote.vote_type === 'dislike') {
-          stats[name].dislikes++;
-        }
+        stats[name].likes++;
       });
 
-      console.log('📊 CALCULATED VOTE STATS:', stats);
+      // Count dislikes
+      dislikesData?.forEach(vote => {
+        const name = vote.candidate_name.trim().replace(/\s+/g, ' ');
+        if (!stats[name]) {
+          stats[name] = { likes: 0, dislikes: 0 };
+        }
+        stats[name].dislikes++;
+      });
+
+      console.log('📊 FINAL STATS:', stats);
       setVotesData(stats);
     };
 
