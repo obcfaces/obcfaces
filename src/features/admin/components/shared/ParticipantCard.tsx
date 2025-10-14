@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Edit, Heart, Star, Trophy, MoreVertical, History, Trash2 } from 'lucide-react';
+import { Edit, Heart, Star, Trophy, MoreVertical, History, Trash2, Copy } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 interface ParticipantCardProps {
@@ -50,6 +51,13 @@ export function ParticipantCard({
 }: ParticipantCardProps) {
   const participantName = `${firstName} ${lastName}`;
   const age = new Date().getFullYear() - (appData.birth_year || new Date().getFullYear() - 25);
+  
+  const handleCopyEmail = () => {
+    if (appData.email) {
+      navigator.clipboard.writeText(appData.email);
+      toast({ description: "Email copied to clipboard" });
+    }
+  };
 
   const getStatusBackgroundColor = (status: string) => {
     switch (status) {
@@ -141,12 +149,6 @@ export function ParticipantCard({
                   className="w-full h-[149px] object-cover cursor-pointer hover:opacity-90 transition-opacity"
                   onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 1, participantName)}
                 />
-                <div className="absolute top-2 right-2">
-                  <Avatar className="h-6 w-6 flex-shrink-0 border-2 border-white shadow-sm">
-                    <AvatarImage src={photo1 || ''} />
-                    <AvatarFallback className="text-xs">{firstName?.charAt(0) || 'U'}</AvatarFallback>
-                  </Avatar>
-                </div>
                 {isWinner && (
                   <div className="absolute top-2 left-2">
                     <Trophy className="h-5 w-5 text-yellow-500" />
@@ -160,13 +162,44 @@ export function ParticipantCard({
           <div className="w-[50ch] flex-shrink-0 flex-1 min-w-0 p-4">
             <div className="flex items-center gap-2 mb-1">
               <span className="text-xs font-semibold whitespace-nowrap">
-                {age} {firstName} {lastName}
+                {age}, {firstName} {lastName}
               </span>
             </div>
 
-            <div className="text-xs text-muted-foreground mb-1">
+            <div className="text-sm text-muted-foreground mb-1">
               {appData.city} {appData.state} {appData.country}
             </div>
+
+            {appData.email && (
+              <div className="flex items-center gap-1 mb-1">
+                <span className="text-xs text-muted-foreground">
+                  {appData.email.substring(0, 10)}...
+                </span>
+                <Copy 
+                  className="h-3 w-3 cursor-pointer text-muted-foreground hover:text-foreground" 
+                  onClick={handleCopyEmail}
+                />
+              </div>
+            )}
+
+            {appData.facebook && (
+              <div className="mb-1">
+                <a 
+                  href={appData.facebook} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-xs text-blue-600 hover:underline"
+                >
+                  Facebook
+                </a>
+              </div>
+            )}
+
+            {appData.phone && (
+              <div className="text-xs text-muted-foreground mb-1">
+                {appData.phone}
+              </div>
+            )}
 
             {showStats && (
               <div className="flex items-center gap-3 mb-2">
