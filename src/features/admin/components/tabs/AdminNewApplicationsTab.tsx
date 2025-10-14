@@ -365,7 +365,7 @@ export function AdminNewApplicationsTab({
               {[
                 { label: 'All', key: 'all', className: '' },
                 { label: 'Pending', key: 'pending', className: '' },
-                { label: 'Approved', key: 'approved', className: '' },
+                { label: 'Approved', key: 'approved', className: 'text-green-600 dark:text-green-500' },
                 { label: 'Rejected', key: 'rejected', className: 'text-red-500' },
               ].map(row => (
                 <tr key={row.key} className="border-b border-border/50">
@@ -376,7 +376,7 @@ export function AdminNewApplicationsTab({
                     return (
                       <td 
                         key={day} 
-                        className={`text-center px-0.5 py-2 md:p-2 ${row.className} cursor-pointer hover:bg-accent/50 ${isActive ? 'bg-accent font-bold' : ''} text-[10px] md:text-xs`}
+                        className={`text-center px-0.5 py-2 md:p-2 ${row.className} cursor-pointer hover:bg-accent/50 ${isActive ? 'bg-accent font-bold' : ''} text-sm md:text-base font-semibold`}
                         onClick={() => handleCellClick(day, row.key)}
                       >
                         {count}
