@@ -331,10 +331,10 @@ export function AdminNewApplicationsTab({
       setStatusRowFilter(null);
       console.log('🔄 Clearing filters');
     } else {
+      // Update all filters together using React's batching
+      setAdminStatusFilter('all');
       setDayFilter(day);
       setStatusRowFilter(statusRow);
-      // When clicking table, set adminStatusFilter to 'all' to show all matching applications
-      setAdminStatusFilter('all');
       console.log('✅ Set filters:', { day, statusRow, adminStatusFilter: 'all' });
     }
   };
