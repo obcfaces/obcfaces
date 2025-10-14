@@ -96,6 +96,11 @@ export function AdminNewApplicationsTab({
     const weekEndUtc = new Date(weekStartUtc);
     weekEndUtc.setUTCDate(weekStartUtc.getUTCDate() + 6);
     weekEndUtc.setUTCHours(23, 59, 59, 999);
+    
+    console.log('🔍🔍🔍 WEEK RANGE CHECK 🔍🔍🔍');
+    console.log('Current UTC:', nowUtc.toISOString());
+    console.log('Week Start UTC:', weekStartUtc.toISOString());
+    console.log('Week End UTC:', weekEndUtc.toISOString());
 
     console.log('📊 Week range:', weekStartUtc.toISOString(), 'to', weekEndUtc.toISOString());
     
