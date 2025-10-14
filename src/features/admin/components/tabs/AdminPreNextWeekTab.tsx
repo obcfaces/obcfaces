@@ -295,8 +295,9 @@ const ParticipantCardWithHistory = ({
                     <SelectItem value="pending">Pending</SelectItem>
                     <SelectItem value="rejected">Rejected</SelectItem>
                     <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                    <SelectItem value="this week">This Week</SelectItem>
+                    <SelectItem value="next week on site">Next Week on Site</SelectItem>
                     <SelectItem value="next week">Next Week</SelectItem>
+                    <SelectItem value="this week">This Week</SelectItem>
                     <SelectItem value="past">Past</SelectItem>
                   </SelectContent>
                 </Select>
@@ -378,12 +379,13 @@ const ParticipantCardWithHistory = ({
                     <SelectTrigger className={`w-[100px] text-[10px] h-5 ${getStatusBackgroundColor(participant.admin_status || 'pre next week')}`}>
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="z-[9999]">
+                    <SelectContent className="z-[9999] bg-popover border shadow-lg">
                       <SelectItem value="pending">Pending</SelectItem>
                       <SelectItem value="rejected">Rejected</SelectItem>
                       <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                      <SelectItem value="this week">This Week</SelectItem>
+                      <SelectItem value="next week on site">Next Week on Site</SelectItem>
                       <SelectItem value="next week">Next Week</SelectItem>
+                      <SelectItem value="this week">This Week</SelectItem>
                       <SelectItem value="past">Past</SelectItem>
                     </SelectContent>
                   </Select>
