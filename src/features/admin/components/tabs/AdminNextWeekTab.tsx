@@ -319,50 +319,44 @@ export function AdminNextWeekTab({
           <table className="w-full text-xs">
             <thead>
               <tr className="border-b border-border">
-                <th className="text-left px-1 py-2 md:p-2 font-medium text-[10px] md:text-xs sticky left-0 bg-muted z-10 w-20 md:w-32 max-w-[80px] md:max-w-[128px]">
+                <th className="text-left px-1 py-1 md:p-1.5 font-medium text-[10px] md:text-xs sticky left-0 bg-muted z-10 w-16 md:w-28 max-w-[64px] md:max-w-[112px]">
                   Name
                 </th>
                 {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((dayName, idx) => (
-                  <th key={dayName} className="text-center px-0.5 py-2 md:p-2 font-medium text-[10px] md:text-xs">
+                  <th key={dayName} className="text-center px-0.5 py-1 md:p-1.5 font-medium text-[10px] md:text-xs">
                     <div className="leading-tight">{dayName}</div>
                     <div className="text-[8px] md:text-[10px] text-muted-foreground font-normal">
                       {weekDates[['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'][idx]]}
                     </div>
                   </th>
                 ))}
-                <th className="text-center px-1 py-2 md:p-2 font-medium text-[10px] md:text-xs">Total</th>
+                <th className="text-center px-1 py-1 md:p-1.5 font-medium text-[10px] md:text-xs">Total</th>
               </tr>
             </thead>
             <tbody>
               {participantsWithVotes.map((participant) => (
                 <tr key={participant.name} className="border-b border-border/50 hover:bg-accent/50">
-                  <td className="text-left px-1 py-2 md:p-2 text-[10px] md:text-xs font-medium sticky left-0 bg-muted z-10 w-20 md:w-32 max-w-[80px] md:max-w-[128px]">
+                  <td className="text-left px-1 py-1 md:p-1.5 text-[10px] md:text-xs font-medium sticky left-0 bg-muted z-10 w-16 md:w-28 max-w-[64px] md:max-w-[112px]">
                     <div className="truncate" title={participant.name}>
                       {participant.name}
                     </div>
                   </td>
                   {['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].map(day => {
                     const dayStats = participant.stats[day as keyof typeof participant.stats];
+                    const hasVotes = dayStats.likes > 0 || dayStats.dislikes > 0;
                     return (
-                      <td key={day} className="text-center px-0.5 py-1 md:p-2">
-                        {(dayStats.likes > 0 || dayStats.dislikes > 0) && (
-                          <div className="flex flex-col gap-0.5">
-                            {dayStats.likes > 0 && (
-                              <span className="text-green-600 dark:text-green-500 text-[10px] md:text-xs font-semibold">
-                                +{dayStats.likes}
-                              </span>
-                            )}
-                            {dayStats.dislikes > 0 && (
-                              <span className="text-red-500 text-[10px] md:text-xs font-semibold">
-                                -{dayStats.dislikes}
-                              </span>
-                            )}
-                          </div>
+                      <td key={day} className="text-center px-0.5 py-1 md:p-1.5">
+                        {hasVotes && (
+                          <span className="text-[10px] md:text-xs font-semibold whitespace-nowrap">
+                            <span className="text-green-600 dark:text-green-500">{dayStats.likes}</span>
+                            <span className="text-muted-foreground">/</span>
+                            <span className="text-red-500">{dayStats.dislikes}</span>
+                          </span>
                         )}
                       </td>
                     );
                   })}
-                  <td className="text-center px-1 py-2 md:p-2">
+                  <td className="text-center px-1 py-1 md:p-1.5">
                     <div className="flex flex-col gap-0.5">
                       <span className="text-green-600 dark:text-green-500 text-xs md:text-sm font-bold">
                         +{participant.totalLikes}
