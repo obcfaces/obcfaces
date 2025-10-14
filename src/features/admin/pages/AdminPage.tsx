@@ -3270,7 +3270,7 @@ const AdminContent = () => {
             <TabsContent value="new-applications" className="space-y-4">
               <AdminNewApplicationsTab
                 loading={tabLoading['new-applications']}
-                applications={(selectedNewAppDay ? (selectedNewAppDay.filter === 'all' ? allApplicationsByDate : contestApplications).filter(app => {
+                applications={(selectedNewAppDay ? allApplicationsByDate.filter(app => {
                   if (!app.submitted_at) return false;
                   
                   // Exclude duplicates: if this user_id already has an entry with a different status, hide this pending one
@@ -3335,7 +3335,7 @@ const AdminContent = () => {
                 }).map(app => ({
                   ...app,
                   created_at: app.created_at || app.submitted_at || new Date().toISOString()
-                })) : contestApplications)}
+                })) : allApplicationsByDate)}
                 deletedApplications={deletedApplications.map((app: any) => ({
                   ...app,
                   created_at: app.created_at || app.submitted_at || new Date().toISOString()
