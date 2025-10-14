@@ -71,6 +71,7 @@ export function AdminNextWeekTab({
         }
       });
 
+      console.log('Votes stats calculated:', stats);
       setVotesStats(stats);
     };
 
@@ -358,6 +359,8 @@ const ParticipantCardWithHistory = ({
   const submittedDate = participant.created_at ? new Date(participant.created_at) : null;
 
   const stats = votesStats[participantName] || { like_count: 0, dislike_count: 0 };
+  
+  console.log('Participant card:', participantName, 'Stats:', stats, 'Available in votesStats:', participantName in votesStats);
 
   const handleShowVoters = async (type: 'like' | 'dislike') => {
     setVotersType(type);
