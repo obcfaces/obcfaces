@@ -97,8 +97,8 @@ export function AdminNewApplicationsTab({
   };
 
   return (
-    <div className="space-y-4 -mx-4 md:mx-0">
-      <div className="flex items-center justify-between px-4 md:px-0">
+    <div className="space-y-4 -mx-2 md:mx-0">
+      <div className="flex items-center justify-between px-2 md:px-0">
         <h2 className="text-2xl font-bold">New Applications</h2>
         <div className="flex items-center space-x-2">
           <Checkbox
@@ -176,7 +176,7 @@ export function AdminNewApplicationsTab({
       })}
 
       {displayApplications.length === 0 && (
-        <div className="text-center py-12 text-muted-foreground px-4 md:px-0">
+        <div className="text-center py-12 text-muted-foreground px-2 md:px-0">
           No {showDeleted ? 'deleted' : 'new'} applications
         </div>
       )}
