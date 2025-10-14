@@ -802,11 +802,19 @@ const AdminContent = () => {
         // Load rating stats for each participant (past and this week) - использовать данные из weekly_contest_participants
         const pastParticipantsWithRatings = pastParticipants.map((participant) => {
           // Используем данные, которые уже есть в weekly_contest_participants
+          const weekInterval = participant.week_interval || getParticipantWeekInterval(participant);
+          
+          console.log(`[PAST PARTICIPANT] ${participant.application_data?.first_name} ${participant.application_data?.last_name}:`, {
+            week_interval_from_db: participant.week_interval,
+            calculated_interval: getParticipantWeekInterval(participant),
+            final_interval: weekInterval
+          });
+          
           return {
             ...participant,
             average_rating: participant.average_rating || 0,
             total_votes: participant.total_votes || 0,
-            weekInterval: getParticipantWeekInterval(participant)
+            week_interval: weekInterval
           };
         });
         
