@@ -303,106 +303,80 @@ const ParticipantCardWithHistory = ({
           </div>
 
           {/* Mobile layout */}
-          <div className="md:hidden flex flex-col h-full">
-                <div className="flex-1 p-3 flex gap-3">
-                  <div className="flex flex-col gap-1 w-20 flex-shrink-0">
-                    {photo1 && (
-                      <img 
-                        src={photo1} 
-                        alt="Portrait" 
-                        className="w-full h-16 object-cover rounded cursor-pointer"
-                        onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 0, `${firstName} ${lastName}`)}
-                      />
-                    )}
-                    {photo2 && (
-                      <img 
-                        src={photo2} 
-                        alt="Full length" 
-                        className="w-full h-16 object-cover rounded cursor-pointer"
-                        onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 1, `${firstName} ${lastName}`)}
-                      />
-                    )}
-                  </div>
-                  
-                  <div className="flex-1 min-w-0 flex flex-col justify-between">
-                    <div>
-                      <h3 className="font-semibold text-sm truncate mb-1">
-                        {firstName} {lastName}
-                      </h3>
-                      <div className="text-xs text-muted-foreground space-y-0.5">
-                        <div>{appData.city || 'Unknown'}, {appData.country || 'Unknown'}</div>
-                        <Badge variant="outline" className="text-xs px-1 py-0 mt-1">
-                          Week: {participant.week_interval}
-                        </Badge>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between pt-1">
-                      <Select 
-                        value={participant.admin_status || 'pre next week'} 
-                        onValueChange={async (value) => {
-                          await onStatusChange(participant, value);
-                        }}
-                      >
-                        <SelectTrigger className={`w-24 h-7 text-xs ${getStatusBackgroundColor(participant.admin_status || 'pre next week')}`}>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                          <SelectItem value="pending">Pending</SelectItem>
-                          <SelectItem value="rejected">Rejected</SelectItem>
-                          <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                          <SelectItem value="this week">This Week</SelectItem>
-                          <SelectItem value="next week">Next Week</SelectItem>
-                          <SelectItem value="past">Past</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </div>
-            <div className="flex-1 p-3 flex gap-3">
-              <div className="flex flex-col gap-1 w-20 flex-shrink-0">
+          <div className="md:hidden">
+            <div className="flex w-full">
+              {/* Photos section - Fixed width */}
+              <div className="flex gap-px w-[200px] flex-shrink-0 h-[149px]">
                 {photo1 && (
-                  <img 
-                    src={photo1} 
-                    alt="Portrait" 
-                    className="w-full h-16 object-cover rounded cursor-pointer"
-                    onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 0, `${firstName} ${lastName}`)}
-                  />
+                  <div className="w-[100px] h-[149px] flex-shrink-0">
+                    <img 
+                      src={photo1} 
+                      alt="Portrait" 
+                      className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                      onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 0, `${firstName} ${lastName}`)}
+                    />
+                  </div>
                 )}
                 {photo2 && (
-                  <img 
-                    src={photo2} 
-                    alt="Full length" 
-                    className="w-full h-16 object-cover rounded cursor-pointer"
-                    onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 1, `${firstName} ${lastName}`)}
-                  />
+                  <div className="w-[100px] h-[149px] flex-shrink-0">
+                    <img 
+                      src={photo2} 
+                      alt="Full length" 
+                      className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                      onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 1, `${firstName} ${lastName}`)}
+                    />
+                  </div>
                 )}
               </div>
-              
-              <div className="flex-1 min-w-0 flex flex-col justify-between">
+
+              {/* Info section */}
+              <div className="flex-1 p-2 flex flex-col justify-between">
                 <div>
-                  <h3 className="font-semibold text-sm truncate mb-1">
-                    {firstName} {lastName}
-                  </h3>
-                  <div className="text-xs text-muted-foreground space-y-0.5">
-                    <div>{appData.city || 'Unknown'}, {appData.country || 'Unknown'}</div>
-                    {participant.week_interval && (
-                      <Badge variant="outline" className="text-xs px-1 py-0 mt-1">
-                        Week: {participant.week_interval}
-                      </Badge>
-                    )}
+                  <div className="flex items-center gap-1 mb-0.5">
+                    <span className="text-xs font-semibold">
+                      {appData.birth_year ? `${new Date().getFullYear() - parseInt(appData.birth_year)}, ` : ''}{firstName} {lastName}
+                    </span>
                   </div>
+                  
+                  <div className="text-xs text-muted-foreground">
+                    {appData.city}, {appData.country}
+                  </div>
+
+                  {/* Week interval */}
+                  {participant.week_interval && (
+                    <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 mt-0.5">
+                      Week: {participant.week_interval}
+                    </Badge>
+                  )}
+                  
+                  {expandedId === participant.id && (
+                    <div className="text-xs text-muted-foreground mt-1 max-h-32 md:max-h-40 overflow-y-auto overflow-x-hidden space-y-1 pr-1">
+                      <div>
+                        {Object.entries(appData).map(([key, value], index) => {
+                          if (key.includes('url') || key.includes('photo') || key === 'phone' || key === 'email' || !value) return null;
+                          return (
+                            <span key={key}>
+                              {String(value)}
+                              {index < Object.entries(appData).filter(([k, v]) => !k.includes('url') && !k.includes('photo') && k !== 'phone' && k !== 'email' && v).length - 1 ? ', ' : ''}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div className="flex items-center justify-between pt-1">
+
+                <div className="flex items-center gap-1 mt-1">
                   <Select 
-                    value={participant.admin_status || 'pre next week'} 
+                    value={participant.admin_status || 'pre next week'}
                     onValueChange={async (value) => {
                       await onStatusChange(participant, value);
                     }}
                   >
-                    <SelectTrigger className={`w-24 h-7 text-xs ${getStatusBackgroundColor(participant.admin_status || 'pre next week')}`}>
+                    <SelectTrigger className={`w-[100px] text-[10px] h-5 ${getStatusBackgroundColor(participant.admin_status || 'pre next week')}`}>
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                    <SelectContent className="z-[9999]">
                       <SelectItem value="pending">Pending</SelectItem>
                       <SelectItem value="rejected">Rejected</SelectItem>
                       <SelectItem value="pre next week">Pre Next Week</SelectItem>
