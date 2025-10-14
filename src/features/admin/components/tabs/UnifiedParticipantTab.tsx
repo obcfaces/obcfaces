@@ -638,6 +638,13 @@ const ParticipantCardWithHistory = ({
                   </SelectContent>
                 </Select>
               )}
+              
+              {/* Week interval badge for Past tab */}
+              {tabType === 'past' && 'week_interval' in participant && participant.week_interval && (
+                <Badge variant="outline" className="h-6 text-[10px] px-2 bg-muted/50 whitespace-nowrap">
+                  {participant.week_interval}
+                </Badge>
+              )}
             </div>
           </div>
         </div>
@@ -786,6 +793,13 @@ const ParticipantCardWithHistory = ({
                     <SelectItem value="past">Past</SelectItem>
                   </SelectContent>
                 </Select>
+              )}
+              
+              {/* Week interval badge for Past tab */}
+              {tabType === 'past' && 'week_interval' in participant && participant.week_interval && (
+                <Badge variant="outline" className="text-[10px] h-5 px-1.5 bg-muted/50 whitespace-nowrap">
+                  {participant.week_interval}
+                </Badge>
               )}
             </div>
           </div>
