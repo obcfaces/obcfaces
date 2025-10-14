@@ -57,14 +57,15 @@ export function AdminNextWeekTab({
 
       const stats: Record<string, { like_count: number; dislike_count: number }> = {};
       
+      // Count each vote record as 1 vote (each record represents one user's vote)
       data.forEach(vote => {
         if (!stats[vote.candidate_name]) {
           stats[vote.candidate_name] = { like_count: 0, dislike_count: 0 };
         }
         if (vote.vote_type === 'like') {
-          stats[vote.candidate_name].like_count++;
+          stats[vote.candidate_name].like_count += 1;
         } else if (vote.vote_type === 'dislike') {
-          stats[vote.candidate_name].dislike_count++;
+          stats[vote.candidate_name].dislike_count += 1;
         }
       });
 
@@ -108,10 +109,11 @@ export function AdminNextWeekTab({
       };
       const day = dayMap[dayOfWeek];
 
+      // Count each vote as 1 (each record is one user's vote)
       if (vote.vote_type === 'like') {
-        stats.like[day]++;
+        stats.like[day] += 1;
       } else if (vote.vote_type === 'dislike') {
-        stats.dislike[day]++;
+        stats.dislike[day] += 1;
       }
     });
 
