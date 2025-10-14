@@ -70,9 +70,12 @@ export function UnifiedParticipantTab({
       filtered = filtered.filter(p => p.admin_status === 'this week');
     }
 
-    // Apply week interval filter for past tab
-    if (tabType === 'past' && weekIntervalFilter !== 'all') {
-      filtered = filtered.filter(p => 'week_interval' in p && p.week_interval === weekIntervalFilter);
+    // Apply week interval filter for past tab - only show "past" status
+    if (tabType === 'past') {
+      filtered = filtered.filter(p => p.admin_status === 'past');
+      if (weekIntervalFilter !== 'all') {
+        filtered = filtered.filter(p => 'week_interval' in p && p.week_interval === weekIntervalFilter);
+      }
     }
 
     // Sort by rating for this and past tabs (only for WeeklyContestParticipant)
