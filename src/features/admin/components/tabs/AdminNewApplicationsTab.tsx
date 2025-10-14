@@ -48,7 +48,7 @@ export function AdminNewApplicationsTab({
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [expandedHistory, setExpandedHistory] = useState<Set<string>>(new Set());
   const [dayFilter, setDayFilter] = useState<string | null>(null);
-  const [statusRowFilter, setStatusRowFilter] = useState<string | null>('pending');
+  const [statusRowFilter, setStatusRowFilter] = useState<string | null>(null);
   const [adminStatusFilter, setAdminStatusFilter] = useState<ParticipantStatus | 'all'>('pending');
   const { selectedCountry } = useAdminCountry();
   
@@ -298,22 +298,6 @@ export function AdminNewApplicationsTab({
             </tbody>
           </table>
         </div>
-        {(dayFilter || statusRowFilter) && (
-          <div className="mt-2 text-xs text-muted-foreground">
-            Active filter: {statusRowFilter} on {dayFilter}
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="ml-2 h-6 px-2 text-xs"
-              onClick={() => {
-                setDayFilter(null);
-                setStatusRowFilter(null);
-              }}
-            >
-              Clear
-            </Button>
-          </div>
-        )}
       </div>
 
       <div className="flex items-center justify-between px-2 md:px-0">
