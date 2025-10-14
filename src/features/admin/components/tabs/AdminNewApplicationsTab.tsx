@@ -49,7 +49,7 @@ export function AdminNewApplicationsTab({
   const [expandedHistory, setExpandedHistory] = useState<Set<string>>(new Set());
   const [dayFilter, setDayFilter] = useState<string | null>(null);
   const [statusRowFilter, setStatusRowFilter] = useState<string | null>(null);
-  const [adminStatusFilter, setAdminStatusFilter] = useState<ParticipantStatus | 'all'>('pending');
+  const [adminStatusFilter, setAdminStatusFilter] = useState<ParticipantStatus | 'all' | 'deleted'>('pending');
   const { selectedCountry } = useAdminCountry();
   
   // Filter by selected country
@@ -148,10 +148,11 @@ export function AdminNewApplicationsTab({
 
   // Filter by day and status row
   const displayApplications = useMemo(() => {
-    let apps = showDeleted ? filteredDeletedApplications : filteredApplications;
+    // Show deleted or regular applications based on filter
+    let apps = adminStatusFilter === 'deleted' ? filteredDeletedApplications : filteredApplications;
 
-    // Filter by admin status first
-    if (adminStatusFilter !== 'all') {
+    // Filter by admin status (skip if showing deleted)
+    if (adminStatusFilter !== 'all' && adminStatusFilter !== 'deleted') {
       apps = apps.filter(app => app.admin_status === adminStatusFilter);
     }
 
@@ -209,7 +210,7 @@ export function AdminNewApplicationsTab({
     }
 
     return apps;
-  }, [filteredApplications, filteredDeletedApplications, showDeleted, dayFilter, statusRowFilter, adminStatusFilter]);
+  }, [filteredApplications, filteredDeletedApplications, dayFilter, statusRowFilter, adminStatusFilter]);
 
   // NOW we can have conditional returns after all hooks
   if (loading) {
@@ -301,7 +302,7 @@ export function AdminNewApplicationsTab({
       </div>
 
       <div className="flex items-center justify-between px-2 md:px-0">
-        <Select value={adminStatusFilter} onValueChange={(value) => setAdminStatusFilter(value as ParticipantStatus | 'all')}>
+        <Select value={adminStatusFilter} onValueChange={(value) => setAdminStatusFilter(value as ParticipantStatus | 'all' | 'deleted')}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Status filter" />
           </SelectTrigger>
@@ -313,18 +314,9 @@ export function AdminNewApplicationsTab({
             <SelectItem value="this week">This Week</SelectItem>
             <SelectItem value="past">Past</SelectItem>
             <SelectItem value="rejected">Rejected</SelectItem>
+            <SelectItem value="deleted">Deleted ({deletedApplications.length})</SelectItem>
           </SelectContent>
         </Select>
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="show-deleted-apps"
-            checked={showDeleted}
-            onCheckedChange={onToggleDeleted}
-          />
-          <label htmlFor="show-deleted-apps" className="text-sm cursor-pointer">
-            Show Deleted ({deletedApplications.length})
-          </label>
-        </div>
       </div>
 
       {displayApplications.map((participant) => {
@@ -392,7 +384,7 @@ export function AdminNewApplicationsTab({
 
       {displayApplications.length === 0 && (
         <div className="text-center py-12 text-muted-foreground px-2 md:px-0">
-          No {showDeleted ? 'deleted' : 'new'} applications
+          No {adminStatusFilter === 'deleted' ? 'deleted' : 'new'} applications
         </div>
       )}
     </div>
