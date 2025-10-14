@@ -154,16 +154,28 @@ export function AdminNewApplicationsTab({
 
   // Filter by day and status row
   const displayApplications = useMemo(() => {
+    console.log('🔍 Filtering applications:', { 
+      totalApps: filteredApplications.length,
+      dayFilter, 
+      statusRowFilter, 
+      adminStatusFilter 
+    });
+    
     // Show deleted or regular applications based on filter
     let apps = adminStatusFilter === 'deleted' ? filteredDeletedApplications : filteredApplications;
+    
+    console.log(`📋 Starting with ${apps.length} apps (${adminStatusFilter === 'deleted' ? 'deleted' : 'regular'})`);
 
-    // Filter by admin status (skip if showing deleted)
-    if (adminStatusFilter !== 'all' && adminStatusFilter !== 'deleted') {
+    // Filter by admin status (skip if showing deleted or using table filters)
+    if (adminStatusFilter !== 'all' && adminStatusFilter !== 'deleted' && !dayFilter && !statusRowFilter) {
       apps = apps.filter(app => app.admin_status === adminStatusFilter);
+      console.log(`✂️ Filtered by admin status ${adminStatusFilter}: ${apps.length} apps remaining`);
     }
 
     // Then filter by table cell click with EXACT date matching
     if (dayFilter || statusRowFilter) {
+      console.log('📅 Applying table filters...');
+      
       // Get current week boundaries
       const nowUtc = new Date();
       const currentDayOfWeek = nowUtc.getUTCDay();
@@ -178,6 +190,8 @@ export function AdminNewApplicationsTab({
       const weekEndUtc = new Date(weekStartUtc);
       weekEndUtc.setUTCDate(weekStartUtc.getUTCDate() + 6);
       weekEndUtc.setUTCHours(23, 59, 59, 999);
+
+      console.log('📆 Week range:', { weekStartUtc, weekEndUtc });
 
       apps = apps.filter(app => {
         const submittedAtUtc = new Date(app.submitted_at);
@@ -213,8 +227,11 @@ export function AdminNewApplicationsTab({
 
         return true;
       });
+      
+      console.log(`✅ After table filters: ${apps.length} apps`);
     }
 
+    console.log(`📊 Final result: ${apps.length} apps to display`);
     return apps;
   }, [filteredApplications, filteredDeletedApplications, dayFilter, statusRowFilter, adminStatusFilter]);
 
@@ -249,13 +266,19 @@ export function AdminNewApplicationsTab({
   };
 
   const handleCellClick = (day: string, statusRow: string) => {
+    console.log('📊 Table cell clicked:', { day, statusRow, currentDayFilter: dayFilter, currentStatusRowFilter: statusRowFilter });
+    
     // If clicking the same cell, clear filters
     if (dayFilter === day && statusRowFilter === statusRow) {
       setDayFilter(null);
       setStatusRowFilter(null);
+      console.log('🔄 Clearing filters');
     } else {
       setDayFilter(day);
       setStatusRowFilter(statusRow);
+      // When clicking table, set adminStatusFilter to 'all' to show all matching applications
+      setAdminStatusFilter('all');
+      console.log('✅ Set filters:', { day, statusRow, adminStatusFilter: 'all' });
     }
   };
 
