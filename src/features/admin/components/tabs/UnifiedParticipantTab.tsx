@@ -59,6 +59,28 @@ export function UnifiedParticipantTab({
   const [selectedParticipant, setSelectedParticipant] = useState<any>(null);
   const [votesCache, setVotesCache] = useState<Map<string, { likes: number; dislikes: number }>>(new Map());
 
+  // Fixed list of week intervals for Past tab
+  const FIXED_WEEK_INTERVALS = useMemo(() => [
+    '06/10-12/10/25',
+    '29/09-05/10/25',
+    '22/09-28/09/25',
+    '15/09-21/09/25',
+    '08/09-14/09/25',
+  ], []);
+
+  // Create interval options for Select
+  const intervalOptions = useMemo(() => {
+    if (tabType !== 'past') return [];
+    
+    return availableIntervals.length > 0 
+      ? availableIntervals 
+      : FIXED_WEEK_INTERVALS.map(interval => ({
+          value: interval,
+          label: interval,
+          count: 0
+        }));
+  }, [tabType, availableIntervals, FIXED_WEEK_INTERVALS]);
+
   const filteredParticipants = useMemo(() => {
     let filtered = participants.filter(p => {
       const country = p.application_data?.country || ('profiles' in p ? p.profiles?.country : undefined);
@@ -207,6 +229,7 @@ export function UnifiedParticipantTab({
             onReject={onReject}
             getStatusBackgroundColor={getStatusBackgroundColor}
             getVotesForParticipant={getVotesForParticipant}
+            intervalOptions={intervalOptions}
           />
         ))}
       </div>
@@ -252,6 +275,7 @@ const ParticipantCardWithHistory = ({
   onReject,
   getStatusBackgroundColor,
   getVotesForParticipant,
+  intervalOptions = [],
 }: any) => {
   const { history, loading } = useApplicationHistory(participant.id);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -639,11 +663,27 @@ const ParticipantCardWithHistory = ({
                 </Select>
               )}
               
-              {/* Week interval badge for Past tab */}
-              {tabType === 'past' && 'week_interval' in participant && participant.week_interval && (
-                <Badge variant="outline" className="h-6 text-[10px] px-2 bg-muted/50 whitespace-nowrap">
-                  {participant.week_interval}
-                </Badge>
+              {/* Week interval selector for Past tab */}
+              {tabType === 'past' && 'week_interval' in participant && onStatusChange && (
+                <Select 
+                  value={participant.week_interval || ''} 
+                  onValueChange={async (value) => {
+                    // Update week_interval via status change handler
+                    const updatedParticipant = { ...participant, week_interval: value };
+                    await onStatusChange(updatedParticipant, participant.admin_status || 'past');
+                  }}
+                >
+                  <SelectTrigger className="h-6 text-[10px] px-2 bg-muted/50 whitespace-nowrap min-w-[110px]">
+                    <SelectValue placeholder="Select week" />
+                  </SelectTrigger>
+                  <SelectContent className="z-[9999]">
+                    {intervalOptions.map((interval) => (
+                      <SelectItem key={interval.value} value={interval.value} className="text-[10px]">
+                        {interval.label} ({interval.count})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               )}
             </div>
           </div>
@@ -795,11 +835,27 @@ const ParticipantCardWithHistory = ({
                 </Select>
               )}
               
-              {/* Week interval badge for Past tab */}
-              {tabType === 'past' && 'week_interval' in participant && participant.week_interval && (
-                <Badge variant="outline" className="text-[10px] h-5 px-1.5 bg-muted/50 whitespace-nowrap">
-                  {participant.week_interval}
-                </Badge>
+              {/* Week interval selector for Past tab */}
+              {tabType === 'past' && 'week_interval' in participant && onStatusChange && (
+                <Select 
+                  value={participant.week_interval || ''} 
+                  onValueChange={async (value) => {
+                    // Update week_interval via status change handler
+                    const updatedParticipant = { ...participant, week_interval: value };
+                    await onStatusChange(updatedParticipant, participant.admin_status || 'past');
+                  }}
+                >
+                  <SelectTrigger className="text-[10px] h-5 px-1.5 bg-muted/50 whitespace-nowrap min-w-[100px]">
+                    <SelectValue placeholder="Select week" />
+                  </SelectTrigger>
+                  <SelectContent className="z-[9999]">
+                    {intervalOptions.map((interval) => (
+                      <SelectItem key={interval.value} value={interval.value} className="text-[10px]">
+                        {interval.label} ({interval.count})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               )}
             </div>
           </div>
