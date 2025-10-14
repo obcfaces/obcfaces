@@ -47,16 +47,29 @@ export function AdminNextWeekTab({
 
   useEffect(() => {
     const fetchVotesStats = async () => {
+      // First check total count
+      const { count } = await supabase
+        .from('next_week_votes')
+        .select('*', { count: 'exact', head: true });
+      
+      console.log('Total records in next_week_votes:', count);
+
       const { data, error } = await supabase
         .from('next_week_votes')
-        .select('*');
+        .select('candidate_name, vote_type, user_id, created_at, vote_count');
 
-      if (error || !data) {
+      if (error) {
         console.error('Error fetching votes:', error);
         return;
       }
 
+      if (!data) {
+        console.log('No data returned');
+        return;
+      }
+
       console.log('Total votes fetched:', data.length);
+      console.log('Sample votes:', data.slice(0, 5));
       setAllVotesData(data);
 
       const stats: Record<string, { like_count: number; dislike_count: number }> = {};
@@ -75,7 +88,7 @@ export function AdminNextWeekTab({
         }
       });
 
-      console.log('Votes stats calculated:', stats);
+      console.log('Votes stats calculated:', Object.keys(stats).length, 'unique candidates');
       console.log('Stats for "Rhyza Mae Jabil":', stats['Rhyza Mae Jabil']);
       console.log('Stats for "Mycel Jera":', stats['Mycel Jera']);
       console.log('Stats for "Jasmine Limpag":', stats['Jasmine Limpag']);
