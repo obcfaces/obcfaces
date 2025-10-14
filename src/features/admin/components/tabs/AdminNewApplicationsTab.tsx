@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { flushSync } from 'react-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -330,14 +329,14 @@ export function AdminNewApplicationsTab({
     if (dayFilter === day && statusRowFilter === statusRow) {
       setDayFilter(null);
       setStatusRowFilter(null);
+      setAdminStatusFilter('all');
       console.log('🔄 Clearing filters');
     } else {
-      // Use flushSync to synchronously update all states together
-      flushSync(() => {
-        setAdminStatusFilter('all');
-        setDayFilter(day);
-        setStatusRowFilter(statusRow);
-      });
+      // Force immediate update by resetting admin filter first
+      setAdminStatusFilter('all');
+      // Then set table filters - React will batch these updates
+      setDayFilter(day);
+      setStatusRowFilter(statusRow);
       console.log('✅ Set filters:', { day, statusRow, adminStatusFilter: 'all' });
     }
   };
