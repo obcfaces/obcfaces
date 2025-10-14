@@ -802,19 +802,11 @@ const AdminContent = () => {
         // Load rating stats for each participant (past and this week) - использовать данные из weekly_contest_participants
         const pastParticipantsWithRatings = pastParticipants.map((participant) => {
           // Используем данные, которые уже есть в weekly_contest_participants
-          const weekInterval = participant.week_interval || getParticipantWeekInterval(participant);
-          
-          console.log(`[PAST PARTICIPANT] ${participant.application_data?.first_name} ${participant.application_data?.last_name}:`, {
-            week_interval_from_db: participant.week_interval,
-            calculated_interval: getParticipantWeekInterval(participant),
-            final_interval: weekInterval
-          });
-          
           return {
             ...participant,
             average_rating: participant.average_rating || 0,
             total_votes: participant.total_votes || 0,
-            week_interval: weekInterval
+            weekInterval: getParticipantWeekInterval(participant)
           };
         });
         
@@ -3446,22 +3438,6 @@ const AdminContent = () => {
                     name: `${appData.first_name} ${appData.last_name}`
                   });
                   setRejectModalOpen(true);
-                }}
-                onStatusChange={async (participant, newStatus) => {
-                  const appData = participant.application_data || {};
-                  const participantName = `${appData.first_name} ${appData.last_name}`;
-                  const result = await updateParticipantStatusWithHistory(
-                    participant.id,
-                    newStatus as ParticipantStatus,
-                    participantName
-                  );
-                  if (result.success) {
-                    toast({
-                      title: "Status Updated",
-                      description: `${participantName} status changed to ${newStatus}`,
-                    });
-                    fetchContestApplications();
-                  }
                 }}
                 onDelete={async (app) => {
                   const appData = app.application_data || {};

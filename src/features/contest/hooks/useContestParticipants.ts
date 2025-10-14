@@ -24,12 +24,6 @@ export const useContestParticipants = () => {
     try {
       setLoading(true);
       
-      console.log(`🔵 [PUBLIC] fetchParticipantsByStatus called:`, {
-        adminStatus,
-        weekInterval,
-        countryCode
-      });
-      
       const statusArray = Array.isArray(adminStatus) ? adminStatus : [adminStatus];
       
       let query = supabase
@@ -39,10 +33,7 @@ export const useContestParticipants = () => {
         .eq('is_active', true)
         .is('deleted_at', null);
       
-      console.log(`🔵 [PUBLIC] Base query created for statuses:`, statusArray);
-      
       if (weekInterval) {
-        console.log(`🔵 [PUBLIC] Adding week_interval filter:`, weekInterval);
         query = query.eq('week_interval', weekInterval);
       }
 
@@ -57,8 +48,6 @@ export const useContestParticipants = () => {
         };
         const countryName = countryNames[countryCode_upper];
         
-        console.log(`🔵 [PUBLIC] Adding country filter:`, { countryCode, countryName });
-        
         if (countryName) {
           query = query.or(`application_data->>country.eq.${countryCode_upper},application_data->>country.eq.${countryName}`);
         } else {
@@ -68,30 +57,14 @@ export const useContestParticipants = () => {
       
       const { data: participants, error } = await query.order('created_at', { ascending: false });
 
-      console.log(`🔵 [PUBLIC] Query result:`, {
-        participantsCount: participants?.length || 0,
-        error: error?.message
-      });
-
       if (error) {
         console.error('Error loading participants:', error);
         return [];
       }
 
       if (!participants || participants.length === 0) {
-        console.log(`🔵 [PUBLIC] No participants found`);
         return [];
       }
-
-      console.log(`🔵 [PUBLIC] Sample participant data:`, participants.slice(0, 3).map(p => {
-        const appData = p.application_data as any;
-        return {
-          name: `${appData?.first_name || ''} ${appData?.last_name || ''}`,
-          status: p.admin_status,
-          week_interval: p.week_interval,
-          country: appData?.country
-        };
-      }));
 
       const userIds = participants.map(p => p.user_id);
       const { data: profilesData } = await (supabase.rpc as any)(

@@ -5,6 +5,8 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getWeekRange } from "@/utils/dateFormatting";
 import { supabase } from "@/integrations/supabase/client";
+import { usePastWeekIntervals } from "../hooks/usePastWeekIntervals";
+import { formatIntervalSync } from "../utils/formatInterval";
 
 interface ContestWeeksRendererProps {
   viewMode: 'compact' | 'full';
@@ -14,31 +16,6 @@ interface ContestWeeksRendererProps {
 }
 
 
-// Calculate dynamic past weeks based on current Monday
-const calculatePastWeeks = () => {
-  const now = new Date();
-  const currentMonday = new Date(now);
-  const dayOfWeek = currentMonday.getDay();
-  const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-  currentMonday.setDate(currentMonday.getDate() + daysToMonday);
-  currentMonday.setHours(0, 0, 0, 0);
-  
-  const weeks = [];
-  for (let i = 1; i <= 5; i++) {
-    const monday = new Date(currentMonday);
-    monday.setDate(currentMonday.getDate() - (i * 7));
-    
-    const sunday = new Date(monday);
-    sunday.setDate(monday.getDate() + 6);
-    
-    const formatDate = (d: Date) => d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' });
-    const formatYear = (d: Date) => String(d.getFullYear()).slice(-2);
-    const interval = `${formatDate(monday)}-${formatDate(sunday)}/${formatYear(sunday)}`;
-    
-    weeks.push({ interval, weeksAgo: i });
-  }
-  return weeks;
-};
 
 export const ContestWeeksRenderer = ({ 
   viewMode, 
@@ -49,6 +26,9 @@ export const ContestWeeksRenderer = ({
   const { t } = useTranslation();
   const { currentLanguage } = useLanguage();
   const [thisWeekInterval, setThisWeekInterval] = useState<string>("");
+  
+  // Load real past week intervals from database
+  const { intervals: pastWeekIntervals, loading: pastWeeksLoading } = usePastWeekIntervals(countryCode, timezone);
 
   // Get actual THIS WEEK interval from database
   useEffect(() => {
@@ -73,12 +53,13 @@ export const ContestWeeksRenderer = ({
     fetchThisWeekInterval();
   }, [currentLanguage.code]);
 
-  // Prepare past week items using dynamically calculated weeks
+  // Prepare past week items using real intervals from database
   const pastWeekItems = useMemo(() => {
-    const pastWeeks = calculatePastWeeks();
+    if (pastWeeksLoading) return [];
     
-    return pastWeeks.map((item) => {
+    return pastWeekIntervals.map((item) => {
       const weekLabel = item.weeksAgo === 1 ? t('1 WEEK AGO') : t(`${item.weeksAgo} WEEKS AGO`);
+      const displayInterval = formatIntervalSync(item.interval); // Format for display: "13-19 Oct 2025"
       
       return {
         id: item.interval,
@@ -87,18 +68,18 @@ export const ContestWeeksRenderer = ({
             key={item.interval}
             title={weekLabel}
             titleSuffix={t("(Closed)")}
-            subtitle={item.interval}
+            subtitle={displayInterval}
             centerSubtitle
             showWinner={true}
             viewMode={viewMode}
             weekOffset={-item.weeksAgo}
-            weekInterval={item.interval}
+            weekInterval={item.interval} // Use database format: "06/10-12/10/25"
             countryCode={countryCode}
           />
         )
       };
     });
-  }, [viewMode, t, countryCode]);
+  }, [pastWeekIntervals, pastWeeksLoading, viewMode, t, countryCode]);
 
   return (
     <>

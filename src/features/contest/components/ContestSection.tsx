@@ -195,20 +195,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       }
       
       // Use the newly loaded participants data
-      console.log(`🟢 [CONTEST SECTION] Before getContestantsSync:`, {
-        participantsDataLength: participantsData.length,
-        title,
-        weekOffset
-      });
-      
       const contestantsData = await getContestantsSync(participantsData, userRatingsMap);
-      
-      console.log(`🟢 [CONTEST SECTION] After getContestantsSync:`, {
-        contestantsDataLength: contestantsData?.length || 0,
-        title,
-        weekOffset
-      });
-      
       setContestants(contestantsData || []);
       setIsLoading(false);
     };
@@ -355,12 +342,12 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     }
 
     // For past week sections (weekOffset < 0), show participants for all users
-    if (weekOffset < 0) {
-      console.log(`🟣 Processing PAST WEEK section (weekOffset === ${weekOffset}) for all users`);
+    if (weekOffset === -1) {
+      console.log('Processing 1 WEEK AGO section (weekOffset === -1) for all users');
       
       // If there are participants, process them
       if (actualParticipants && actualParticipants.length > 0) {
-        console.log(`🟣 Processing PAST WEEK participants: ${actualParticipants.length}`);
+        console.log('Processing 1 WEEK AGO participants:', actualParticipants.length);
         
         const contestantsWithRatings = await Promise.all(
           actualParticipants.map(async (contestant) => {
