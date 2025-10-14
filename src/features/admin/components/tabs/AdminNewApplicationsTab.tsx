@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -51,6 +51,12 @@ export function AdminNewApplicationsTab({
   const [statusRowFilter, setStatusRowFilter] = useState<string | null>(null);
   const [adminStatusFilter, setAdminStatusFilter] = useState<ParticipantStatus | 'all' | 'deleted'>('pending');
   const { selectedCountry } = useAdminCountry();
+  
+  // Reset table filters when admin status filter changes
+  useEffect(() => {
+    setDayFilter(null);
+    setStatusRowFilter(null);
+  }, [adminStatusFilter]);
   
   // Filter by selected country
   const filteredApplications = useMemo(() => {
