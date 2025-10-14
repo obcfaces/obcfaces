@@ -93,11 +93,19 @@ export function AdminNextWeekTab({
     loadVotes();
   }, []);
 
-  const [weeklyVotes, setWeeklyVotes] = useState<any[]>([]);
+  const [participantWeeklyStats, setParticipantWeeklyStats] = useState<Record<string, {
+    mon: { likes: number; dislikes: number };
+    tue: { likes: number; dislikes: number };
+    wed: { likes: number; dislikes: number };
+    thu: { likes: number; dislikes: number };
+    fri: { likes: number; dislikes: number };
+    sat: { likes: number; dislikes: number };
+    sun: { likes: number; dislikes: number };
+  }>>({});
 
-  // Load votes with dates for weekly stats
+  // Load weekly votes and calculate stats
   useEffect(() => {
-    const loadWeeklyVotes = async () => {
+    const loadWeeklyStats = async () => {
       const { data, error } = await supabase
         .from('next_week_votes')
         .select('candidate_name, vote_type, created_at');
@@ -107,70 +115,68 @@ export function AdminNextWeekTab({
         return;
       }
 
-      setWeeklyVotes(data);
+      console.log('📅 Weekly votes loaded:', data.length);
+
+      const stats: Record<string, {
+        mon: { likes: number; dislikes: number };
+        tue: { likes: number; dislikes: number };
+        wed: { likes: number; dislikes: number };
+        thu: { likes: number; dislikes: number };
+        fri: { likes: number; dislikes: number };
+        sat: { likes: number; dislikes: number };
+        sun: { likes: number; dislikes: number };
+      }> = {};
+
+      // Get current week boundaries
+      const now = new Date();
+      const dayOfWeek = now.getUTCDay();
+      const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+      const monday = new Date(Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate() - daysFromMonday,
+        0, 0, 0, 0
+      ));
+      const sunday = new Date(monday);
+      sunday.setUTCDate(monday.getUTCDate() + 6);
+      sunday.setUTCHours(23, 59, 59, 999);
+
+      // Count each vote record
+      data.forEach(vote => {
+        const voteDate = new Date(vote.created_at);
+        
+        // Check if vote is in current week
+        if (voteDate >= monday && voteDate <= sunday) {
+          const dayIndex = voteDate.getUTCDay();
+          const dayKey = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][dayIndex] as 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
+          const name = vote.candidate_name.trim().replace(/\s+/g, ' ');
+
+          if (!stats[name]) {
+            stats[name] = {
+              mon: { likes: 0, dislikes: 0 },
+              tue: { likes: 0, dislikes: 0 },
+              wed: { likes: 0, dislikes: 0 },
+              thu: { likes: 0, dislikes: 0 },
+              fri: { likes: 0, dislikes: 0 },
+              sat: { likes: 0, dislikes: 0 },
+              sun: { likes: 0, dislikes: 0 },
+            };
+          }
+          
+          if (vote.vote_type === 'like') {
+            stats[name][dayKey].likes++;
+          } else if (vote.vote_type === 'dislike') {
+            stats[name][dayKey].dislikes++;
+          }
+        }
+      });
+
+      console.log('📅 Weekly stats calculated:', stats);
+      setParticipantWeeklyStats(stats);
     };
 
-    loadWeeklyVotes();
+    loadWeeklyStats();
   }, []);
-
-  // Calculate weekly statistics by participant and day
-  const participantWeeklyStats = useMemo(() => {
-    const stats: Record<string, {
-      mon: { likes: number; dislikes: number };
-      tue: { likes: number; dislikes: number };
-      wed: { likes: number; dislikes: number };
-      thu: { likes: number; dislikes: number };
-      fri: { likes: number; dislikes: number };
-      sat: { likes: number; dislikes: number };
-      sun: { likes: number; dislikes: number };
-    }> = {};
-
-    // Get current week boundaries
-    const now = new Date();
-    const dayOfWeek = now.getUTCDay();
-    const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-    const monday = new Date(Date.UTC(
-      now.getUTCFullYear(),
-      now.getUTCMonth(),
-      now.getUTCDate() - daysFromMonday,
-      0, 0, 0, 0
-    ));
-    const sunday = new Date(monday);
-    sunday.setUTCDate(monday.getUTCDate() + 6);
-    sunday.setUTCHours(23, 59, 59, 999);
-
-    // Count votes per participant per day
-    weeklyVotes.forEach(vote => {
-      const voteDate = new Date(vote.created_at);
-      
-      // Check if vote is in current week
-      if (voteDate >= monday && voteDate <= sunday) {
-        const dayIndex = voteDate.getUTCDay();
-        const dayKey = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][dayIndex] as 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
-        const name = vote.candidate_name.trim().replace(/\s+/g, ' ');
-
-        if (!stats[name]) {
-          stats[name] = {
-            mon: { likes: 0, dislikes: 0 },
-            tue: { likes: 0, dislikes: 0 },
-            wed: { likes: 0, dislikes: 0 },
-            thu: { likes: 0, dislikes: 0 },
-            fri: { likes: 0, dislikes: 0 },
-            sat: { likes: 0, dislikes: 0 },
-            sun: { likes: 0, dislikes: 0 },
-          };
-        }
-        
-        if (vote.vote_type === 'like') {
-          stats[name][dayKey].likes++;
-        } else if (vote.vote_type === 'dislike') {
-          stats[name][dayKey].dislikes++;
-        }
-      }
-    });
-
-    return stats;
-  }, [weeklyVotes]);
 
   // Week dates for table headers
   const weekDates = useMemo(() => {
@@ -260,7 +266,9 @@ export function AdminNextWeekTab({
           <table className="w-full text-xs">
             <thead>
               <tr className="border-b border-border">
-                <th className="text-left px-1 py-2 md:p-2 font-medium text-[10px] md:text-xs sticky left-0 bg-muted z-10">Name</th>
+                <th className="text-left px-1 py-2 md:p-2 font-medium text-[10px] md:text-xs sticky left-0 bg-muted z-10 w-20 md:w-32 max-w-[80px] md:max-w-[128px]">
+                  Name
+                </th>
                 {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((dayName, idx) => (
                   <th key={dayName} className="text-center px-0.5 py-2 md:p-2 font-medium text-[10px] md:text-xs">
                     <div className="leading-tight">{dayName}</div>
@@ -275,8 +283,10 @@ export function AdminNextWeekTab({
             <tbody>
               {participantsWithVotes.map((participant) => (
                 <tr key={participant.name} className="border-b border-border/50 hover:bg-accent/50">
-                  <td className="text-left px-1 py-2 md:p-2 text-[10px] md:text-xs font-medium sticky left-0 bg-muted z-10">
-                    {participant.name}
+                  <td className="text-left px-1 py-2 md:p-2 text-[10px] md:text-xs font-medium sticky left-0 bg-muted z-10 w-20 md:w-32 max-w-[80px] md:max-w-[128px]">
+                    <div className="truncate" title={participant.name}>
+                      {participant.name}
+                    </div>
                   </td>
                   {['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].map(day => {
                     const dayStats = participant.stats[day as keyof typeof participant.stats];
