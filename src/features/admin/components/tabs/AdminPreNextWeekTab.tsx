@@ -4,12 +4,15 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Edit, Info } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Edit, Info, MoreVertical, History, ChevronDown, ChevronUp, Copy } from 'lucide-react';
 import { WeeklyContestParticipant } from '@/types/admin';
 import { LoadingSpinner } from '../LoadingSpinner';
 import { useAdminCountry } from '@/contexts/AdminCountryContext';
 import { formatDateInCountry } from '@/utils/weekIntervals';
 import { useApplicationHistory } from '@/hooks/useApplicationHistory';
+import { Country } from 'country-state-city';
+import { ParticipantStatusHistoryModal } from '../ParticipantStatusHistoryModal';
 
 interface AdminPreNextWeekTabProps {
   participants: WeeklyContestParticipant[];
@@ -109,6 +112,8 @@ const ParticipantCardWithHistory = ({
   getStatusBackgroundColor,
 }: any) => {
   const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [showStatusHistoryModal, setShowStatusHistoryModal] = useState(false);
   const { history } = useApplicationHistory(participant.id);
   const historyCount = history.length;
 
@@ -151,6 +156,29 @@ const ParticipantCardWithHistory = ({
             </div>
           )}
 
+          {/* Three dots menu - top right corner */}
+          <div className="absolute top-0 right-0 z-20">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 rounded-none rounded-bl-md hover:bg-background/90 bg-background/80"
+                >
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="z-[9999]">
+                <DropdownMenuItem
+                  onClick={() => setShowStatusHistoryModal(true)}
+                >
+                  <History className="h-3.5 w-3.5 mr-2" />
+                  History
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
           {/* Edit button in bottom left corner */}
           <Button
             size="sm"
@@ -162,92 +190,120 @@ const ParticipantCardWithHistory = ({
             <Edit className="w-4 h-4" />
           </Button>
 
-              {/* Desktop layout */}
-              <div className="hidden md:flex">
-                {/* Photos section - 2 columns */}
-                <div className="flex gap-px w-[25ch] flex-shrink-0">
-                  {photo1 && (
-                    <div className="w-1/2">
-                      <img 
-                        src={photo1} 
-                        alt="Portrait" 
-                        className="w-full h-[149px] object-contain cursor-pointer hover:opacity-90 transition-opacity"
-                        onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 0, `${firstName} ${lastName}`)}
-                      />
-                    </div>
+          {/* Desktop/Tablet layout */}
+          <div className="hidden md:flex h-[149px]">
+            {/* Photos section - Fixed width */}
+            <div className="flex gap-px w-[200px] flex-shrink-0 h-[149px]">
+              {photo1 && (
+                <div className="w-[100px] h-[149px] flex-shrink-0 relative overflow-hidden">
+                  <img 
+                    src={photo1} 
+                    alt="Portrait" 
+                    className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 0, `${firstName} ${lastName}`)}
+                  />
+                  {['this week', 'next week', 'pre next week'].includes(participant.admin_status || '') && (
+                    <Badge variant="outline" className="absolute bottom-1 left-1 text-[10px] px-1 py-0 h-4 bg-green-500/90 text-white border-green-600 shadow-sm">
+                      on site
+                    </Badge>
                   )}
-                  {photo2 && (
-                    <div className="w-1/2 relative">
-                      <img 
-                        src={photo2} 
-                        alt="Full length" 
-                        className="w-full h-[149px] object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                        onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 1, `${firstName} ${lastName}`)}
-                      />
-                      {/* User avatar positioned in top right corner */}
-                      <div className="absolute top-2 right-2">
-                        <Avatar className="h-6 w-6 flex-shrink-0 border-2 border-white shadow-sm">
-                          <AvatarImage src={photo1 || ''} />
-                          <AvatarFallback className="text-xs">
-                            {firstName?.charAt(0) || 'U'}
-                          </AvatarFallback>
-                        </Avatar>
-                      </div>
-                    </div>
+                </div>
+              )}
+              {photo2 && (
+                <div className="w-[100px] h-[149px] flex-shrink-0 relative overflow-hidden">
+                  <img 
+                    src={photo2} 
+                    alt="Full length" 
+                    className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 1, `${firstName} ${lastName}`)}
+                  />
+                </div>
+              )}
+              {!photo2 && (
+                <div className="w-[100px] h-[149px] flex-shrink-0 bg-muted flex items-center justify-center border border-border overflow-hidden">
+                  <div className="text-center text-muted-foreground">
+                    <p className="text-xs font-medium">No Photo 2</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Info section */}
+            <div className="flex-1 p-2 flex flex-col justify-between overflow-hidden">
+              <div>
+                <div className="flex items-center gap-1 mb-0.5">
+                  <span className="text-xs font-semibold">
+                    {appData.birth_year ? `${new Date().getFullYear() - parseInt(appData.birth_year)}, ` : ''}{firstName} {lastName}
+                  </span>
+                </div>
+                
+                <div className="text-xs text-muted-foreground mb-1">
+                  {appData.city}, {appData.country}
+                </div>
+
+                {/* Week interval */}
+                {participant.week_interval && (
+                  <Badge variant="outline" className="text-xs px-1 py-0 mb-1">
+                    Week: {participant.week_interval}
+                  </Badge>
+                )}
+                
+                {/* Expandable application data */}
+                <div 
+                  className="text-[10px] text-muted-foreground cursor-pointer hover:text-foreground transition-colors flex items-center gap-1"
+                  onClick={() => setExpandedId(expandedId === participant.id ? null : participant.id)}
+                  title="Click to view full application data"
+                >
+                  <span>More info</span>
+                  {expandedId === participant.id ? (
+                    <ChevronUp className="h-2.5 w-2.5" />
+                  ) : (
+                    <ChevronDown className="h-2.5 w-2.5" />
                   )}
                 </div>
 
-                {/* Main info section */}
-                <div className="w-[50ch] flex-shrink-0 flex-1 min-w-0 p-4">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs font-semibold whitespace-nowrap">
-                      {new Date().getFullYear() - (appData.birth_year || new Date().getFullYear() - 25)} {firstName} {lastName}
-                    </span>
-                  </div>
-
-                  <div className="text-xs text-muted-foreground mb-1">
-                    {appData.city} {appData.state} {appData.country}
-                  </div>
-
-                  <div className="flex items-center gap-2 mt-2">
-                    <Select 
-                      value={participant.admin_status || 'pre next week'} 
-                      onValueChange={async (value) => {
-                        await onStatusChange(participant, value);
-                      }}
-                    >
-                      <SelectTrigger className={`w-24 h-7 text-xs ${getStatusBackgroundColor(participant.admin_status || 'pre next week')}`}>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="rejected">Rejected</SelectItem>
-                        <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                        <SelectItem value="this week">This Week</SelectItem>
-                        <SelectItem value="next week">Next Week</SelectItem>
-                        <SelectItem value="past">Past</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Button 
-                      size="sm"
-                      variant="ghost"
-                      className="h-7 w-7 p-0"
-                      onClick={() => {
-                        onStatusHistory(
-                          participant.id,
-                          `${firstName} ${lastName}`,
-                          participant.status_history
+                {expandedId === participant.id && (
+                  <div className="text-xs text-muted-foreground mt-1 max-h-32 md:max-h-40 overflow-y-auto overflow-x-hidden space-y-1 pr-1">
+                    <div>
+                      {Object.entries(appData).map(([key, value], index) => {
+                        if (key.includes('url') || key.includes('photo') || key === 'phone' || key === 'email' || !value) return null;
+                        return (
+                          <span key={key}>
+                            {String(value)}
+                            {index < Object.entries(appData).filter(([k, v]) => !k.includes('url') && !k.includes('photo') && k !== 'phone' && k !== 'email' && v).length - 1 ? ', ' : ''}
+                          </span>
                         );
-                      }}
-                    >
-                      <Info className="h-4 w-4" />
-                    </Button>
+                      })}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
+              
+              <div className="flex items-center gap-2 mt-2">
+                <Select 
+                  value={participant.admin_status || 'pre next week'}
+                  onValueChange={async (value) => {
+                    await onStatusChange(participant, value);
+                  }}
+                >
+                  <SelectTrigger className={`w-[110px] h-6 text-xs ${getStatusBackgroundColor(participant.admin_status || 'pre next week')}`}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
+                    <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                    <SelectItem value="this week">This Week</SelectItem>
+                    <SelectItem value="next week">Next Week</SelectItem>
+                    <SelectItem value="past">Past</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
 
-              {/* Mobile layout */}
-              <div className="md:hidden flex flex-col h-full">
+          {/* Mobile layout */}
+          <div className="md:hidden flex flex-col h-full">
                 <div className="flex-1 p-3 flex gap-3">
                   <div className="flex flex-col gap-1 w-20 flex-shrink-0">
                     {photo1 && (
@@ -302,9 +358,76 @@ const ParticipantCardWithHistory = ({
                     </div>
                   </div>
                 </div>
+            <div className="flex-1 p-3 flex gap-3">
+              <div className="flex flex-col gap-1 w-20 flex-shrink-0">
+                {photo1 && (
+                  <img 
+                    src={photo1} 
+                    alt="Portrait" 
+                    className="w-full h-16 object-cover rounded cursor-pointer"
+                    onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 0, `${firstName} ${lastName}`)}
+                  />
+                )}
+                {photo2 && (
+                  <img 
+                    src={photo2} 
+                    alt="Full length" 
+                    className="w-full h-16 object-cover rounded cursor-pointer"
+                    onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 1, `${firstName} ${lastName}`)}
+                  />
+                )}
               </div>
-            </CardContent>
-          </Card>
+              
+              <div className="flex-1 min-w-0 flex flex-col justify-between">
+                <div>
+                  <h3 className="font-semibold text-sm truncate mb-1">
+                    {firstName} {lastName}
+                  </h3>
+                  <div className="text-xs text-muted-foreground space-y-0.5">
+                    <div>{appData.city || 'Unknown'}, {appData.country || 'Unknown'}</div>
+                    {participant.week_interval && (
+                      <Badge variant="outline" className="text-xs px-1 py-0 mt-1">
+                        Week: {participant.week_interval}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center justify-between pt-1">
+                  <Select 
+                    value={participant.admin_status || 'pre next week'} 
+                    onValueChange={async (value) => {
+                      await onStatusChange(participant, value);
+                    }}
+                  >
+                    <SelectTrigger className={`w-24 h-7 text-xs ${getStatusBackgroundColor(participant.admin_status || 'pre next week')}`}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="rejected">Rejected</SelectItem>
+                      <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                      <SelectItem value="this week">This Week</SelectItem>
+                      <SelectItem value="next week">Next Week</SelectItem>
+                      <SelectItem value="past">Past</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Status History Modal */}
+      {showStatusHistoryModal && (
+        <ParticipantStatusHistoryModal
+          isOpen={showStatusHistoryModal}
+          participantId={participant.id}
+          participantName={`${firstName} ${lastName}`}
+          statusHistory={participant.status_history}
+          onClose={() => setShowStatusHistoryModal(false)}
+        />
+      )}
     </div>
   );
 };
