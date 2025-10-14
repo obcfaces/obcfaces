@@ -55,11 +55,14 @@ export function AdminNextWeekTab({
         return;
       }
 
-      // Calculate stats
+      console.log('📊 Total votes loaded:', data.length);
+
+      // Calculate stats - normalize names by removing multiple spaces
       const stats: Record<string, { likes: number; dislikes: number }> = {};
       
       data.forEach(vote => {
-        const name = vote.candidate_name.trim();
+        // Normalize: trim and replace multiple spaces with single space
+        const name = vote.candidate_name.trim().replace(/\s+/g, ' ');
         if (!stats[name]) {
           stats[name] = { likes: 0, dislikes: 0 };
         }
@@ -70,6 +73,7 @@ export function AdminNextWeekTab({
         }
       });
 
+      console.log('📊 Vote stats by name:', stats);
       setVotesData(stats);
     };
 
@@ -280,11 +284,14 @@ const ParticipantCard = ({
   const lastName = appData.last_name || '';
   const photo1 = appData.photo_1_url || appData.photo1_url || '';
   const photo2 = appData.photo_2_url || appData.photo2_url || '';
-  const participantName = `${firstName} ${lastName}`.trim();
+  // Normalize name: trim and replace multiple spaces with single space
+  const participantName = `${firstName} ${lastName}`.trim().replace(/\s+/g, ' ');
   const submittedDate = participant.created_at ? new Date(participant.created_at) : null;
 
   // Get vote stats for this participant
   const stats = votesData[participantName] || { likes: 0, dislikes: 0 };
+  
+  console.log(`🔍 Card for "${participantName}": likes=${stats.likes}, dislikes=${stats.dislikes}`);
 
   const handleShowVoters = async (type: 'like' | 'dislike') => {
     setVotersType(type);
