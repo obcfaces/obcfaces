@@ -438,6 +438,23 @@ const AdminContent = () => {
         status_history: statusHistory
       };
 
+      // CRITICAL: Set preview_week_start for "next week" status to satisfy constraint
+      if (newStatus === 'next week') {
+        // Get next Monday for preview week
+        const now = new Date();
+        const currentDay = now.getUTCDay();
+        const daysUntilNextMonday = currentDay === 0 ? 1 : (8 - currentDay);
+        const nextMonday = new Date(now);
+        nextMonday.setUTCDate(now.getUTCDate() + daysUntilNextMonday);
+        nextMonday.setUTCHours(0, 0, 0, 0);
+        
+        updateData.preview_week_start = nextMonday.toISOString().split('T')[0];
+        console.log('🟢 Setting preview_week_start for next week:', updateData.preview_week_start);
+      } else {
+        // Clear preview_week_start for non-"next week" statuses
+        updateData.preview_week_start = null;
+      }
+
       // Add additional data if provided (for rejection)
       if (additionalData) {
         if (additionalData.rejection_reason_types !== undefined) {
