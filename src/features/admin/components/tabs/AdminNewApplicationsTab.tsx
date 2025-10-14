@@ -97,8 +97,8 @@ export function AdminNewApplicationsTab({
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 -mx-4 md:mx-0">
+      <div className="flex items-center justify-between px-4 md:px-0">
         <h2 className="text-2xl font-bold">New Applications</h2>
         <div className="flex items-center space-x-2">
           <Checkbox
@@ -176,7 +176,7 @@ export function AdminNewApplicationsTab({
       })}
 
       {displayApplications.length === 0 && (
-        <div className="text-center py-12 text-muted-foreground">
+        <div className="text-center py-12 text-muted-foreground px-4 md:px-0">
           No {showDeleted ? 'deleted' : 'new'} applications
         </div>
       )}
@@ -215,7 +215,7 @@ const ApplicationCardWithHistory = ({
 
   return (
     <div className="space-y-0">
-      <Card className={`overflow-hidden relative rounded-lg h-[149px] mx-0 md:mx-0 ${participant.admin_status === 'rejected' ? 'bg-red-50 border-red-200' : ''} ${participant.deleted_at ? 'opacity-60' : ''}`}>
+      <Card className={`overflow-hidden relative rounded-none md:rounded-lg h-[149px] ${participant.admin_status === 'rejected' ? 'bg-red-50 border-red-200' : ''} ${participant.deleted_at ? 'opacity-60' : ''}`}>
         <CardContent className="p-0">
           {/* Date/Time badge - left top corner */}
           {submittedDate && (
@@ -452,6 +452,22 @@ const ApplicationCardWithHistory = ({
                     <SelectItem value="past">Past</SelectItem>
                   </SelectContent>
                 </Select>
+                {participant.status_history && (() => {
+                  const history = participant.status_history as any;
+                  const latestStatus = Object.keys(history)
+                    .filter(k => k !== 'changed_at' && k !== 'changed_by' && k !== 'change_reason')
+                    .sort((a, b) => {
+                      const dateA = history[a]?.changed_at || history[a]?.timestamp || '';
+                      const dateB = history[b]?.changed_at || history[b]?.timestamp || '';
+                      return dateB.localeCompare(dateA);
+                    })[0];
+                  const changedBy = history[latestStatus]?.changed_by;
+                  return changedBy ? (
+                    <span className="text-[10px] text-muted-foreground ml-1">
+                      {changedBy.substring(0, 4)}
+                    </span>
+                  ) : null;
+                })()}
               </div>
             </div>
           </div>
@@ -593,6 +609,22 @@ const ApplicationCardWithHistory = ({
                       <SelectItem value="past">Past</SelectItem>
                     </SelectContent>
                   </Select>
+                  {participant.status_history && (() => {
+                    const history = participant.status_history as any;
+                    const latestStatus = Object.keys(history)
+                      .filter(k => k !== 'changed_at' && k !== 'changed_by' && k !== 'change_reason')
+                      .sort((a, b) => {
+                        const dateA = history[a]?.changed_at || history[a]?.timestamp || '';
+                        const dateB = history[b]?.changed_at || history[b]?.timestamp || '';
+                        return dateB.localeCompare(dateA);
+                      })[0];
+                    const changedBy = history[latestStatus]?.changed_by;
+                    return changedBy ? (
+                      <span className="text-[10px] text-muted-foreground ml-1">
+                        {changedBy.substring(0, 4)}
+                      </span>
+                    ) : null;
+                  })()}
                   
                 </div>
               </div>
@@ -602,39 +634,56 @@ const ApplicationCardWithHistory = ({
       </Card>
       
       {/* Rejection reasons banner - displayed below card with no gap */}
-      {participant.admin_status === 'rejected' && (
-        <div className="bg-red-200 border-x border-b border-red-300 rounded-b-lg p-3 text-xs">
-          {(() => {
-            const hasReasons = (participant as any).rejection_reason_types && (participant as any).rejection_reason_types.length > 0;
-            const hasNote = (participant as any).rejection_reason && (participant as any).rejection_reason.trim();
+      {participant.admin_status === 'rejected' && (() => {
+        const [isExpanded, setIsExpanded] = useState(false);
+        const hasReasons = (participant as any).rejection_reason_types && (participant as any).rejection_reason_types.length > 0;
+        const hasNote = (participant as any).rejection_reason && (participant as any).rejection_reason.trim();
+        
+        if (!hasReasons && !hasNote) {
+          return (
+            <div className="bg-red-200 border-x border-b border-red-300 rounded-none md:rounded-b-lg p-3 text-xs">
+              <div className="text-red-800 italic">
+                No rejection reason provided. Please update the rejection reason.
+              </div>
+            </div>
+          );
+        }
+        
+        const reasons = hasReasons ? ((participant as any).rejection_reason_types as string[]) : [];
+        const firstReason = reasons.length > 0 ? REJECTION_REASONS[reasons[0] as keyof typeof REJECTION_REASONS] || reasons[0] : '';
+        const hasMore = reasons.length > 1 || hasNote;
+        
+        return (
+          <div className="bg-red-200 border-x border-b border-red-300 rounded-none md:rounded-b-lg p-3 text-xs">
+            <div 
+              className="flex items-center justify-between cursor-pointer"
+              onClick={() => setIsExpanded(!isExpanded)}
+            >
+              <div className="text-red-700">
+                • {firstReason}
+              </div>
+              {hasMore && (
+                <ChevronDown className={`h-3 w-3 text-red-700 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+              )}
+            </div>
             
-            if (!hasReasons && !hasNote) {
-              return (
-                <div className="text-red-800 italic">
-                  No rejection reason provided. Please update the rejection reason.
-                </div>
-              );
-            }
-            
-            return (
-              <>
-                {hasReasons && (
-                  <div className="space-y-1 text-red-700">
-                    {((participant as any).rejection_reason_types as string[]).map((reasonType: string, idx: number) => (
-                      <div key={idx}>• {REJECTION_REASONS[reasonType as keyof typeof REJECTION_REASONS] || reasonType}</div>
-                    ))}
+            {isExpanded && hasMore && (
+              <div className="mt-2 pt-2 border-t border-red-300">
+                {reasons.slice(1).map((reasonType: string, idx: number) => (
+                  <div key={idx} className="text-red-700 mt-1">
+                    • {REJECTION_REASONS[reasonType as keyof typeof REJECTION_REASONS] || reasonType}
                   </div>
-                )}
+                ))}
                 {hasNote && (
-                  <div className={`text-red-700 ${hasReasons ? 'mt-2 pt-2 border-t border-red-300' : ''}`}>
-                    {(participant as any).rejection_reason}
+                  <div className={`text-red-700 ${reasons.length > 1 ? 'mt-2 pt-2 border-t border-red-300' : ''}`}>
+                    • {(participant as any).rejection_reason}
                   </div>
                 )}
-              </>
-            );
-          })()}
-        </div>
-      )}
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* History versions - shown when expanded */}
       {isHistoryExpanded && history.length > 0 && (
