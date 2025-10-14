@@ -88,6 +88,26 @@ export function AdminNextWeekTab({
     loadVotes();
   }, []);
 
+  const [weeklyVotes, setWeeklyVotes] = useState<any[]>([]);
+
+  // Load votes with dates for weekly stats
+  useEffect(() => {
+    const loadWeeklyVotes = async () => {
+      const { data, error } = await supabase
+        .from('next_week_votes')
+        .select('vote_type, created_at');
+
+      if (error || !data) {
+        console.error('Error loading weekly votes:', error);
+        return;
+      }
+
+      setWeeklyVotes(data);
+    };
+
+    loadWeeklyVotes();
+  }, []);
+
   // Calculate weekly statistics
   const weeklyStats = useMemo(() => {
     const stats = {
@@ -105,15 +125,29 @@ export function AdminNextWeekTab({
       now.getUTCDate() - daysFromMonday,
       0, 0, 0, 0
     ));
+    const sunday = new Date(monday);
+    sunday.setUTCDate(monday.getUTCDate() + 6);
+    sunday.setUTCHours(23, 59, 59, 999);
 
     // Count votes per day
-    Object.entries(votesData).forEach(([_, candidate]) => {
-      // This is simplified - you'd need vote dates from the original data
-      // For now just show totals
+    weeklyVotes.forEach(vote => {
+      const voteDate = new Date(vote.created_at);
+      
+      // Check if vote is in current week
+      if (voteDate >= monday && voteDate <= sunday) {
+        const dayIndex = voteDate.getUTCDay();
+        const dayKey = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][dayIndex];
+        
+        if (vote.vote_type === 'like') {
+          stats.like[dayKey as keyof typeof stats.like]++;
+        } else if (vote.vote_type === 'dislike') {
+          stats.dislike[dayKey as keyof typeof stats.dislike]++;
+        }
+      }
     });
 
     return stats;
-  }, [votesData]);
+  }, [weeklyVotes]);
 
   // Week dates for table headers
   const weekDates = useMemo(() => {
