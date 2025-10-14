@@ -707,13 +707,13 @@ const ApplicationCardWithHistory = ({
                     </span>
                   </div>
                   
-                  <div className="text-xs text-muted-foreground mb-1">
+                  <div className="text-xs text-muted-foreground">
                     {appData.city}, {appData.country}
                   </div>
 
                   {/* Email with copy icon */}
                   {appData.email && (
-                    <div className="flex items-center gap-1 mb-1">
+                    <div className="flex items-center gap-1">
                       <span className="text-xs text-muted-foreground truncate" title={appData.email}>
                         {appData.email.substring(0, 10)}...
                       </span>
@@ -729,7 +729,7 @@ const ApplicationCardWithHistory = ({
 
                   {/* Facebook link */}
                   {(appData.facebook_url || appData.cached_facebook_url) && (
-                    <div className="mb-1">
+                    <div>
                       <a 
                         href={appData.facebook_url || appData.cached_facebook_url} 
                         target="_blank" 
@@ -743,7 +743,7 @@ const ApplicationCardWithHistory = ({
 
                   {/* Phone */}
                   {(appData.phone?.number || appData.cached_phone?.number) && (
-                    <div className="text-xs text-muted-foreground mb-1">
+                    <div className="text-xs text-muted-foreground">
                       {appData.phone?.number ? (
                         <>
                           {appData.phone.country_code && `+${Country.getCountryByCode(appData.phone.country_code)?.phonecode || ''} `}
@@ -757,20 +757,6 @@ const ApplicationCardWithHistory = ({
                       )}
                     </div>
                   )}
-                  
-                  {/* Expandable application data */}
-                  <div 
-                    className="text-[10px] text-muted-foreground cursor-pointer hover:text-foreground transition-colors flex items-center gap-1"
-                    onClick={() => setExpandedId(expandedId === participant.id ? null : participant.id)}
-                    title="Click to view full application data"
-                  >
-                    <span>More info</span>
-                    {expandedId === participant.id ? (
-                      <ChevronUp className="h-2.5 w-2.5" />
-                    ) : (
-                      <ChevronDown className="h-2.5 w-2.5" />
-                    )}
-                  </div>
                   
                   {expandedId === participant.id && (
                     <div className="text-xs text-muted-foreground mt-1 max-h-32 md:max-h-40 overflow-y-auto overflow-x-hidden space-y-1 pr-1">
