@@ -2237,24 +2237,22 @@ const AdminContent = () => {
     setContestApplications(processedData);
   };
 
-  // Load all applications for the selected date when 'all' filter is active
+  // Load ALL applications for statistics table (always, not just when filter is 'all')
   useEffect(() => {
-    if (selectedNewAppDay?.filter === 'all') {
-      const loadAllApplicationsForDate = async () => {
-        const { data } = await supabase
-          .from('weekly_contest_participants')
-          .select('*')
-          .is('deleted_at', null)
-          .order('submitted_at', { ascending: false });
-        
-        if (data) {
-          setAllApplicationsByDate(data);
-        }
-      };
+    const loadAllApplicationsForStats = async () => {
+      const { data } = await supabase
+        .from('weekly_contest_participants')
+        .select('*')
+        .is('deleted_at', null)
+        .order('submitted_at', { ascending: false });
       
-      loadAllApplicationsForDate();
-    }
-  }, [selectedNewAppDay]);
+      if (data) {
+        setAllApplicationsByDate(data);
+      }
+    };
+    
+    loadAllApplicationsForStats();
+  }, []); // Load once on mount
 
   const fetchDeletedApplications = async () => {
     const { data, error } = await supabase
