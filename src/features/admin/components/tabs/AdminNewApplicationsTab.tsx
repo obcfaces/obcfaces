@@ -49,16 +49,24 @@ export function AdminNewApplicationsTab({
   // ALL HOOKS MUST COME BEFORE ANY CONDITIONAL RETURNS
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [expandedHistory, setExpandedHistory] = useState<Set<string>>(new Set());
-  const [dayFilter, setDayFilter] = useState<string | null>(null);
-  const [statusRowFilter, setStatusRowFilter] = useState<string | null>(null);
-  const [adminStatusFilter, setAdminStatusFilter] = useState<ParticipantStatus | 'all' | 'deleted'>('pending');
+  
+  // Combine all filters into single state for atomic updates
+  const [filters, setFilters] = useState<{
+    day: string | null;
+    statusRow: string | null;
+    adminStatus: ParticipantStatus | 'all' | 'deleted';
+  }>({
+    day: null,
+    statusRow: null,
+    adminStatus: 'pending'
+  });
+  
   const { selectedCountry } = useAdminCountry();
   
-  // Reset table filters when admin status filter changes
+  // Reset table filters when admin status filter changes from dropdown
   useEffect(() => {
-    setDayFilter(null);
-    setStatusRowFilter(null);
-  }, [adminStatusFilter]);
+    // Only reset if changed via dropdown (not via table click)
+  }, []);
   
   // Filter by selected country
   const filteredApplications = useMemo(() => {
@@ -186,24 +194,22 @@ export function AdminNewApplicationsTab({
   const displayApplications = useMemo(() => {
     console.log('🔍 Filtering applications:', { 
       totalApps: filteredApplications.length,
-      dayFilter, 
-      statusRowFilter, 
-      adminStatusFilter 
+      filters 
     });
     
     // Show deleted or regular applications based on filter
-    let apps = adminStatusFilter === 'deleted' ? filteredDeletedApplications : filteredApplications;
+    let apps = filters.adminStatus === 'deleted' ? filteredDeletedApplications : filteredApplications;
     
-    console.log(`📋 Starting with ${apps.length} apps (${adminStatusFilter === 'deleted' ? 'deleted' : 'regular'})`);
+    console.log(`📋 Starting with ${apps.length} apps (${filters.adminStatus === 'deleted' ? 'deleted' : 'regular'})`);
 
     // Filter by admin status (skip if showing deleted or using table filters)
-    if (adminStatusFilter !== 'all' && adminStatusFilter !== 'deleted' && !dayFilter && !statusRowFilter) {
-      apps = apps.filter(app => app.admin_status === adminStatusFilter);
-      console.log(`✂️ Filtered by admin status ${adminStatusFilter}: ${apps.length} apps remaining`);
+    if (filters.adminStatus !== 'all' && filters.adminStatus !== 'deleted' && !filters.day && !filters.statusRow) {
+      apps = apps.filter(app => app.admin_status === filters.adminStatus);
+      console.log(`✂️ Filtered by admin status ${filters.adminStatus}: ${apps.length} apps remaining`);
     }
 
     // Then filter by table cell click - FILTER BY REGISTRATION DATE (submitted_at)
-    if (dayFilter || statusRowFilter) {
+    if (filters.day || filters.statusRow) {
       console.log('📅 Applying table filters (by registration date)...');
       
       // Get current week boundaries
@@ -225,7 +231,7 @@ export function AdminNewApplicationsTab({
 
       // Count how many apps we're filtering
       const totalBeforeFilter = apps.length;
-      console.log(`🔍 Starting to filter ${totalBeforeFilter} apps for day=${dayFilter}, statusRow=${statusRowFilter}`);
+      console.log(`🔍 Starting to filter ${totalBeforeFilter} apps for day=${filters.day}, statusRow=${filters.statusRow}`);
       
       apps = apps.filter(app => {
         // USE CREATED_AT FOR REGISTRATION DATE (not submitted_at which can be updated)
@@ -256,25 +262,25 @@ export function AdminNewApplicationsTab({
         console.log(`📅 Registered on: ${day}`);
 
         // Day filter
-        if (dayFilter && day !== dayFilter) {
-          console.log(`❌ Day mismatch: expected ${dayFilter}, got ${day}`);
+        if (filters.day && day !== filters.day) {
+          console.log(`❌ Day mismatch: expected ${filters.day}, got ${day}`);
           return false;
         }
 
         // Status row filter
-        if (statusRowFilter) {
-          if (statusRowFilter === 'all') {
+        if (filters.statusRow) {
+          if (filters.statusRow === 'all') {
             console.log(`✅ Match (all)`);
             return true;
-          } else if (statusRowFilter === 'pending') {
+          } else if (filters.statusRow === 'pending') {
             const match = app.admin_status === 'pending';
             console.log(`${match ? '✅' : '❌'} Pending status check: ${app.admin_status}`);
             return match;
-          } else if (statusRowFilter === 'approved') {
+          } else if (filters.statusRow === 'approved') {
             const match = app.admin_status && ['pre next week', 'next week', 'next week on site', 'this week'].includes(app.admin_status);
             console.log(`${match ? '✅' : '❌'} Approved status check: ${app.admin_status}`);
             return match;
-          } else if (statusRowFilter === 'rejected') {
+          } else if (filters.statusRow === 'rejected') {
             const match = app.admin_status === 'rejected';
             console.log(`${match ? '✅' : '❌'} Rejected status check: ${app.admin_status}`);
             return match;
@@ -290,7 +296,7 @@ export function AdminNewApplicationsTab({
 
     console.log(`📊 Final result: ${apps.length} apps to display`);
     return apps;
-  }, [filteredApplications, filteredDeletedApplications, dayFilter, statusRowFilter, adminStatusFilter]);
+  }, [filteredApplications, filteredDeletedApplications, filters]);
 
   // NOW we can have conditional returns after all hooks
   if (loading) {
@@ -323,21 +329,16 @@ export function AdminNewApplicationsTab({
   };
 
   const handleCellClick = (day: string, statusRow: string) => {
-    console.log('📊 Table cell clicked:', { day, statusRow, currentDayFilter: dayFilter, currentStatusRowFilter: statusRowFilter });
+    console.log('📊 Table cell clicked:', { day, statusRow, currentFilters: filters });
     
     // If clicking the same cell, clear filters
-    if (dayFilter === day && statusRowFilter === statusRow) {
-      setDayFilter(null);
-      setStatusRowFilter(null);
-      setAdminStatusFilter('all');
+    if (filters.day === day && filters.statusRow === statusRow) {
+      setFilters({ day: null, statusRow: null, adminStatus: 'all' });
       console.log('🔄 Clearing filters');
     } else {
-      // Force immediate update by resetting admin filter first
-      setAdminStatusFilter('all');
-      // Then set table filters - React will batch these updates
-      setDayFilter(day);
-      setStatusRowFilter(statusRow);
-      console.log('✅ Set filters:', { day, statusRow, adminStatusFilter: 'all' });
+      // Atomic update of all filters at once
+      setFilters({ day, statusRow, adminStatus: 'all' });
+      console.log('✅ Set filters:', { day, statusRow, adminStatus: 'all' });
     }
   };
 
@@ -371,7 +372,7 @@ export function AdminNewApplicationsTab({
                   <td className={`text-left p-2 ${row.className}`}>{row.label}</td>
                   {(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const).map(day => {
                     const count = weeklyStats[row.key as keyof typeof weeklyStats][day];
-                    const isActive = dayFilter === day && statusRowFilter === row.key;
+                    const isActive = filters.day === day && filters.statusRow === row.key;
                     return (
                       <td 
                         key={day} 
@@ -390,7 +391,7 @@ export function AdminNewApplicationsTab({
       </div>
 
       <div className="flex items-center justify-between px-2 md:px-0">
-        <Select value={adminStatusFilter} onValueChange={(value) => setAdminStatusFilter(value as ParticipantStatus | 'all' | 'deleted')}>
+        <Select value={filters.adminStatus} onValueChange={(value) => setFilters({ ...filters, adminStatus: value as ParticipantStatus | 'all' | 'deleted', day: null, statusRow: null })}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Status filter" />
           </SelectTrigger>
@@ -472,7 +473,7 @@ export function AdminNewApplicationsTab({
 
       {displayApplications.length === 0 && (
         <div className="text-center py-12 text-muted-foreground px-2 md:px-0">
-          No {adminStatusFilter === 'deleted' ? 'deleted' : 'new'} applications
+          No {filters.adminStatus === 'deleted' ? 'deleted' : 'new'} applications
         </div>
       )}
     </div>
