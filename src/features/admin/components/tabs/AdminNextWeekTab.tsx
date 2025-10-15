@@ -152,25 +152,30 @@ export function AdminNextWeekTab({
         const voteDate = new Date(vote.created_at);
         const name = vote.candidate_name.trim().replace(/\s+/g, ' ');
         
-        // Debug ALL votes for Mycel first
+        // Check if vote is in range
+        const inRange = voteDate >= weekMonday && voteDate <= weekSunday;
+        
+        // Debug for Mycel Jera
         if (name === 'Mycel Jera') {
-          console.log('🔍 Processing Mycel vote:', {
+          console.log('🔍 Mycel vote:', {
             created_at: vote.created_at,
-            voteDate: voteDate.toISOString(),
-            weekMonday: weekMonday.toISOString(),
-            weekSunday: weekSunday.toISOString(),
-            inRange: voteDate >= weekMonday && voteDate <= weekSunday
+            voteDate_iso: voteDate.toISOString(),
+            voteDate_utc: voteDate.toUTCString(),
+            vote_type: vote.vote_type,
+            inRange,
+            weekMonday_iso: weekMonday.toISOString(),
+            weekSunday_iso: weekSunday.toISOString()
           });
         }
         
-        if (voteDate >= weekMonday && voteDate <= weekSunday) {
+        if (inRange) {
           // getUTCDay returns: 0=Sunday, 1=Monday, 2=Tuesday, 3=Wednesday, 4=Thursday, 5=Friday, 6=Saturday
           const dayIndex = voteDate.getUTCDay();
           const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
           const dayKey = dayKeys[dayIndex] as 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
 
           if (name === 'Mycel Jera') {
-            console.log('✅ Mycel vote IN RANGE:', {
+            console.log('✅ Mycel vote COUNTED:', {
               dayIndex,
               dayKey,
               vote_type: vote.vote_type
