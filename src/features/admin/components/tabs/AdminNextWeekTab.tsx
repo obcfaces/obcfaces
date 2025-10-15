@@ -43,68 +43,33 @@ export function AdminNextWeekTab({
     });
   }, [participants, selectedCountry]);
 
-  // Load votes data from next_week_votes for cards display
+  // Load votes data using RPC function
   useEffect(() => {
     const loadVotes = async () => {
-      // Get all participants with 'next week' status
-      const { data: participants, error: participantsError } = await supabase
-        .from('weekly_contest_participants')
-        .select('id, user_id, application_data')
-        .eq('admin_status', 'next week')
-        .is('deleted_at', null);
+      // Get vote statistics using RPC
+      const { data: voteStats, error: voteStatsError } = await supabase
+        .rpc('get_next_week_votes_summary');
 
-      if (participantsError || !participants) {
-        console.error('❌ Error loading next week participants:', participantsError);
+      if (voteStatsError) {
+        console.error('❌ Error loading vote stats:', voteStatsError);
         return;
       }
 
-      const participantIds = participants.map(p => p.id);
-      console.log('📊 Next week participants for cards:', participants.length);
+      console.log('📊 Vote stats from RPC:', voteStats?.length, 'candidates');
 
-      if (participantIds.length === 0) {
-        setVotesData({});
-        return;
-      }
-
-      // Create participant map for quick lookup
-      const participantMap = new Map(
-        participants.map(p => {
-          const appData = (p.application_data || {}) as any;
-          const name = `${appData.first_name || ''} ${appData.last_name || ''}`.trim().replace(/\s+/g, ' ');
-          return [p.id, name];
-        })
-      );
-
-      // Get ALL votes from next_week_votes (both likes and dislikes)
-      const { data: votesData, error: votesError } = await supabase
-        .from('next_week_votes')
-        .select('candidate_name, vote_type');
-
-      if (votesError) {
-        console.error('❌ Error loading votes:', votesError);
-        return;
-      }
-
-      console.log('📊 All votes data:', votesData?.length, 'records');
-
-      // Calculate stats
+      // Convert to stats object
       const stats: Record<string, { likes: number; dislikes: number }> = {};
-
-      // Count both likes and dislikes
-      votesData?.forEach(vote => {
-        const name = vote.candidate_name.trim().replace(/\s+/g, ' ');
-        if (!stats[name]) {
-          stats[name] = { likes: 0, dislikes: 0 };
-        }
-        if (vote.vote_type === 'like') {
-          stats[name].likes++;
-        } else if (vote.vote_type === 'dislike') {
-          stats[name].dislikes++;
-        }
+      
+      voteStats?.forEach(stat => {
+        const name = stat.candidate_name.trim().replace(/\s+/g, ' ');
+        stats[name] = {
+          likes: Number(stat.likes_count) || 0,
+          dislikes: Number(stat.dislikes_count) || 0
+        };
       });
 
       console.log('📊 FINAL STATS:', stats);
-      console.log('📊 Sample names from votesData:', votesData?.slice(0, 5).map(v => `"${v.candidate_name}"`));
+      console.log('📊 Mycel Jera stats:', stats['Mycel Jera']);
       setVotesData(stats);
     };
 
