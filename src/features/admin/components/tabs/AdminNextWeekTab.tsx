@@ -82,132 +82,114 @@ export function AdminNextWeekTab({
 
   // Load weekly votes breakdown by day
   useEffect(() => {
-    console.log('🔄 Loading weekly stats useEffect triggered');
     const loadWeeklyStats = async () => {
       try {
-        console.log('⏳ Starting loadWeeklyStats function');
+        // Get current week boundaries (Monday to Sunday) in UTC
+        const now = new Date();
+        const dayOfWeek = now.getUTCDay(); // 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
+        const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
         
-        // Get ALL votes from next_week_votes with dates - SIMPLE DIRECT QUERY
-        const { data: allVotes, error: votesError } = await supabase
-          .from('next_week_votes')
-          .select('*');
+        const weekMonday = new Date(Date.UTC(
+          now.getUTCFullYear(),
+          now.getUTCMonth(),
+          now.getUTCDate() - daysFromMonday,
+          0, 0, 0, 0
+        ));
+        const weekSunday = new Date(weekMonday);
+        weekSunday.setUTCDate(weekMonday.getUTCDate() + 6);
+        weekSunday.setUTCHours(23, 59, 59, 999);
 
-        console.log('📊 All votes loaded:', { 
-          count: allVotes?.length,
-          hasError: !!votesError,
-          error: votesError
+        console.log('📅 Week boundaries:', {
+          monday: weekMonday.toISOString(),
+          sunday: weekSunday.toISOString()
         });
 
-        if (votesError) {
-          console.error('❌ Error loading votes:', votesError);
+        // Get ALL votes
+        const { data: allVotes, error } = await supabase
+          .from('next_week_votes')
+          .select('candidate_name, vote_type, created_at');
+
+        if (error) {
+          console.error('Error loading votes:', error);
           return;
         }
 
         if (!allVotes || allVotes.length === 0) {
-          console.log('⚠️ No votes found');
           setParticipantWeeklyStats({});
           return;
         }
 
-      const stats: Record<string, {
-        mon: { likes: number; dislikes: number };
-        tue: { likes: number; dislikes: number };
-        wed: { likes: number; dislikes: number };
-        thu: { likes: number; dislikes: number };
-        fri: { likes: number; dislikes: number };
-        sat: { likes: number; dislikes: number };
-        sun: { likes: number; dislikes: number };
-      }> = {};
+        console.log(`📊 Total votes in database: ${allVotes.length}`);
 
-      // Get CURRENT week boundaries (Monday to Sunday)
-      const now = new Date();
-      const dayOfWeek = now.getUTCDay();
-      const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-      
-      // Calculate this week's Monday
-      const weekMonday = new Date(Date.UTC(
-        now.getUTCFullYear(),
-        now.getUTCMonth(),
-        now.getUTCDate() - daysFromMonday,
-        0, 0, 0, 0
-      ));
-      const weekSunday = new Date(weekMonday);
-      weekSunday.setUTCDate(weekMonday.getUTCDate() + 6);
-      weekSunday.setUTCHours(23, 59, 59, 999);
+        // Initialize stats
+        const stats: Record<string, {
+          mon: { likes: number; dislikes: number };
+          tue: { likes: number; dislikes: number };
+          wed: { likes: number; dislikes: number };
+          thu: { likes: number; dislikes: number };
+          fri: { likes: number; dislikes: number };
+          sat: { likes: number; dislikes: number };
+          sun: { likes: number; dislikes: number };
+        }> = {};
 
-      console.log('📅 Week boundaries for Next tab:', {
-        now: now.toISOString(),
-        weekMonday: weekMonday.toISOString(),
-        weekSunday: weekSunday.toISOString()
-      });
-
-        // Count votes by day and type - process ALL votes
+        // Process each vote
         allVotes.forEach(vote => {
-        const voteDate = new Date(vote.created_at);
-        const name = vote.candidate_name.trim().replace(/\s+/g, ' ');
-        
-        // Check if vote is in range
-        const inRange = voteDate >= weekMonday && voteDate <= weekSunday;
-        
-        // Debug for Mycel
-        if (name === 'Mycel Jera') {
-          console.log('🔍 Mycel vote check:', {
-            created_at: vote.created_at,
-            voteDate_utc: voteDate.toUTCString(),
-            vote_type: vote.vote_type,
-            dayOfWeek: voteDate.getUTCDay(),
-            inRange,
-            weekMonday_utc: weekMonday.toUTCString(),
-            weekSunday_utc: weekSunday.toUTCString()
-          });
-        }
-        
-        if (inRange) {
-          // Initialize stats object if not exists
-          if (!stats[name]) {
-            stats[name] = {
-              mon: { likes: 0, dislikes: 0 },
-              tue: { likes: 0, dislikes: 0 },
-              wed: { likes: 0, dislikes: 0 },
-              thu: { likes: 0, dislikes: 0 },
-              fri: { likes: 0, dislikes: 0 },
-              sat: { likes: 0, dislikes: 0 },
-              sun: { likes: 0, dislikes: 0 },
+          const voteDate = new Date(vote.created_at);
+          const name = vote.candidate_name.trim().replace(/\s+/g, ' ');
+          
+          // Only count votes from this week
+          if (voteDate >= weekMonday && voteDate <= weekSunday) {
+            // Initialize candidate if not exists
+            if (!stats[name]) {
+              stats[name] = {
+                mon: { likes: 0, dislikes: 0 },
+                tue: { likes: 0, dislikes: 0 },
+                wed: { likes: 0, dislikes: 0 },
+                thu: { likes: 0, dislikes: 0 },
+                fri: { likes: 0, dislikes: 0 },
+                sat: { likes: 0, dislikes: 0 },
+                sun: { likes: 0, dislikes: 0 },
+              };
+            }
+
+            // Get day of week (0=Sunday, 1=Monday, ..., 6=Saturday)
+            const dayOfWeek = voteDate.getUTCDay();
+            const dayMap: Record<number, 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat'> = {
+              0: 'sun',
+              1: 'mon',
+              2: 'tue',
+              3: 'wed',
+              4: 'thu',
+              5: 'fri',
+              6: 'sat'
             };
-          }
+            const dayKey = dayMap[dayOfWeek];
 
-          // getUTCDay returns: 0=Sunday, 1=Monday, 2=Tuesday, 3=Wednesday, 4=Thursday, 5=Friday, 6=Saturday
-          const dayIndex = voteDate.getUTCDay();
-          const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-          const dayKey = dayKeys[dayIndex] as 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
-          
-          if (name === 'Mycel Jera') {
-            console.log('✅ Mycel vote ADDED to stats:', {
-              dayKey,
-              vote_type: vote.vote_type,
-              currentCount: vote.vote_type === 'like' ? stats[name][dayKey].likes : stats[name][dayKey].dislikes
-            });
-          }
-          
-          if (vote.vote_type === 'like') {
-            stats[name][dayKey].likes++;
-          } else if (vote.vote_type === 'dislike') {
-            stats[name][dayKey].dislikes++;
-          }
-        }
-      });
+            // Count the vote
+            if (vote.vote_type === 'like') {
+              stats[name][dayKey].likes++;
+            } else if (vote.vote_type === 'dislike') {
+              stats[name][dayKey].dislikes++;
+            }
 
-      console.log('📅 Weekly stats calculated:', stats);
-      console.log('📅 All candidate names in stats:', Object.keys(stats));
-      console.log('📅 Mycel Jera weekly:', stats['Mycel Jera']);
-      
-      // Debug: check if any name contains "Mycel"
-      const mycelNames = Object.keys(stats).filter(name => name.toLowerCase().includes('mycel'));
-      console.log('📅 Names containing "mycel":', mycelNames);
-      
-      setParticipantWeeklyStats(stats);
+            // Debug for Mycel Jera
+            if (name === 'Mycel Jera') {
+              console.log('✅ Mycel vote counted:', {
+                date: vote.created_at,
+                dayKey,
+                type: vote.vote_type,
+                newCount: vote.vote_type === 'like' ? stats[name][dayKey].likes : stats[name][dayKey].dislikes
+              });
+            }
+          }
+        });
+
+        console.log('📊 Weekly stats:', stats);
+        console.log('📊 Mycel Jera stats:', stats['Mycel Jera']);
+        
+        setParticipantWeeklyStats(stats);
       } catch (error) {
-        console.error('💥 Error in loadWeeklyStats:', error);
+        console.error('Error in loadWeeklyStats:', error);
       }
     };
 
