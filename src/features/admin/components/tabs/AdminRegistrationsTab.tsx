@@ -517,7 +517,7 @@ export function AdminRegistrationsTab({
           
           return (
             <div key={profile.id} className="space-y-2">
-              <Card className="rounded-none md:rounded-lg p-4 relative hover:shadow-md transition-shadow">
+              <Card className="p-4 relative hover:shadow-md transition-shadow md:rounded-lg">
                 {/* Date/time badge in top-left */}
                 <Badge 
                   variant="outline"
@@ -1309,15 +1309,9 @@ export function AdminRegistrationsTab({
                                       {(() => {
                                         if (!ipActivityData) return '0';
                                         
-                                        const votes = ipActivityData.ratingsCount || 0;
-                                        const likes = ipActivityData.likes || [];
-                                        
-                                        const nextLikes = likes.filter((like: any) => 
-                                          like.admin_status === 'next week on site'
-                                        ).length;
-                                        const thisWeekLikes = likes.filter((like: any) => 
-                                          like.admin_status === 'this week'
-                                        ).length;
+                            const votes = ipActivityData.ratingsCount || 0;
+                            const nextLikes = ipActivityData.next_week_likes_count || 0;
+                            const thisWeekLikes = ipActivityData.this_week_likes_count || 0;
                                         
                                         const parts = [];
                                         if (votes > 0) parts.push(<span key="votes" className="text-red-500">{votes}</span>);
