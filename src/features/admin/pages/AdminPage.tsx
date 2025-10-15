@@ -2744,7 +2744,7 @@ const AdminContent = () => {
     try {
       const { data, error } = await supabase
         .from('next_week_votes')
-        .select('candidate_name, vote_type');
+        .select('candidate_name, vote_type, created_at');
 
       if (error) {
         console.error('Error fetching next week votes stats:', error);
