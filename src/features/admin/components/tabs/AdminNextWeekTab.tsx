@@ -90,10 +90,18 @@ export function AdminNextWeekTab({
   useEffect(() => {
     console.log('🔄 Loading weekly stats useEffect triggered');
     const loadWeeklyStats = async () => {
+      console.log('⏳ Starting loadWeeklyStats function');
+      
       // Get ALL votes from next_week_votes with dates
       const { data: votesData, error: votesError } = await supabase
         .from('next_week_votes')
         .select('candidate_name, vote_type, created_at');
+
+      console.log('📊 Votes query result:', { 
+        dataLength: votesData?.length, 
+        hasError: !!votesError,
+        error: votesError
+      });
 
       if (votesError) {
         console.error('❌ Error loading weekly votes:', votesError);
