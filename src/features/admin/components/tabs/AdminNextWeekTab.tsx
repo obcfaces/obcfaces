@@ -217,42 +217,46 @@ export function AdminNextWeekTab({
     return dates;
   }, []);
 
-  // Get participants with votes only - use votesData from cards
-  // Only show participants that are in filteredParticipants (status "next week")
+  // Get participants with votes - show ALL next week participants
   const participantsWithVotes = useMemo(() => {
-    // Create a set of names from filtered participants
-    const filteredNames = new Set(
+    // Create a map of all participants with their basic info
+    const allParticipantsMap = new Map(
       filteredParticipants.map(p => {
         const appData = p.application_data || {};
         const firstName = appData.first_name || '';
         const lastName = appData.last_name || '';
-        return `${firstName} ${lastName}`.trim().replace(/\s+/g, ' ');
+        const name = `${firstName} ${lastName}`.trim().replace(/\s+/g, ' ');
+        return [name, p];
       })
     );
 
-    return Object.entries(votesData)
-      .filter(([name]) => filteredNames.has(name)) // Only participants with "next week" status
-      .map(([name, stats]) => {
-        // Get weekly breakdown from participantWeeklyStats if available
-        const weeklyBreakdown = participantWeeklyStats[name] || {
-          mon: { likes: 0, dislikes: 0 },
-          tue: { likes: 0, dislikes: 0 },
-          wed: { likes: 0, dislikes: 0 },
-          thu: { likes: 0, dislikes: 0 },
-          fri: { likes: 0, dislikes: 0 },
-          sat: { likes: 0, dislikes: 0 },
-          sun: { likes: 0, dislikes: 0 },
-        };
+    // Build results from ALL participants
+    const results = Array.from(allParticipantsMap.entries()).map(([name, participant]) => {
+      // Get vote stats from votesData
+      const voteStats = votesData[name] || { likes: 0, dislikes: 0 };
+      
+      // Get weekly breakdown from participantWeeklyStats
+      const weeklyBreakdown = participantWeeklyStats[name] || {
+        mon: { likes: 0, dislikes: 0 },
+        tue: { likes: 0, dislikes: 0 },
+        wed: { likes: 0, dislikes: 0 },
+        thu: { likes: 0, dislikes: 0 },
+        fri: { likes: 0, dislikes: 0 },
+        sat: { likes: 0, dislikes: 0 },
+        sun: { likes: 0, dislikes: 0 },
+      };
 
-        return {
-          name,
-          stats: weeklyBreakdown,
-          totalLikes: stats.likes,  // Use totals from votesData (same as cards)
-          totalDislikes: stats.dislikes,  // Use totals from votesData (same as cards)
-        };
-      })
-      .sort((a, b) => (b.totalLikes + b.totalDislikes) - (a.totalLikes + a.totalDislikes));
-  }, [votesData, participantWeeklyStats, filteredParticipants]);
+      return {
+        name,
+        stats: weeklyBreakdown,
+        totalLikes: voteStats.likes,
+        totalDislikes: voteStats.dislikes,
+      };
+    });
+
+    // Sort by total votes (likes + dislikes)
+    return results.sort((a, b) => (b.totalLikes + b.totalDislikes) - (a.totalLikes + a.totalDislikes));
+  }, [filteredParticipants, votesData, participantWeeklyStats]);
 
   const totalStats = useMemo(() => {
     const total = { like: 0, dislike: 0 };
