@@ -26,17 +26,39 @@ If you discover a security vulnerability or potential security issue in OBC Face
 
 This project implements:
 
-- ✅ Row-Level Security (RLS) on all Supabase tables
-- ✅ Secure authentication with JWT tokens
-- ✅ HTTPS-only communication
-- ✅ Rate limiting on sensitive endpoints
-- ✅ Input validation and sanitization
+#### Database & Backend
+- ✅ Row-Level Security (RLS) on all Supabase tables with `SECURITY DEFINER` functions
+- ✅ Secure authentication with JWT tokens (OAuth + Email)
+- ✅ Automated weekly transitions via `pg_cron` (no hardcoded secrets)
+- ✅ RPC functions for privileged operations (no direct HTTP calls)
 - ✅ SQL injection protection via parameterized queries
+- ✅ Storage policies for participant photos (public read, authenticated write)
+
+#### Frontend & API
+- ✅ HTTPS-only communication
+- ✅ Rate limiting on sensitive endpoints (vote, login, registration)
+- ✅ Cloudflare Turnstile (CAPTCHA) for bot protection
+- ✅ Input validation and sanitization (client + server)
 - ✅ XSS protection through React's built-in escaping
 - ✅ CORS policies for API access
-- ✅ Environment variable protection (.env not in git)
+
+#### DevOps & CI/CD
+- ✅ Environment variable protection (.env excluded from git)
+- ✅ GitHub secret scanning (Gitleaks + TruffleHog)
 - ✅ Dependency scanning (GitHub Dependabot)
-- ✅ Regular security audits
+- ✅ Required checks: lint, typecheck, test (unit + E2E)
+- ✅ Branch protection on `main` (PR required, CI must pass)
+- ✅ Pre-push hooks (Husky): type-check → lint → build → test
+
+#### Secrets Management
+- ✅ Production keys via Supabase Edge Function secrets (not in code)
+- ✅ Test keys for CI/local development (Turnstile, etc.)
+- ✅ `.env` excluded from repository (only `.env.example` committed)
+
+#### Architecture
+- ✅ Layered data access: UI → hooks → services → data → RPC/views
+- ✅ User roles in separate table (`user_roles`, not on `profiles`)
+- ✅ Admin checks via `has_role()` RLS function (prevents privilege escalation)
 
 ### Supported Versions
 

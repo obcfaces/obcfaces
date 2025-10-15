@@ -295,16 +295,34 @@ supabase db reset     # Reset local database
 
 ---
 
-## 🔧 Environment Variables
+## 🔧 Environment Configuration
 
-Copy `.env.example` to `.env.local` and configure:
+### ⚠️ Security Notice
 
+**NEVER commit `.env` or `.env.local` to the repository.**
+
+- ✅ Only `.env.example` should be in git
+- ✅ Production secrets MUST be set via deployment platform
+- ✅ Local secrets MUST be in `.env.local` (excluded by `.gitignore`)
+
+### Local Development Setup
+
+```bash
+# 1. Copy template
+cp .env.example .env.local
+
+# 2. Configure local secrets
+# Edit .env.local with your development keys
+```
+
+**`.env.local` (example)**:
 ```bash
 # Locale
 DEFAULT_LOCALE=en-ph
 
-# API
-VITE_API_BASE_URL=http://localhost:5173
+# Supabase (from Supabase Dashboard → Project Settings → API)
+VITE_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
+VITE_SUPABASE_ANON_KEY=your_anon_key_here
 
 # Turnstile (use test keys for development)
 VITE_TURNSTILE_SITE_KEY=1x00000000000000000000AA
@@ -314,7 +332,50 @@ TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
 BASE_URL=http://localhost:4173
 ```
 
-**Production**: Use Lovable Cloud Secrets or Supabase Edge Function secrets for sensitive keys.
+### Production Deployment
+
+**Set secrets via your deployment platform:**
+
+#### Lovable Cloud
+1. Open **Project Settings** → **Secrets**
+2. Add secrets (e.g., `VITE_SUPABASE_ANON_KEY`, `VITE_TURNSTILE_SITE_KEY`)
+3. Secrets auto-inject into build
+
+#### Vercel / Netlify
+1. Go to **Settings** → **Environment Variables**
+2. Add production secrets
+3. Redeploy to apply changes
+
+#### Supabase Edge Functions
+```bash
+# Set secrets for Edge Functions
+supabase secrets set TURNSTILE_SECRET_KEY=your_secret_key
+supabase secrets set SERVICE_ROLE_KEY=your_service_role_key
+```
+
+### Required Variables
+
+| Variable | Description | Where to get |
+|----------|-------------|--------------|
+| `VITE_SUPABASE_URL` | Supabase project URL | Supabase → Project Settings → API |
+| `VITE_SUPABASE_ANON_KEY` | Public anon key | Supabase → Project Settings → API |
+| `VITE_TURNSTILE_SITE_KEY` | Cloudflare site key | Cloudflare → Turnstile → Site Keys |
+| `TURNSTILE_SECRET_KEY` | Cloudflare secret | Cloudflare → Turnstile → Site Keys (Edge Function only) |
+
+### Test Keys (Development/CI)
+
+Cloudflare Turnstile provides **always-pass test keys**:
+
+```bash
+# Visible challenge (always passes)
+VITE_TURNSTILE_SITE_KEY=1x00000000000000000000AA
+TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
+```
+
+Use these for:
+- Local development
+- CI/CD pipelines
+- Staging environments
 
 ---
 

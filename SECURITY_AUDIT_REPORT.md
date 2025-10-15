@@ -130,8 +130,48 @@ Created production-safe logging wrapper:
 
 ## 📝 Next Steps
 
-1. Run migration to apply RLS fixes
-2. Replace console.log with logger utility
-3. Enable security features in Supabase dashboard
-4. Schedule Postgres upgrade
-5. Monitor audit logs for suspicious activity
+1. ✅ **RLS fixes applied** via migrations (user_voting_stats, likes, shares)
+2. ✅ **Cron job secured** via `pg_cron` → RPC (no hardcoded tokens)
+3. ✅ **Branch protection enabled** on `main` (PR + CI required)
+4. ✅ **Secret scanning active** (Gitleaks + TruffleHog workflows)
+5. ✅ **CI/CD pipelines** (lint, typecheck, test, E2E)
+6. ⚠️ **Key rotation required** (see below)
+7. 🔄 **Postgres upgrade** (schedule via Supabase dashboard)
+8. 🔄 **Enable leaked password protection** (Supabase Auth settings)
+9. 🔄 **Reduce OTP expiry** to 15 minutes (Supabase Auth settings)
+
+## 🔐 Key Rotation (CRITICAL)
+
+Since JWT tokens were previously committed in migrations, **regenerate these keys immediately**:
+
+### Supabase Dashboard → Project Settings → API
+
+1. Click **"Regenerate"** next to:
+   - `anon` (public) key
+   - `service_role` (admin) key
+
+2. Update keys in deployment platform:
+   - **Lovable Cloud**: Project Settings → Secrets
+   - **Vercel/Netlify**: Environment Variables
+   - **Supabase Functions**: `supabase secrets set SERVICE_ROLE_KEY=...`
+
+3. Update `src/data/supabaseClient.ts` with new `anon` key
+
+4. Verify functionality after rotation:
+   ```sql
+   -- Test authentication
+   SELECT auth.uid();
+   
+   -- Test RLS policies
+   SELECT * FROM profiles LIMIT 1;
+   ```
+
+## 🧪 Verification Checklist
+
+- [ ] `SELECT * FROM cron.job;` → confirm `weekly-contest-transition` exists
+- [ ] `SELECT transition_this_week(true);` → dry-run returns JSON
+- [ ] Branch protection enabled: Settings → Branches → Add rule on `main`
+- [ ] Secret scanning active: Settings → Code security → Enable secret scanning
+- [ ] CI workflows passing: Actions tab shows ✅ for lint, typecheck, test
+- [ ] `.env` excluded from git: `git check-ignore .env` returns `.env`
+- [ ] Production keys rotated and updated in deployment platform
