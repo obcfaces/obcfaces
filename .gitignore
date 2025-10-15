@@ -48,3 +48,30 @@ supabase/.output/**
 .DS_Store
 .vscode/*
 !.vscode/extensions.json
+# env / secrets
+.env
+.env.*.local
+supabase/.env
+supabase/config.json
+*.key
+*.pem
+*.p12
+*.jks
+
+# builds / caches
+node_modules/
+.next/
+out/
+dist/
+coverage/
+*.log
+
+# supabase temp
+supabase/.temp/**
+supabase/.output/**
+
+# OS/IDE
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+
