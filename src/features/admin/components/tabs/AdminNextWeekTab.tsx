@@ -104,6 +104,7 @@ export function AdminNextWeekTab({
       });
 
       console.log('📊 FINAL STATS:', stats);
+      console.log('📊 Sample names from votesData:', votesData?.slice(0, 5).map(v => `"${v.candidate_name}"`));
       setVotesData(stats);
     };
 
@@ -429,7 +430,7 @@ const ParticipantCard = ({
   // Get vote stats for this participant
   const stats = votesData[participantName] || { likes: 0, dislikes: 0 };
   
-  console.log(`🔍 Card for "${participantName}": likes=${stats.likes}, dislikes=${stats.dislikes}`);
+  console.log(`🔍 Card for "${participantName}": likes=${stats.likes}, dislikes=${stats.dislikes}, votesData keys:`, Object.keys(votesData).filter(k => k.includes('Mycel') || k.includes('Jera')));
 
   const handleShowVoters = async (type: 'like' | 'dislike') => {
     setVotersType(type);
