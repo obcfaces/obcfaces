@@ -250,11 +250,22 @@ export function AdminRegistrationsTab({
     });
   }, [profiles, searchQuery, verificationFilter, roleFilter, maybeSuspiciousActive, userRoleMap, userRoles]);
 
-  // Pagination
+  // Pagination - get profile IDs for current page
   const paginatedProfiles = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     return filteredProfiles.slice(startIndex, startIndex + itemsPerPage);
   }, [filteredProfiles, currentPage]);
+
+  // Fetch activity for paginated profiles when page changes
+  React.useEffect(() => {
+    if (fetchUserActivity) {
+      paginatedProfiles.forEach(profile => {
+        if (!userActivityData[profile.id] && !loadingActivity.has(profile.id)) {
+          fetchUserActivity(profile.id);
+        }
+      });
+    }
+  }, [paginatedProfiles, fetchUserActivity, userActivityData, loadingActivity]);
 
   const totalPages = Math.ceil(filteredProfiles.length / itemsPerPage);
 
@@ -506,7 +517,7 @@ export function AdminRegistrationsTab({
           
           return (
             <div key={profile.id} className="space-y-2">
-              <Card className="rounded-none md:rounded-lg p-4 relative hover:shadow-md transition-shadow">
+              <Card className="rounded-none md:rounded-lg p-0 md:p-4 relative hover:shadow-md transition-shadow">
                 {/* Date/time badge in top-left */}
                 <Badge 
                   variant="outline"
