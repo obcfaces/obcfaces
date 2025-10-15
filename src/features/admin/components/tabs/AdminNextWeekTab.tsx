@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,7 +13,10 @@ import { ParticipantStatusHistoryModal } from '../ParticipantStatusHistoryModal'
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { loadDailyByParticipant, loadCardTotals, loadTop3, NextTotalsRow } from '../../utils/nextWeekData';
+import { useWeeklyVotes } from '@/hooks/useWeeklyVotes';
+import { useRealtimeVotes } from '@/hooks/useRealtimeVotes';
+import { getCardTotalsMap } from '@/services/weeklyContest';
+import { loadTop3 } from '../../utils/nextWeekData';
 
 interface AdminNextWeekTabProps {
   participants: WeeklyContestParticipant[];
@@ -23,15 +26,6 @@ interface AdminNextWeekTabProps {
   onEdit: (participant: any) => void;
   loading?: boolean;
 }
-
-type VoteRow = {
-  participant_user_id: string;
-  candidate_name: string;
-  vote_date: string;
-  likes: number;
-  dislikes: number;
-  total_votes: number;
-};
 
 const DAYS: { key: number; label: string }[] = [
   { key: 1, label: 'Mon' },
@@ -43,11 +37,6 @@ const DAYS: { key: number; label: string }[] = [
   { key: 0, label: 'Sun' },
 ];
 
-function isoToDowUtc(iso: string) {
-  const d = new Date(iso + 'T00:00:00.000Z');
-  return d.getUTCDay();
-}
-
 export function AdminNextWeekTab({
   participants,
   onViewPhotos,
@@ -58,12 +47,28 @@ export function AdminNextWeekTab({
 }: AdminNextWeekTabProps) {
   const { selectedCountry } = useAdminCountry();
   const [filterType, setFilterType] = useState<'all' | 'like' | 'dislike'>('all');
-  const [rows, setRows] = useState<VoteRow[]>([]);
-  const [votesLoading, setVotesLoading] = useState(true);
-  const [votesError, setVotesError] = useState<string | null>(null);
-  const [cardTotals, setCardTotals] = useState<Map<string, NextTotalsRow>>(new Map());
-  const [top3Ranks, setTop3Ranks] = useState<Map<string, number>>(new Map());
   const [sortBy, setSortBy] = useState<'likes' | 'dislikes' | 'total'>('total');
+  
+  // Use new hooks
+  const { rows: weeklyTableRows, loading: votesLoading, refresh } = useWeeklyVotes();
+  const [cardTotals, setCardTotals] = React.useState<Map<string, any>>(new Map());
+  const [top3Ranks, setTop3Ranks] = React.useState<Map<string, number>>(new Map());
+  
+  // Realtime updates
+  useRealtimeVotes(refresh);
+
+  // Load card totals and top3
+  React.useEffect(() => {
+    const loadData = async () => {
+      const [totalsMap, ranksMap] = await Promise.all([
+        getCardTotalsMap(),
+        loadTop3(),
+      ]);
+      setCardTotals(totalsMap);
+      setTop3Ranks(ranksMap);
+    };
+    loadData();
+  }, []);
 
   const filteredParticipants = useMemo(() => {
     return participants.filter(p => {
@@ -71,32 +76,6 @@ export function AdminNextWeekTab({
       return country === selectedCountry;
     });
   }, [participants, selectedCountry]);
-
-  const loadAllData = async () => {
-    setVotesLoading(true);
-    setVotesError(null);
-    
-    // Load daily data for table
-    const dailyData = await loadDailyByParticipant();
-    setRows(dailyData);
-    
-    // Load card totals for cards
-    const totalsMap = await loadCardTotals();
-    setCardTotals(totalsMap);
-    
-    // Load top 3 ranks
-    const ranksMap = await loadTop3();
-    setTop3Ranks(ranksMap);
-    
-    setVotesLoading(false);
-  };
-
-  useEffect(() => {
-    loadAllData();
-    // Auto-refresh every 60 seconds
-    const timer = setInterval(loadAllData, 60000);
-    return () => clearInterval(timer);
-  }, []);
 
   const weekDates = useMemo(() => {
     const now = new Date();
@@ -128,12 +107,13 @@ export function AdminNextWeekTab({
       totalDislikes: number;
     }>();
 
-    for (const r of rows) {
-      const dow = isoToDowUtc(r.vote_date);
-      const key = r.participant_user_id || r.candidate_name;
+    const DOW_MAP = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    
+    for (const r of weeklyTableRows) {
+      const key = r.participant_user_id;
       if (!byCandidate.has(key)) {
         byCandidate.set(key, {
-          name: r.candidate_name,
+          name: r.name,
           participant_id: r.participant_user_id,
           days: {},
           total: 0,
@@ -141,17 +121,21 @@ export function AdminNextWeekTab({
           totalDislikes: 0,
         });
       }
+      
       const item = byCandidate.get(key)!;
-      const prev = item.days[dow] ?? { likes: 0, dislikes: 0, total: 0 };
-      const next = {
-        likes: prev.likes + (r.likes || 0),
-        dislikes: prev.dislikes + (r.dislikes || 0),
-        total: prev.total + (r.total_votes || 0),
-      };
-      item.days[dow] = next;
-      item.total += r.total_votes || 0;
-      item.totalLikes += r.likes || 0;
-      item.totalDislikes += r.dislikes || 0;
+      
+      // Convert row data to daily stats
+      DOW_MAP.forEach((day, index) => {
+        const dayData = r[day as keyof typeof r];
+        if (Array.isArray(dayData) && dayData.length === 2) {
+          const [likes, dislikes] = dayData;
+          item.days[index] = { likes, dislikes, total: likes + dislikes };
+        }
+      });
+      
+      item.total = r.totalVotes;
+      item.totalLikes = r.totalLikes;
+      item.totalDislikes = r.totalDislikes;
     }
 
     const rowsArr = Array.from(byCandidate.values());
@@ -164,7 +148,7 @@ export function AdminNextWeekTab({
     });
 
     return rowsArr;
-  }, [rows, sortBy]);
+  }, [weeklyTableRows, sortBy]);
 
   const displayParticipants = useMemo(() => {
     let result = filteredParticipants;
@@ -237,8 +221,6 @@ export function AdminNextWeekTab({
         
         {votesLoading ? (
           <div className="text-center py-8">Loading daily votes…</div>
-        ) : votesError ? (
-          <div className="text-center py-8 text-destructive">Error: {votesError}</div>
         ) : table.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">No votes this week yet.</div>
         ) : (
