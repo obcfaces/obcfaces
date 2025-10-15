@@ -23,6 +23,30 @@ interface AdminNextWeekTabProps {
   loading?: boolean;
 }
 
+type VoteRow = {
+  participant_user_id: string;
+  candidate_name: string;
+  vote_date: string;
+  likes: number;
+  dislikes: number;
+  total_votes: number;
+};
+
+const DAYS: { key: number; label: string }[] = [
+  { key: 1, label: 'Mon' },
+  { key: 2, label: 'Tue' },
+  { key: 3, label: 'Wed' },
+  { key: 4, label: 'Thu' },
+  { key: 5, label: 'Fri' },
+  { key: 6, label: 'Sat' },
+  { key: 0, label: 'Sun' },
+];
+
+function isoToDowUtc(iso: string) {
+  const d = new Date(iso + 'T00:00:00.000Z');
+  return d.getUTCDay();
+}
+
 export function AdminNextWeekTab({
   participants,
   onViewPhotos,
@@ -31,11 +55,11 @@ export function AdminNextWeekTab({
   onEdit,
   loading = false,
 }: AdminNextWeekTabProps) {
-  console.log('🔥🔥🔥 VERSION 2025-10-15 22:18 - AdminNextWeekTab WITH weeklyVotesByDay 🔥🔥🔥');
-  console.log('👥 Participants count:', participants.length);
   const { selectedCountry } = useAdminCountry();
   const [filterType, setFilterType] = useState<'all' | 'like' | 'dislike'>('all');
-  const [filterDay, setFilterDay] = useState<string | null>(null);
+  const [rows, setRows] = useState<VoteRow[]>([]);
+  const [votesLoading, setVotesLoading] = useState(true);
+  const [votesError, setVotesError] = useState<string | null>(null);
   const [votesData, setVotesData] = useState<Record<string, { likes: number; dislikes: number }>>({});
 
   const filteredParticipants = useMemo(() => {
@@ -45,125 +69,38 @@ export function AdminNextWeekTab({
     });
   }, [participants, selectedCountry]);
 
-  // Load votes data using RPC function - ALL votes for cards
   useEffect(() => {
     const loadVotes = async () => {
-      const { data: voteStats, error: voteStatsError } = await supabase
-        .rpc('get_next_week_votes_summary');
-
-      if (voteStatsError) {
-        console.error('❌ Error loading vote stats:', voteStatsError);
-        return;
-      }
-
-      const stats: Record<string, { likes: number; dislikes: number }> = {};
+      setVotesLoading(true);
+      setVotesError(null);
       
-      voteStats?.forEach(stat => {
-        const name = stat.candidate_name.trim().replace(/\s+/g, ' ');
-        stats[name] = {
-          likes: Number(stat.likes_count) || 0,
-          dislikes: Number(stat.dislikes_count) || 0
-        };
-      });
+      const { data, error } = await supabase
+        .from('v_next_week_votes_by_day')
+        .select('*');
 
-      setVotesData(stats);
+      if (error) {
+        setVotesError(error.message);
+        console.error('❌ Error loading v_next_week_votes_by_day:', error);
+      } else {
+        setRows((data ?? []) as VoteRow[]);
+        
+        const stats: Record<string, { likes: number; dislikes: number }> = {};
+        (data ?? []).forEach((r: VoteRow) => {
+          const key = r.candidate_name;
+          if (!stats[key]) {
+            stats[key] = { likes: 0, dislikes: 0 };
+          }
+          stats[key].likes += r.likes || 0;
+          stats[key].dislikes += r.dislikes || 0;
+        });
+        setVotesData(stats);
+      }
+      setVotesLoading(false);
     };
 
     loadVotes();
   }, []);
 
-  const [weeklyVotesByDay, setWeeklyVotesByDay] = useState<Record<string, {
-    mon: { likes: number; dislikes: number };
-    tue: { likes: number; dislikes: number };
-    wed: { likes: number; dislikes: number };
-    thu: { likes: number; dislikes: number };
-    fri: { likes: number; dislikes: number };
-    sat: { likes: number; dislikes: number };
-    sun: { likes: number; dislikes: number };
-  }>>({});
-
-  // Load ALL votes and calculate daily breakdown for current week using RPC
-  useEffect(() => {
-    const loadDailyVotes = async () => {
-      try {
-        console.log('⚡️ Loading daily votes using RPC...');
-        
-        // Use the new RPC function
-        const { data, error } = await supabase.rpc('get_next_week_daily_stats_by_participant');
-
-        if (error) {
-          console.error('❌ Error fetching daily stats:', error);
-          return;
-        }
-
-        if (!data || data.length === 0) {
-          console.log('📊 No daily vote data');
-          setWeeklyVotesByDay({});
-          return;
-        }
-
-        console.log('📊 Received', data.length, 'daily stat records from RPC');
-
-        // Transform RPC data into our stats structure
-        const dailyStats: Record<string, {
-          mon: { likes: number; dislikes: number };
-          tue: { likes: number; dislikes: number };
-          wed: { likes: number; dislikes: number };
-          thu: { likes: number; dislikes: number };
-          fri: { likes: number; dislikes: number };
-          sat: { likes: number; dislikes: number };
-          sun: { likes: number; dislikes: number };
-        }> = {};
-
-        data.forEach((row: any) => {
-          const participantName = row.candidate_name.trim().replace(/\s+/g, ' ');
-          
-          // Initialize if needed
-          if (!dailyStats[participantName]) {
-            dailyStats[participantName] = {
-              mon: { likes: 0, dislikes: 0 },
-              tue: { likes: 0, dislikes: 0 },
-              wed: { likes: 0, dislikes: 0 },
-              thu: { likes: 0, dislikes: 0 },
-              fri: { likes: 0, dislikes: 0 },
-              sat: { likes: 0, dislikes: 0 },
-              sun: { likes: 0, dislikes: 0 },
-            };
-          }
-
-          // Map day_of_week to day key
-          const dayMap: Record<number, 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat'> = {
-            0: 'sun',
-            1: 'mon',
-            2: 'tue',
-            3: 'wed',
-            4: 'thu',
-            5: 'fri',
-            6: 'sat'
-          };
-          const dayKey = dayMap[row.day_of_week];
-
-          if (dayKey) {
-            dailyStats[participantName][dayKey] = {
-              likes: Number(row.like_count) || 0,
-              dislikes: Number(row.dislike_count) || 0
-            };
-          }
-        });
-
-        console.log('📊 Mycel Jera daily stats:', dailyStats['Mycel Jera']);
-        console.log('📊 Total participants with votes:', Object.keys(dailyStats).length);
-
-        setWeeklyVotesByDay(dailyStats);
-      } catch (err) {
-        console.error('❌ Error in loadDailyVotes:', err);
-      }
-    };
-
-    loadDailyVotes();
-  }, []);
-
-  // Week dates for table headers
   const weekDates = useMemo(() => {
     const now = new Date();
     const dayOfWeek = now.getUTCDay();
@@ -174,64 +111,50 @@ export function AdminNextWeekTab({
       now.getUTCDate() - daysFromMonday
     ));
 
-    const dates: Record<string, string> = {};
-    ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].forEach((day, index) => {
+    const dates: Record<number, string> = {};
+    DAYS.forEach(({ key }, index) => {
       const date = new Date(monday);
       date.setUTCDate(monday.getUTCDate() + index);
-      dates[day] = `${date.getUTCDate()}/${date.getUTCMonth() + 1}`;
+      dates[key] = `${date.getUTCDate()}/${date.getUTCMonth() + 1}`;
     });
 
     return dates;
   }, []);
 
-  // Get participants with votes - show ALL next week participants with their daily stats
-  const participantsWithVotes = useMemo(() => {
-    const results = filteredParticipants.map(p => {
-      const appData = p.application_data || {};
-      const firstName = appData.first_name || '';
-      const lastName = appData.last_name || '';
-      const name = `${firstName} ${lastName}`.trim().replace(/\s+/g, ' ');
-      
-      const weeklyBreakdown = weeklyVotesByDay[name] || {
-        mon: { likes: 0, dislikes: 0 },
-        tue: { likes: 0, dislikes: 0 },
-        wed: { likes: 0, dislikes: 0 },
-        thu: { likes: 0, dislikes: 0 },
-        fri: { likes: 0, dislikes: 0 },
-        sat: { likes: 0, dislikes: 0 },
-        sun: { likes: 0, dislikes: 0 },
+  const table = useMemo(() => {
+    const byCandidate = new Map<string, {
+      name: string;
+      days: Record<number, { likes: number; dislikes: number; total: number }>;
+      total: number;
+    }>();
+
+    for (const r of rows) {
+      const dow = isoToDowUtc(r.vote_date);
+      const key = r.participant_user_id || r.candidate_name;
+      if (!byCandidate.has(key)) {
+        byCandidate.set(key, {
+          name: r.candidate_name,
+          days: {},
+          total: 0,
+        });
+      }
+      const item = byCandidate.get(key)!;
+      const prev = item.days[dow] ?? { likes: 0, dislikes: 0, total: 0 };
+      const next = {
+        likes: prev.likes + (r.likes || 0),
+        dislikes: prev.dislikes + (r.dislikes || 0),
+        total: prev.total + (r.total_votes || 0),
       };
+      item.days[dow] = next;
+      item.total += r.total_votes || 0;
+    }
 
-      // Calculate WEEKLY total from daily stats (for table)
-      const totalLikes = (weeklyBreakdown.mon?.likes || 0) + (weeklyBreakdown.tue?.likes || 0) + 
-                         (weeklyBreakdown.wed?.likes || 0) + (weeklyBreakdown.thu?.likes || 0) + 
-                         (weeklyBreakdown.fri?.likes || 0) + (weeklyBreakdown.sat?.likes || 0) + 
-                         (weeklyBreakdown.sun?.likes || 0);
-      
-      const totalDislikes = (weeklyBreakdown.mon?.dislikes || 0) + (weeklyBreakdown.tue?.dislikes || 0) + 
-                            (weeklyBreakdown.wed?.dislikes || 0) + (weeklyBreakdown.thu?.dislikes || 0) + 
-                            (weeklyBreakdown.fri?.dislikes || 0) + (weeklyBreakdown.sat?.dislikes || 0) + 
-                            (weeklyBreakdown.sun?.dislikes || 0);
+    const rowsArr = Array.from(byCandidate.values()).sort(
+      (a, b) => b.total - a.total
+    );
 
-      return {
-        name,
-        stats: weeklyBreakdown,
-        totalLikes,
-        totalDislikes,
-      };
-    });
-
-    return results.sort((a, b) => (b.totalLikes + b.totalDislikes) - (a.totalLikes + a.totalDislikes));
-  }, [filteredParticipants, weeklyVotesByDay]);
-
-  const totalStats = useMemo(() => {
-    const total = { like: 0, dislike: 0 };
-    Object.values(votesData).forEach(stat => {
-      total.like += stat.likes;
-      total.dislike += stat.dislikes;
-    });
-    return total;
-  }, [votesData]);
+    return rowsArr;
+  }, [rows]);
 
   const displayParticipants = useMemo(() => {
     let result = filteredParticipants;
@@ -274,72 +197,69 @@ export function AdminNextWeekTab({
     <div className="space-y-4">
       {/* Votes Statistics Table */}
       <div className="mb-6 p-2 md:p-4 bg-muted rounded-lg">
-        <div className="overflow-x-auto -mx-1">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="text-left px-1 py-0.5 md:p-1 font-medium text-[10px] md:text-xs sticky left-0 bg-muted z-10 w-16 md:w-28 max-w-[64px] md:max-w-[112px]">
-                  Name
-                </th>
-                {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((dayName, idx) => (
-                  <th key={dayName} className="text-center px-0.5 py-0.5 md:p-1 font-medium text-[10px] md:text-xs">
-                    <div className="leading-tight">{dayName}</div>
-                    <div className="text-[8px] md:text-[10px] text-muted-foreground font-normal">
-                      {weekDates[['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'][idx]]}
-                    </div>
+        {votesLoading ? (
+          <div className="text-center py-8">Loading daily votes…</div>
+        ) : votesError ? (
+          <div className="text-center py-8 text-destructive">Error: {votesError}</div>
+        ) : table.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">No votes this week yet.</div>
+        ) : (
+          <div className="overflow-x-auto -mx-1">
+            <table className="w-full text-xs border-collapse">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left px-1 py-0.5 md:p-1 font-medium text-[10px] md:text-xs sticky left-0 bg-muted z-10 w-16 md:w-28 max-w-[64px] md:max-w-[112px]">
+                    Name
                   </th>
+                  {DAYS.map((d) => (
+                    <th key={d.key} className="text-center px-0.5 py-0.5 md:p-1 font-medium text-[10px] md:text-xs">
+                      <div className="leading-tight">{d.label}</div>
+                      <div className="text-[8px] md:text-[10px] text-muted-foreground font-normal">
+                        {weekDates[d.key]}
+                      </div>
+                    </th>
+                  ))}
+                  <th className="text-center px-1 py-0.5 md:p-1 font-medium text-[10px] md:text-xs bg-primary/10">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {table.map((row) => (
+                  <tr key={row.name} className="border-b border-border/50 hover:bg-accent/50">
+                    <td className="text-left px-1 py-0.5 md:p-1 text-[10px] md:text-xs font-medium sticky left-0 bg-muted z-10 w-16 md:w-28 max-w-[64px] md:max-w-[112px]">
+                      <div className="truncate" title={row.name}>
+                        {row.name}
+                      </div>
+                    </td>
+                    {DAYS.map((d) => {
+                      const cell = row.days[d.key] ?? { likes: 0, dislikes: 0, total: 0 };
+                      return (
+                        <td key={d.key} className="text-center px-0.5 py-0.5 md:p-1">
+                          {cell.total > 0 && (
+                            <>
+                              <div className="text-xs md:text-sm font-semibold whitespace-nowrap">
+                                <span className="text-green-600 dark:text-green-500">{cell.likes}</span>
+                                <span className="text-muted-foreground">/</span>
+                                <span className="text-red-500">{cell.dislikes}</span>
+                              </div>
+                              <div className="text-[8px] md:text-[10px] text-muted-foreground">
+                                ({cell.total})
+                              </div>
+                            </>
+                          )}
+                        </td>
+                      );
+                    })}
+                    <td className="text-center px-1 py-0.5 md:p-1 bg-primary/5">
+                      <span className="text-sm md:text-lg font-bold">
+                        {row.total}
+                      </span>
+                    </td>
+                  </tr>
                 ))}
-                <th className="text-center px-1 py-0.5 md:p-1 font-medium text-[10px] md:text-xs">Total</th>
-                <th className="text-center px-1 py-0.5 md:p-1 font-medium text-[10px] md:text-xs bg-primary/10">Votes</th>
-              </tr>
-            </thead>
-            <tbody>
-              {participantsWithVotes.map((participant) => (
-                <tr key={participant.name} className="border-b border-border/50 hover:bg-accent/50">
-                  <td className="text-left px-1 py-0.5 md:p-1 text-[10px] md:text-xs font-medium sticky left-0 bg-muted z-10 w-16 md:w-28 max-w-[64px] md:max-w-[112px]">
-                    <div className="truncate" title={participant.name}>
-                      {participant.name}
-                    </div>
-                  </td>
-                  {['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].map(day => {
-                    const dayStats = participant.stats[day as keyof typeof participant.stats];
-                    const hasVotes = dayStats.likes > 0 || dayStats.dislikes > 0;
-                    return (
-                      <td key={day} className="text-center px-0.5 py-0.5 md:p-1">
-                        {hasVotes && (
-                          <span className="text-xs md:text-sm font-semibold whitespace-nowrap">
-                            <span className="text-green-600 dark:text-green-500">{dayStats.likes}</span>
-                            <span className="text-muted-foreground">/</span>
-                            <span className="text-red-500">{dayStats.dislikes}</span>
-                          </span>
-                        )}
-                      </td>
-                    );
-                  })}
-                  <td className="text-center px-1 py-0.5 md:p-1">
-                    <span className="text-sm md:text-base font-bold whitespace-nowrap">
-                      <span className="text-green-600 dark:text-green-500">{participant.totalLikes}</span>
-                      <span className="text-muted-foreground">/</span>
-                      <span className="text-red-500">{participant.totalDislikes}</span>
-                    </span>
-                  </td>
-                  <td className="text-center px-1 py-0.5 md:p-1 bg-primary/5">
-                    <span className="text-sm md:text-lg font-bold">
-                      {participant.totalLikes + participant.totalDislikes}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-              {participantsWithVotes.length === 0 && (
-                <tr>
-                  <td colSpan={10} className="text-center py-8 text-muted-foreground">
-                    No votes yet
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       <h2 className="text-2xl font-bold">
