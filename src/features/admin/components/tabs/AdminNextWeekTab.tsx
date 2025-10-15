@@ -31,6 +31,7 @@ export function AdminNextWeekTab({
   onEdit,
   loading = false,
 }: AdminNextWeekTabProps) {
+  console.log('🚀 AdminNextWeekTab rendering - NEW VERSION with weeklyVotesByDay');
   const { selectedCountry } = useAdminCountry();
   const [filterType, setFilterType] = useState<'all' | 'like' | 'dislike'>('all');
   const [filterDay, setFilterDay] = useState<string | null>(null);
