@@ -46,12 +46,42 @@ export function AdminNextWeekTab({
   // Load votes data from next_week_votes for cards display
   useEffect(() => {
     const loadVotes = async () => {
-      // Get aggregated vote counts from next_week_votes table
-      const { data: likesData, error: likesError } = await supabase
-        .from('next_week_votes')
-        .select('candidate_name, vote_type')
-        .eq('vote_type', 'like');
+      // Get all participants with 'next week on site' status
+      const { data: participants, error: participantsError } = await supabase
+        .from('weekly_contest_participants')
+        .select('id, user_id, application_data')
+        .eq('admin_status', 'next week on site')
+        .is('deleted_at', null);
 
+      if (participantsError || !participants) {
+        console.error('❌ Error loading next week participants:', participantsError);
+        return;
+      }
+
+      const participantIds = participants.map(p => p.id);
+      console.log('📊 Next week participants for cards:', participants.length);
+
+      if (participantIds.length === 0) {
+        setVotesData({});
+        return;
+      }
+
+      // Create participant map for quick lookup
+      const participantMap = new Map(
+        participants.map(p => {
+          const appData = (p.application_data || {}) as any;
+          const name = `${appData.first_name || ''} ${appData.last_name || ''}`.trim().replace(/\s+/g, ' ');
+          return [p.id, name];
+        })
+      );
+
+      // Get likes for these participants
+      const { data: likesData, error: likesError } = await supabase
+        .from('likes')
+        .select('participant_id')
+        .in('participant_id', participantIds);
+
+      // Get dislikes from next_week_votes
       const { data: dislikesData, error: dislikesError } = await supabase
         .from('next_week_votes')
         .select('candidate_name, vote_type')
@@ -68,16 +98,18 @@ export function AdminNextWeekTab({
       // Calculate stats
       const stats: Record<string, { likes: number; dislikes: number }> = {};
 
-      // Count likes
-      likesData?.forEach(vote => {
-        const name = vote.candidate_name.trim().replace(/\s+/g, ' ');
-        if (!stats[name]) {
-          stats[name] = { likes: 0, dislikes: 0 };
+      // Count likes by participant_id
+      likesData?.forEach(like => {
+        const name = participantMap.get(like.participant_id);
+        if (name) {
+          if (!stats[name]) {
+            stats[name] = { likes: 0, dislikes: 0 };
+          }
+          stats[name].likes++;
         }
-        stats[name].likes++;
       });
 
-      // Count dislikes
+      // Count dislikes by candidate_name
       dislikesData?.forEach(vote => {
         const name = vote.candidate_name.trim().replace(/\s+/g, ' ');
         if (!stats[name]) {
@@ -475,34 +507,68 @@ const ParticipantCard = ({
   const handleShowVoters = async (type: 'like' | 'dislike') => {
     setVotersType(type);
     
-    const { data: votesData, error } = await supabase
-      .from('next_week_votes')
-      .select('user_id, vote_type, created_at')
-      .eq('candidate_name', participantName)
-      .eq('vote_type', type);
+    if (type === 'like') {
+      // For likes, fetch from likes table
+      const { data: likesData, error: likesError } = await supabase
+        .from('likes')
+        .select('user_id, created_at')
+        .eq('participant_id', participant.id);
 
-    if (error || !votesData) {
-      console.error('Error fetching voters:', error);
-      setVoters([]);
-      setShowVotersModal(true);
-      return;
-    }
+      if (likesError || !likesData) {
+        console.error('Error fetching like voters:', likesError);
+        setVoters([]);
+        setShowVotersModal(true);
+        return;
+      }
 
-    // Get profiles
-    const userIds = votesData.map(v => v.user_id);
-    if (userIds.length > 0) {
-      const { data: profilesData } = await supabase
-        .from('profiles')
-        .select('id, display_name, first_name, last_name, avatar_url')
-        .in('id', userIds);
+      // Get profiles
+      const userIds = likesData.map(v => v.user_id);
+      if (userIds.length > 0) {
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('id, display_name, first_name, last_name, avatar_url')
+          .in('id', userIds);
 
-      const votersWithProfiles = votesData.map(vote => ({
-        ...vote,
-        profiles: profilesData?.find(p => p.id === vote.user_id) || null
-      }));
-      setVoters(votersWithProfiles);
+        const votersWithProfiles = likesData.map(like => ({
+          ...like,
+          vote_type: 'like',
+          profiles: profilesData?.find(p => p.id === like.user_id) || null
+        }));
+        setVoters(votersWithProfiles);
+      } else {
+        setVoters([]);
+      }
     } else {
-      setVoters([]);
+      // For dislikes, fetch from next_week_votes table
+      const { data: dislikesData, error: dislikesError } = await supabase
+        .from('next_week_votes')
+        .select('user_id, vote_type, created_at')
+        .eq('candidate_name', participantName)
+        .eq('vote_type', 'dislike');
+
+      if (dislikesError || !dislikesData) {
+        console.error('Error fetching dislike voters:', dislikesError);
+        setVoters([]);
+        setShowVotersModal(true);
+        return;
+      }
+
+      // Get profiles
+      const userIds = dislikesData.map(v => v.user_id);
+      if (userIds.length > 0) {
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('id, display_name, first_name, last_name, avatar_url')
+          .in('id', userIds);
+
+        const votersWithProfiles = dislikesData.map(vote => ({
+          ...vote,
+          profiles: profilesData?.find(p => p.id === vote.user_id) || null
+        }));
+        setVoters(votersWithProfiles);
+      } else {
+        setVoters([]);
+      }
     }
 
     setShowVotersModal(true);
