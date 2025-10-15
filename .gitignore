@@ -22,3 +22,29 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+# env / secrets
+.env
+.env.*.local
+supabase/.env
+supabase/config.json
+supabase/.branches/*
+*.key
+*.pem
+*.p12
+*.jks
+
+# build artifacts
+.next/
+out/
+dist/
+coverage/
+*.log
+
+# Supabase generated/temp
+supabase/.temp/**
+supabase/.output/**
+
+# OS/IDE
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
