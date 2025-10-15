@@ -449,7 +449,7 @@ export function AdminRegistrationsTab({
       </div>
 
       {/* User Cards */}
-      <div className="space-y-4 px-2 md:px-0">
+      <div className="space-y-4">
         {paginatedProfiles.map(profile => {
           const fullName = profile.display_name || 
             `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 

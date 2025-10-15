@@ -1081,12 +1081,6 @@ const AdminContent = () => {
         console.log(`📋 Processing ${likesData.length} likes, ${participantIds.length} with participant_id`);
         
         if (participantIds.length > 0) {
-          // Get profiles
-          const { data: profilesData } = await supabase
-            .from('profiles')
-            .select('id, display_name, first_name, last_name, avatar_url, photo_1_url, photo_2_url')
-            .in('id', participantIds);
-          
           // Get participant week intervals and admin_status from weekly_contest_participants table
           const { data: participantsData, error: participantsError } = await supabase
             .from('weekly_contest_participants')
@@ -1097,12 +1091,23 @@ const AdminContent = () => {
             console.error('❌ Error fetching participants data:', participantsError);
           }
           
+          // Get user_ids from participant records
+          const userIds = (participantsData || [])
+            .map(p => p.user_id)
+            .filter(id => id != null);
+          
+          // Get profiles using user_ids
+          const { data: profilesData } = await supabase
+            .from('profiles')
+            .select('id, display_name, first_name, last_name, avatar_url, photo_1_url, photo_2_url')
+            .in('id', userIds);
+          
           const profilesMap = new Map(
             (profilesData || []).map(p => [p.id, p])
           );
           
           const participantsMap = new Map(
-            (participantsData || []).map(p => [p.id, { week_interval: p.week_interval, admin_status: p.admin_status }])
+            (participantsData || []).map(p => [p.id, { week_interval: p.week_interval, admin_status: p.admin_status, user_id: p.user_id }])
           );
           
           console.log('📅 Participant week intervals for likes:', Array.from(participantsMap.entries()).slice(0, 5));
@@ -1110,7 +1115,7 @@ const AdminContent = () => {
           // Use participant's week_interval and admin_status from the table
           likesWithProfiles = likesData.map(like => {
             const participantData = like.participant_id ? participantsMap.get(like.participant_id) : null;
-            const profile = like.participant_id ? profilesMap.get(like.participant_id) : null;
+            const profile = participantData?.user_id ? profilesMap.get(participantData.user_id) : null;
             
             return {
               ...like,
