@@ -2343,6 +2343,14 @@ export type Database = {
           vote_type: string
         }[]
       }
+      get_next_week_votes_summary: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          candidate_name: string
+          dislikes_count: number
+          likes_count: number
+        }[]
+      }
       get_or_create_conversation: {
         Args: { user1_id: string; user2_id: string }
         Returns: string
