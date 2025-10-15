@@ -3,6 +3,7 @@ import { MessageCircle, Heart } from "lucide-react";
 import { AuthNav } from "@/components/auth-nav";
 import GlobalSearch from "@/components/global-search";
 import LanguageSelector from "@/components/language-selector";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { useUnreadLikes } from "@/hooks/useUnreadLikes";
 import { useAdminStatus } from "@/hooks/useAdminStatus";
@@ -55,6 +56,7 @@ const TopBar = () => {
         </div>
         
         <div className="flex items-center gap-1">
+          <LanguageSwitcher />
           <LanguageSelector />
           
           {/* Admin-only Translate button */}

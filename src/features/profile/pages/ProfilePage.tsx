@@ -21,6 +21,10 @@ import { ContestParticipationModal } from "@/features/contest/components/Contest
 import CreatePostModal from "../components/CreatePostModal";
 import { REJECTION_REASONS, RejectReasonModal, RejectionReasonType } from "@/components/reject-reason-modal";
 import { AuthProtectedModal } from "@/components/auth-protected-modal";
+import UserRankingWidget from "@/components/UserRankingWidget";
+import UserProgressChart from "@/components/UserProgressChart";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { motion } from "framer-motion";
 import c1 from "@/assets/contestant-1.jpg";
 import c2 from "@/assets/contestant-2.jpg";
 import c3 from "@/assets/contestant-3.jpg";
@@ -57,6 +61,7 @@ interface ProfileRow {
   country?: string | null;
   bio?: string | null;
   gender?: string | null;
+  is_contest_participant?: boolean | null;
 }
 
 const Profile = () => {
@@ -1275,6 +1280,19 @@ const Profile = () => {
 
 
           </div>
+
+          {/* User Ranking & Progress (for contest participants only) */}
+          {isOwner && profile.is_contest_participant && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="mt-6 space-y-4"
+            >
+              <UserRankingWidget userId={currentUserId || ''} />
+              <UserProgressChart userId={currentUserId || ''} />
+            </motion.div>
+          )}
 
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
