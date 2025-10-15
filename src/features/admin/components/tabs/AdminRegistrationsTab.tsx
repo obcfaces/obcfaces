@@ -516,8 +516,8 @@ export function AdminRegistrationsTab({
           if (hasDuplicateFingerprint) reasonCodes.push(`FP ${duplicateCount + 1}`);
           
           return (
-            <div key={profile.id} className="space-y-2">
-              <Card className="p-4 relative hover:shadow-md transition-shadow md:rounded-lg">
+            <div key={profile.id} className="space-y-2 px-0 md:px-0">
+              <Card className="p-4 relative hover:shadow-md transition-shadow rounded-none md:rounded-lg">
                 {/* Date/time badge in top-left */}
                 <Badge 
                   variant="outline"
@@ -1109,25 +1109,21 @@ export function AdminRegistrationsTab({
                                               <div className="text-xs font-medium text-muted-foreground">{week}</div>
                                               {ratings.map((rating: any) => (
                                                 <div key={rating.id} className="flex items-center gap-2 text-xs p-2 bg-background rounded border">
-                                                  <div className="relative h-12 w-12 flex-shrink-0">
-                                                    <img 
-                                                      src={rating.profiles?.photo_1_url || rating.profiles?.avatar_url || ''} 
-                                                      alt={rating.profiles?.display_name}
-                                                      className="h-full w-full object-cover rounded"
-                                                    />
-                                                  </div>
-                                                   <div className="flex-1 min-w-0">
-                                                     <div className="font-medium truncate">
-                                                       {rating.profiles?.display_name || 
-                                                        `${rating.profiles?.first_name || ''} ${rating.profiles?.last_name || ''}`.trim() || 
-                                                        'Unknown'}
-                                                     </div>
-                                                     <div className="text-muted-foreground truncate">
-                                                       {rating.profiles?.city && rating.profiles?.country ? 
-                                                         `${rating.profiles.city}, ${rating.profiles.country}` : 
-                                                         rating.profiles?.country || ''}
-                                                     </div>
-                                                   </div>
+                                  <div className="relative h-12 w-12 flex-shrink-0">
+                                    <img 
+                                      src={rating.participant?.photo_1_url || rating.participant?.avatar_url || ''} 
+                                      alt={rating.participant?.display_name || rating.contestant_name}
+                                      className="h-full w-full object-cover rounded"
+                                    />
+                                  </div>
+                                   <div className="flex-1 min-w-0">
+                                     <div className="font-medium truncate">
+                                       {rating.participant?.display_name || rating.contestant_name || 'Unknown'}
+                                     </div>
+                                     <div className="text-muted-foreground text-xs">
+                                       {new Date(rating.created_at).toLocaleDateString('en-GB')}
+                                     </div>
+                                   </div>
                                                    <div className="flex items-center gap-1 flex-shrink-0">
                                                      <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
                                                      <span className="text-xs font-medium">{rating.rating}</span>
