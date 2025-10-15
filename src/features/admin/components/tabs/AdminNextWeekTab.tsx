@@ -319,14 +319,17 @@ const ParticipantCard = ({
   const lastName = appData.last_name || '';
   const photo1 = appData.photo_1_url || appData.photo1_url || '';
   const photo2 = appData.photo_2_url || appData.photo2_url || '';
-  // Normalize name: trim and replace multiple spaces with single space
-  const participantName = `${firstName} ${lastName}`.trim().replace(/\s+/g, ' ');
+  
+  // CRITICAL: Use profiles.display_name_generated for matching
+  const participantName = participant.profiles?.display_name_generated || 
+                         participant.profiles?.display_name || 
+                         `${firstName} ${lastName}`.trim().replace(/\s+/g, ' ');
   const submittedDate = participant.created_at ? new Date(participant.created_at) : null;
 
-  // Get vote stats for this participant
+  // Get vote stats for this participant using the SAME data source as the table
   const stats = votesData[participantName] || { likes: 0, dislikes: 0 };
   
-  console.log(`🔍 Card for "${participantName}": likes=${stats.likes}, dislikes=${stats.dislikes}, votesData keys:`, Object.keys(votesData).filter(k => k.includes('Mycel') || k.includes('Jera')));
+  console.log(`🔍 Card for "${participantName}": likes=${stats.likes}, dislikes=${stats.dislikes}`);
 
   const handleShowVoters = async (type: 'like' | 'dislike') => {
     setVotersType(type);
