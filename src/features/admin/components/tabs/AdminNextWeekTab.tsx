@@ -13,7 +13,7 @@ import { ParticipantStatusHistoryModal } from '../ParticipantStatusHistoryModal'
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { loadDailyByParticipant, loadCardTotals, NextTotalsRow } from '../../utils/nextWeekData';
+import { loadDailyByParticipant, loadCardTotals, loadTop3, NextTotalsRow } from '../../utils/nextWeekData';
 
 interface AdminNextWeekTabProps {
   participants: WeeklyContestParticipant[];
@@ -62,6 +62,8 @@ export function AdminNextWeekTab({
   const [votesLoading, setVotesLoading] = useState(true);
   const [votesError, setVotesError] = useState<string | null>(null);
   const [cardTotals, setCardTotals] = useState<Map<string, NextTotalsRow>>(new Map());
+  const [top3Ranks, setTop3Ranks] = useState<Map<string, number>>(new Map());
+  const [sortBy, setSortBy] = useState<'likes' | 'dislikes' | 'total'>('total');
 
   const filteredParticipants = useMemo(() => {
     return participants.filter(p => {
@@ -70,23 +72,30 @@ export function AdminNextWeekTab({
     });
   }, [participants, selectedCountry]);
 
-  useEffect(() => {
-    const loadVotes = async () => {
-      setVotesLoading(true);
-      setVotesError(null);
-      
-      // Load daily data for table
-      const dailyData = await loadDailyByParticipant();
-      setRows(dailyData);
-      
-      // Load card totals for cards
-      const totalsMap = await loadCardTotals();
-      setCardTotals(totalsMap);
-      
-      setVotesLoading(false);
-    };
+  const loadAllData = async () => {
+    setVotesLoading(true);
+    setVotesError(null);
+    
+    // Load daily data for table
+    const dailyData = await loadDailyByParticipant();
+    setRows(dailyData);
+    
+    // Load card totals for cards
+    const totalsMap = await loadCardTotals();
+    setCardTotals(totalsMap);
+    
+    // Load top 3 ranks
+    const ranksMap = await loadTop3();
+    setTop3Ranks(ranksMap);
+    
+    setVotesLoading(false);
+  };
 
-    loadVotes();
+  useEffect(() => {
+    loadAllData();
+    // Auto-refresh every 60 seconds
+    const timer = setInterval(loadAllData, 60000);
+    return () => clearInterval(timer);
   }, []);
 
   const weekDates = useMemo(() => {
@@ -112,8 +121,11 @@ export function AdminNextWeekTab({
   const table = useMemo(() => {
     const byCandidate = new Map<string, {
       name: string;
+      participant_id: string;
       days: Record<number, { likes: number; dislikes: number; total: number }>;
       total: number;
+      totalLikes: number;
+      totalDislikes: number;
     }>();
 
     for (const r of rows) {
@@ -122,8 +134,11 @@ export function AdminNextWeekTab({
       if (!byCandidate.has(key)) {
         byCandidate.set(key, {
           name: r.candidate_name,
+          participant_id: r.participant_user_id,
           days: {},
           total: 0,
+          totalLikes: 0,
+          totalDislikes: 0,
         });
       }
       const item = byCandidate.get(key)!;
@@ -135,14 +150,21 @@ export function AdminNextWeekTab({
       };
       item.days[dow] = next;
       item.total += r.total_votes || 0;
+      item.totalLikes += r.likes || 0;
+      item.totalDislikes += r.dislikes || 0;
     }
 
-    const rowsArr = Array.from(byCandidate.values()).sort(
-      (a, b) => b.total - a.total
-    );
+    const rowsArr = Array.from(byCandidate.values());
+    
+    // Sort by selected column
+    rowsArr.sort((a, b) => {
+      if (sortBy === 'likes') return b.totalLikes - a.totalLikes;
+      if (sortBy === 'dislikes') return b.totalDislikes - a.totalDislikes;
+      return b.total - a.total;
+    });
 
     return rowsArr;
-  }, [rows]);
+  }, [rows, sortBy]);
 
   const displayParticipants = useMemo(() => {
     let result = filteredParticipants;
@@ -189,6 +211,30 @@ export function AdminNextWeekTab({
     <div className="space-y-4">
       {/* Votes Statistics Table */}
       <div className="mb-6 p-2 md:p-4 bg-muted rounded-lg">
+        <div className="flex gap-2 mb-3">
+          <Button 
+            size="sm" 
+            variant={sortBy === 'likes' ? 'default' : 'outline'}
+            onClick={() => setSortBy('likes')}
+          >
+            Sort by Likes
+          </Button>
+          <Button 
+            size="sm" 
+            variant={sortBy === 'dislikes' ? 'default' : 'outline'}
+            onClick={() => setSortBy('dislikes')}
+          >
+            Sort by Dislikes
+          </Button>
+          <Button 
+            size="sm" 
+            variant={sortBy === 'total' ? 'default' : 'outline'}
+            onClick={() => setSortBy('total')}
+          >
+            Sort by Total
+          </Button>
+        </div>
+        
         {votesLoading ? (
           <div className="text-center py-8">Loading daily votes…</div>
         ) : votesError ? (
@@ -215,10 +261,22 @@ export function AdminNextWeekTab({
                 </tr>
               </thead>
               <tbody>
-                {table.map((row) => (
-                  <tr key={row.name} className="border-b border-border/50 hover:bg-accent/50">
-                    <td className="text-left px-1 py-0.5 md:p-1 text-[10px] md:text-xs font-medium sticky left-0 bg-muted z-10 w-16 md:w-28 max-w-[64px] md:max-w-[112px]">
-                      <div className="truncate" title={row.name}>
+                {table.map((row, index) => {
+                  const rank = top3Ranks.get(row.participant_id);
+                  const isTop3 = rank && rank <= 3;
+                  const bgColor = rank === 1 ? 'bg-yellow-50 dark:bg-yellow-950/30' : 
+                                 rank === 2 ? 'bg-gray-50 dark:bg-gray-900/30' : 
+                                 rank === 3 ? 'bg-amber-50 dark:bg-amber-950/30' : '';
+                  
+                  return (
+                  <tr key={row.name} className={`border-b border-border/50 hover:bg-accent/50 ${bgColor} ${isTop3 ? 'font-semibold' : ''}`}>
+                    <td className={`text-left px-1 py-0.5 md:p-1 text-[10px] md:text-xs font-medium sticky left-0 z-10 w-16 md:w-28 max-w-[64px] md:max-w-[112px] ${bgColor || 'bg-muted'}`}>
+                      <div className="truncate flex items-center gap-1" title={row.name}>
+                        {rank && rank <= 3 && (
+                          <span className="text-xs">
+                            {rank === 1 ? '🥇' : rank === 2 ? '🥈' : '🥉'}
+                          </span>
+                        )}
                         {row.name}
                       </div>
                     </td>
@@ -247,7 +305,8 @@ export function AdminNextWeekTab({
                       </span>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -277,6 +336,7 @@ export function AdminNextWeekTab({
           onEdit={onEdit}
           getStatusBackgroundColor={getStatusBackgroundColor}
           cardTotals={cardTotals}
+          top3Ranks={top3Ranks}
         />
       ))}
 
@@ -297,6 +357,7 @@ const ParticipantCard = ({
   onEdit,
   getStatusBackgroundColor,
   cardTotals,
+  top3Ranks,
 }: any) => {
   const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);
   const [showStatusHistoryModal, setShowStatusHistoryModal] = useState(false);
@@ -320,13 +381,17 @@ const ParticipantCard = ({
 
   // Get vote stats from v_next_week_cards_totals via cardTotals Map
   const totals = cardTotals.get(participant.user_id);
+  const rank = top3Ranks.get(participant.user_id);
   const stats = {
     likes: totals?.total_likes || 0,
     dislikes: totals?.total_dislikes || 0,
     total: totals?.total_votes || 0
   };
   
-  console.log(`🔍 Card for "${participantName}" (${participant.user_id}): likes=${stats.likes}, dislikes=${stats.dislikes}, total=${stats.total}`);
+  const isTop3 = rank && rank <= 3;
+  const borderColor = rank === 1 ? 'border-yellow-400' : 
+                     rank === 2 ? 'border-gray-400' : 
+                     rank === 3 ? 'border-amber-600' : '';
 
   const handleShowVoters = async (type: 'like' | 'dislike') => {
     setVotersType(type);
@@ -367,7 +432,7 @@ const ParticipantCard = ({
 
   return (
     <>
-      <Card className="overflow-hidden relative rounded-none md:rounded-lg h-[149px]">
+      <Card className={`overflow-hidden relative rounded-none md:rounded-lg h-[149px] ${isTop3 ? `border-2 ${borderColor}` : ''}`}>
         <CardContent className="p-0">
           {/* Date badge */}
           {submittedDate && (

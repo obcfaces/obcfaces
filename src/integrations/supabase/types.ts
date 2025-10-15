@@ -1866,6 +1866,17 @@ export type Database = {
         }
         Relationships: []
       }
+      v_next_week_top3: {
+        Row: {
+          candidate_name: string | null
+          participant_user_id: string | null
+          rank_position: number | null
+          total_dislikes: number | null
+          total_likes: number | null
+          total_votes: number | null
+        }
+        Relationships: []
+      }
       v_next_week_votes_by_day: {
         Row: {
           candidate_name: string | null
