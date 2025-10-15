@@ -31,7 +31,8 @@ export function AdminNextWeekTab({
   onEdit,
   loading = false,
 }: AdminNextWeekTabProps) {
-  console.log('🚀 AdminNextWeekTab rendering - NEW VERSION with weeklyVotesByDay');
+  console.log('🔥🔥🔥 VERSION 2025-10-15 22:18 - AdminNextWeekTab WITH weeklyVotesByDay 🔥🔥🔥');
+  console.log('👥 Participants count:', participants.length);
   const { selectedCountry } = useAdminCountry();
   const [filterType, setFilterType] = useState<'all' | 'like' | 'dislike'>('all');
   const [filterDay, setFilterDay] = useState<string | null>(null);
@@ -83,8 +84,10 @@ export function AdminNextWeekTab({
 
   // Load ALL votes and calculate daily breakdown for current week
   useEffect(() => {
+    console.log('⚡️ useEffect STARTED - loadDailyVotes');
     const loadDailyVotes = async () => {
       try {
+        console.log('⚡️ Inside loadDailyVotes function');
         // Fetch all votes from next_week_votes
         const { data: allVotes, error } = await supabase
           .from('next_week_votes')
