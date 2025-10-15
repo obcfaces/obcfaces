@@ -7,6 +7,8 @@
 *Real-time voting • Admin management • Performance optimized*
 
 [![CI](https://github.com/your-repo/obc-faces/actions/workflows/ci.yml/badge.svg)](https://github.com/your-repo/obc-faces/actions/workflows/ci.yml)
+[![Dependency Review](https://github.com/your-repo/obc-faces/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/your-repo/obc-faces/actions/workflows/dependency-review.yml)
+[![Secret Scan](https://github.com/your-repo/obc-faces/actions/workflows/secret-scan.yml/badge.svg)](https://github.com/your-repo/obc-faces/actions/workflows/secret-scan.yml)
 [![Production Smoke](https://github.com/your-repo/obc-faces/actions/workflows/prod-smoke.yml/badge.svg)](https://github.com/your-repo/obc-faces/actions/workflows/prod-smoke.yml)
 [![codecov](https://codecov.io/gh/your-repo/obc-faces/branch/main/graph/badge.svg)](https://codecov.io/gh/your-repo/obc-faces)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5+-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
