@@ -2096,6 +2096,15 @@ export type Database = {
         }
         Relationships: []
       }
+      v_user_weekly_rank: {
+        Row: {
+          display_name_generated: string | null
+          participant_user_id: string | null
+          rank_position: number | null
+          total_votes: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       archive_old_data: {

@@ -1,0 +1,13 @@
+{
+  "your_rank": "Your Weekly Rank",
+  "total_votes": "Total Votes",
+  "loading": "Loading...",
+  "loading_ranking": "Loading ranking...",
+  "rank_improved": "Your position improved by {{count}} places in 24h! 🎉",
+  "top3_achievement": "Congratulations! You've reached TOP 3! 🏆",
+  "my_progress": "My Progress",
+  "votes_today": "Votes Today",
+  "weekly_trend": "Weekly Trend",
+  "no_data": "No data available yet",
+  "refresh_in": "Auto-refresh in {{seconds}}s"
+}

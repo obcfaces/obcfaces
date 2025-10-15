@@ -1,0 +1,13 @@
+{
+  "your_rank": "Iyong Weekly Rank",
+  "total_votes": "Kabuuang Boto",
+  "loading": "Naglo-load...",
+  "loading_ranking": "Naglo-load ng ranggo...",
+  "rank_improved": "Umangat ang iyong posisyon ng {{count}} puwesto sa loob ng 24 oras! 🎉",
+  "top3_achievement": "Binabati kita! Nasa TOP 3 ka na! 🏆",
+  "my_progress": "Aking Progreso",
+  "votes_today": "Boto Ngayong Araw",
+  "weekly_trend": "Takbo ng Linggo",
+  "no_data": "Walang available na data",
+  "refresh_in": "Auto-refresh sa {{seconds}}s"
+}
