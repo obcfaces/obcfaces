@@ -138,8 +138,10 @@ export function AdminNextWeekTab({
         const voteDate = new Date(vote.created_at);
         
         if (voteDate >= monday && voteDate <= sunday) {
+          // getUTCDay returns: 0=Sunday, 1=Monday, 2=Tuesday, 3=Wednesday, 4=Thursday, 5=Friday, 6=Saturday
           const dayIndex = voteDate.getUTCDay();
-          const dayKey = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][dayIndex] as 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
+          const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+          const dayKey = dayKeys[dayIndex] as 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
           const name = vote.candidate_name.trim().replace(/\s+/g, ' ');
 
           // Debug for Mycel Jera
