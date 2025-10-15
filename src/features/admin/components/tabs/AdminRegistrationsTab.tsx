@@ -449,7 +449,7 @@ export function AdminRegistrationsTab({
       </div>
 
       {/* User Cards */}
-      <div className="space-y-4">
+      <div className="space-y-4 -mx-4 md:mx-0">
         {paginatedProfiles.map(profile => {
           const fullName = profile.display_name || 
             `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 
@@ -962,85 +962,235 @@ export function AdminRegistrationsTab({
               
               {/* Expanded fingerprint section */}
               {isExpanded && profilesWithSameFingerprint.length > 0 && (
-                <Card className="p-4 bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800">
-                  <h4 className="text-sm font-medium mb-3 text-blue-900 dark:text-blue-100">
+                <Card className="rounded-none md:rounded-lg p-4 bg-muted/50 border relative">
+                  <h4 className="text-sm font-medium mb-3">
                     Users with same Fingerprint ({profile.fingerprint_id?.substring(0, 16)}...):
                   </h4>
                   
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {profilesWithSameFingerprint.map(fpProfile => {
                       const fpFullName = fpProfile.display_name || 
                         `${fpProfile.first_name || ''} ${fpProfile.last_name || ''}`.trim() || 
                         'Unknown';
                       const fpEmail = (fpProfile as any).email || '';
                       const fpVotingStats = userVotingStats[fpProfile.id];
+                      const fpActivityData = userActivityData[fpProfile.id];
                       const fpActivityDate = new Date(fpProfile.created_at);
+                      const fpUserRole = userRoleMap[fpProfile.id] || 'usual';
                       
                       return (
-                        <div key={fpProfile.id} className="p-3 bg-background rounded border">
-                          <div className="flex items-start gap-3">
-                            <Avatar className="h-10 w-10">
-                              <AvatarImage src={fpProfile.avatar_url || ''} />
-                              <AvatarFallback className="text-xs">
-                                {fpProfile.display_name?.charAt(0) || fpProfile.first_name?.charAt(0) || 'U'}
-                              </AvatarFallback>
-                            </Avatar>
+                        <Card key={fpProfile.id} className="p-4 relative">
+                          {/* Date/time badge */}
+                          <Badge 
+                            variant="outline"
+                            className="absolute top-0 left-0 text-xs rounded-none rounded-tr-md font-normal"
+                          >
+                            {fpActivityDate.toLocaleDateString('en-GB', { 
+                              day: 'numeric', 
+                              month: 'short' 
+                            })} {fpActivityDate.toLocaleTimeString('en-GB', { 
+                              hour: '2-digit', 
+                              minute: '2-digit',
+                              hour12: false 
+                            })}
+                          </Badge>
+                          
+                          {/* Main content */}
+                          <div className="mt-4">
+                            <div className="flex items-start gap-2 mb-1">
+                              <Avatar className="h-6 w-6 flex-shrink-0">
+                                <AvatarImage src={fpProfile.avatar_url || ''} />
+                                <AvatarFallback className="text-xs">
+                                  {fpProfile.display_name?.charAt(0) || fpProfile.first_name?.charAt(0) || 'U'}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="font-medium">
+                                {fpFullName}
+                              </span>
+                            </div>
                             
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="font-medium text-sm">{fpFullName}</span>
+                            {/* Email */}
+                            {fpEmail && (
+                              <div className="text-xs text-foreground/80 flex items-center gap-1 mb-1">
+                                <span>{fpEmail}</span>
                                 {fpProfile.auth_provider === 'google' && (
-                                  <Badge variant="outline" className="text-xs">G</Badge>
+                                  <span className="ml-1 font-bold text-blue-600 dark:text-blue-400 text-sm">G</span>
                                 )}
                                 {fpProfile.auth_provider === 'facebook' && (
-                                  <Badge variant="outline" className="text-xs">F</Badge>
+                                  <Facebook className="h-3 w-3 ml-1 text-blue-600" />
                                 )}
                               </div>
-                              
-                              {fpEmail && (
-                                <div className="text-xs text-muted-foreground mb-0.5">{fpEmail}</div>
-                              )}
-                              
-                              {fpProfile.ip_address && (
-                                <div className="text-xs text-blue-600 mb-0.5">
-                                  IP: {fpProfile.ip_address}
-                                </div>
-                              )}
-                              
-                              <div className="text-xs text-muted-foreground mb-0.5">
-                                Registered: {fpActivityDate.toLocaleString('en-GB', {
-                                  timeZone: 'Asia/Manila',
-                                  day: '2-digit',
-                                  month: '2-digit',
-                                  year: 'numeric',
-                                  hour: '2-digit',
-                                  minute: '2-digit',
-                                })}
+                            )}
+                            
+                            {/* IP address */}
+                            {fpProfile.ip_address && (
+                              <div className="text-xs text-muted-foreground mb-1">
+                                IP: {fpProfile.ip_address}
+                              </div>
+                            )}
+                            
+                            {/* Device info */}
+                            {fpProfile.user_agent && (() => {
+                              const { browser, device, os } = UAParser(fpProfile.user_agent);
+                              const deviceInfo = `${device.type || 'Desktop'} | ${os.name || 'Unknown OS'} ${os.version || ''}`;
+                              return (
+                                <div className="text-xs text-muted-foreground mb-2">{deviceInfo}</div>
+                              );
+                            })()}
+                            
+                            {/* Stats row */}
+                            <div className="flex items-center gap-4 text-xs mt-2">
+                              <div 
+                                className="flex items-center gap-1 cursor-pointer hover:opacity-80"
+                                onClick={() => {
+                                  if (!fpActivityData && fetchUserActivity) {
+                                    fetchUserActivity(fpProfile.id);
+                                  }
+                                  const newExpanded = new Set(expandedUserActivity);
+                                  if (newExpanded.has(fpProfile.id)) {
+                                    newExpanded.delete(fpProfile.id);
+                                  } else {
+                                    newExpanded.add(fpProfile.id);
+                                  }
+                                  setExpandedUserActivity(newExpanded);
+                                }}
+                              >
+                                <Star className="h-3 w-3 text-yellow-500" />
+                                <span>
+                                  {fpVotingStats?.total_votes_count || 0}
+                                  {fpVotingStats?.this_week_count ? `/${fpVotingStats.this_week_count}` : ''}
+                                  {fpVotingStats?.next_week_count ? (
+                                    <span className="text-blue-500">/{fpVotingStats.next_week_count}</span>
+                                  ) : ''}
+                                </span>
                               </div>
                               
-                              {fpProfile.user_agent && (() => {
-                                const { browser, device, os } = UAParser(fpProfile.user_agent);
-                                return (
-                                  <div className="text-xs text-muted-foreground">
-                                    {device.type || 'Desktop'} | {os.name || 'Unknown OS'}
-                                  </div>
-                                );
-                              })()}
-                              
-                              {/* Stats */}
-                              <div className="flex items-center gap-3 mt-2">
-                                <div className="flex items-center gap-1">
-                                  <Star className="h-3 w-3 text-yellow-500" />
-                                  <span className="text-xs">{fpVotingStats?.total_votes_count || 0}</span>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <Heart className="h-3 w-3 text-red-500" />
-                                  <span className="text-xs">{userActivityData?.[fpProfile.id]?.likes_given || 0}</span>
-                                </div>
+                              <div 
+                                className="flex items-center gap-1 cursor-pointer hover:opacity-80"
+                                onClick={() => {
+                                  if (!fpActivityData && fetchUserActivity) {
+                                    fetchUserActivity(fpProfile.id);
+                                  }
+                                  const newExpanded = new Set(expandedUserActivity);
+                                  if (newExpanded.has(fpProfile.id)) {
+                                    newExpanded.delete(fpProfile.id);
+                                  } else {
+                                    newExpanded.add(fpProfile.id);
+                                  }
+                                  setExpandedUserActivity(newExpanded);
+                                }}
+                              >
+                                <Heart className="h-3 w-3 text-red-500" />
+                                <span>
+                                  {fpActivityData?.likes_given || 0}
+                                  {fpActivityData?.this_week_likes_count ? `/${fpActivityData.this_week_likes_count}` : ''}
+                                  {fpActivityData?.next_week_likes_count ? (
+                                    <span className="text-blue-500">/{fpActivityData.next_week_likes_count}</span>
+                                  ) : ''}
+                                </span>
                               </div>
                             </div>
                           </div>
-                        </div>
+                          
+                          {/* Expanded activity section */}
+                          {expandedUserActivity.has(fpProfile.id) && (
+                            <Card className="mt-3 p-4 bg-muted/50 border">
+                              {fpActivityData ? (
+                                <>
+                                  {/* Ratings */}
+                                  {fpActivityData.ratings && fpActivityData.ratings.length > 0 && (
+                                    <div className="mb-4">
+                                      <h5 className="text-sm font-semibold mb-3 flex items-center gap-1">
+                                        <Star className="h-4 w-4 text-yellow-500" />
+                                        Ratings ({fpActivityData.ratingsCount})
+                                      </h5>
+                                      <div className="space-y-2 max-h-64 overflow-y-auto">
+                                        {Object.entries(fpActivityData.ratingsByWeek || {}).map(([week, ratings]: [string, any]) => {
+                                          return (
+                                            <div key={week} className="space-y-2">
+                                              <div className="text-xs font-medium text-muted-foreground">{week}</div>
+                                              {ratings.map((rating: any) => (
+                                                <div key={rating.id} className="flex items-center gap-2 text-xs p-2 bg-background rounded border">
+                                                  <div className="relative h-12 w-12 flex-shrink-0">
+                                                    <img 
+                                                      src={rating.profiles?.photo_1_url || rating.profiles?.avatar_url || ''} 
+                                                      alt={rating.profiles?.display_name}
+                                                      className="h-full w-full object-cover rounded"
+                                                    />
+                                                  </div>
+                                                  <div className="flex-1">
+                                                    <div className="font-medium">
+                                                      {rating.profiles?.display_name || 
+                                                       `${rating.profiles?.first_name || ''} ${rating.profiles?.last_name || ''}`.trim()}
+                                                    </div>
+                                                    <div className="flex items-center gap-2 mt-1">
+                                                      <div className="flex">
+                                                        {[1,2,3,4,5].map(i => (
+                                                          <Star key={i} className={`h-3 w-3 ${i <= rating.rating ? 'fill-yellow-500 text-yellow-500' : 'text-gray-300'}`} />
+                                                        ))}
+                                                        <span className="font-bold text-sm ml-1">{rating.rating}</span>
+                                                      </div>
+                                                      <span className="text-muted-foreground text-xs">
+                                                        {new Date(rating.created_at).toLocaleDateString('en-GB')}
+                                                      </span>
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              ))}
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+                                  )}
+                                  
+                                  {/* Likes */}
+                                  {fpActivityData.likes && fpActivityData.likes.length > 0 && (
+                                    <div>
+                                      <h5 className="text-sm font-semibold mb-3 flex items-center gap-1">
+                                        <Heart className="h-4 w-4 text-red-500" />
+                                        Likes ({fpActivityData.likesCount})
+                                      </h5>
+                                      <div className="space-y-2 max-h-64 overflow-y-auto">
+                                        {fpActivityData.likes.map((like: any) => (
+                                          <div key={like.id} className="flex items-center gap-2 text-xs p-2 bg-background rounded border">
+                                            <div className="relative h-12 w-12 flex-shrink-0">
+                                              <img 
+                                                src={like.profiles?.photo_1_url || like.profiles?.avatar_url || ''} 
+                                                alt={like.profiles?.display_name}
+                                                className="h-full w-full object-cover rounded"
+                                              />
+                                            </div>
+                                            <div className="flex-1">
+                                              <div className="font-medium">
+                                                {like.profiles?.display_name || 
+                                                 `${like.profiles?.first_name || ''} ${like.profiles?.last_name || ''}`.trim()}
+                                              </div>
+                                              <div className="text-muted-foreground text-xs mt-1">
+                                                {new Date(like.created_at).toLocaleDateString('en-GB')}
+                                              </div>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                  
+                                  {(!fpActivityData.ratings || fpActivityData.ratings.length === 0) &&
+                                   (!fpActivityData.likes || fpActivityData.likes.length === 0) && (
+                                    <div className="text-center text-muted-foreground py-4">
+                                      No activity yet
+                                    </div>
+                                  )}
+                                </>
+                              ) : (
+                                <div className="text-center text-muted-foreground py-4">
+                                  <LoadingSpinner />
+                                </div>
+                              )}
+                            </Card>
+                          )}
+                        </Card>
                       );
                     })}
                   </div>
@@ -1051,85 +1201,234 @@ export function AdminRegistrationsTab({
               {profile.ip_address && expandedIpAddress === `${profile.ip_address}-${profile.id}` && (() => {
                 const profilesWithSameIp = getProfilesWithIp(profile.ip_address!).filter(p => p.id !== profile.id);
                 return profilesWithSameIp.length > 0 && (
-                  <Card className="p-4 bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-800">
-                    <h4 className="text-sm font-medium mb-3 text-purple-900 dark:text-purple-100">
+                  <Card className="rounded-none md:rounded-lg p-4 bg-muted/50 border relative">
+                    <h4 className="text-sm font-medium mb-3">
                       Users with same IP ({profile.ip_address}):
                     </h4>
                     
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                       {profilesWithSameIp.map(ipProfile => {
                         const ipFullName = ipProfile.display_name || 
                           `${ipProfile.first_name || ''} ${ipProfile.last_name || ''}`.trim() || 
                           'Unknown';
                         const ipEmail = (ipProfile as any).email || '';
                         const ipVotingStats = userVotingStats[ipProfile.id];
+                        const ipActivityData = userActivityData[ipProfile.id];
                         const ipActivityDate = new Date(ipProfile.created_at);
                         
                         return (
-                          <div key={ipProfile.id} className="p-3 bg-background rounded border">
-                            <div className="flex items-start gap-3">
-                              <Avatar className="h-10 w-10">
-                                <AvatarImage src={ipProfile.avatar_url || ''} />
-                                <AvatarFallback className="text-xs">
-                                  {ipProfile.display_name?.charAt(0) || ipProfile.first_name?.charAt(0) || 'U'}
-                                </AvatarFallback>
-                              </Avatar>
+                          <Card key={ipProfile.id} className="p-4 relative">
+                            {/* Date/time badge */}
+                            <Badge 
+                              variant="outline"
+                              className="absolute top-0 left-0 text-xs rounded-none rounded-tr-md font-normal"
+                            >
+                              {ipActivityDate.toLocaleDateString('en-GB', { 
+                                day: 'numeric', 
+                                month: 'short' 
+                              })} {ipActivityDate.toLocaleTimeString('en-GB', { 
+                                hour: '2-digit', 
+                                minute: '2-digit',
+                                hour12: false 
+                              })}
+                            </Badge>
+                            
+                            {/* Main content */}
+                            <div className="mt-4">
+                              <div className="flex items-start gap-2 mb-1">
+                                <Avatar className="h-6 w-6 flex-shrink-0">
+                                  <AvatarImage src={ipProfile.avatar_url || ''} />
+                                  <AvatarFallback className="text-xs">
+                                    {ipProfile.display_name?.charAt(0) || ipProfile.first_name?.charAt(0) || 'U'}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span className="font-medium">
+                                  {ipFullName}
+                                </span>
+                              </div>
                               
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <span className="font-medium text-sm">{ipFullName}</span>
+                              {/* Email */}
+                              {ipEmail && (
+                                <div className="text-xs text-foreground/80 flex items-center gap-1 mb-1">
+                                  <span>{ipEmail}</span>
                                   {ipProfile.auth_provider === 'google' && (
-                                    <Badge variant="outline" className="text-xs">G</Badge>
+                                    <span className="ml-1 font-bold text-blue-600 dark:text-blue-400 text-sm">G</span>
                                   )}
                                   {ipProfile.auth_provider === 'facebook' && (
-                                    <Badge variant="outline" className="text-xs">F</Badge>
+                                    <Facebook className="h-3 w-3 ml-1 text-blue-600" />
                                   )}
                                 </div>
-                                
-                                {ipEmail && (
-                                  <div className="text-xs text-muted-foreground mb-0.5">{ipEmail}</div>
-                                )}
-                                
-                                {ipProfile.fingerprint_id && (
-                                  <div className="text-xs text-blue-600 mb-0.5">
-                                    FP: {ipProfile.fingerprint_id.substring(0, 16)}...
-                                  </div>
-                                )}
-                                
-                                <div className="text-xs text-muted-foreground mb-0.5">
-                                  Registered: {ipActivityDate.toLocaleString('en-GB', {
-                                    timeZone: 'Asia/Manila',
-                                    day: '2-digit',
-                                    month: '2-digit',
-                                    year: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                  })}
+                              )}
+                              
+                              {/* Fingerprint */}
+                              {ipProfile.fingerprint_id && (
+                                <div className="text-xs text-muted-foreground mb-1">
+                                  FP: {ipProfile.fingerprint_id.substring(0, 16)}...
+                                </div>
+                              )}
+                              
+                              {/* Device info */}
+                              {ipProfile.user_agent && (() => {
+                                const { browser, device, os } = UAParser(ipProfile.user_agent);
+                                const deviceInfo = `${device.type || 'Desktop'} | ${os.name || 'Unknown OS'} ${os.version || ''}`;
+                                return (
+                                  <div className="text-xs text-muted-foreground mb-2">{deviceInfo}</div>
+                                );
+                              })()}
+                              
+                              {/* Stats row */}
+                              <div className="flex items-center gap-4 text-xs mt-2">
+                                <div 
+                                  className="flex items-center gap-1 cursor-pointer hover:opacity-80"
+                                  onClick={() => {
+                                    if (!ipActivityData && fetchUserActivity) {
+                                      fetchUserActivity(ipProfile.id);
+                                    }
+                                    const newExpanded = new Set(expandedUserActivity);
+                                    if (newExpanded.has(ipProfile.id)) {
+                                      newExpanded.delete(ipProfile.id);
+                                    } else {
+                                      newExpanded.add(ipProfile.id);
+                                    }
+                                    setExpandedUserActivity(newExpanded);
+                                  }}
+                                >
+                                  <Star className="h-3 w-3 text-yellow-500" />
+                                  <span>
+                                    {ipVotingStats?.total_votes_count || 0}
+                                    {ipVotingStats?.this_week_count ? `/${ipVotingStats.this_week_count}` : ''}
+                                    {ipVotingStats?.next_week_count ? (
+                                      <span className="text-blue-500">/{ipVotingStats.next_week_count}</span>
+                                    ) : ''}
+                                  </span>
                                 </div>
                                 
-                                {ipProfile.user_agent && (() => {
-                                  const { browser, device, os } = UAParser(ipProfile.user_agent);
-                                  return (
-                                    <div className="text-xs text-muted-foreground">
-                                      {device.type || 'Desktop'} | {os.name || 'Unknown OS'}
-                                    </div>
-                                  );
-                                })()}
-                                
-                                {/* Stats */}
-                                <div className="flex items-center gap-3 mt-2">
-                                  <div className="flex items-center gap-1">
-                                    <Star className="h-3 w-3 text-yellow-500" />
-                                    <span className="text-xs">{ipVotingStats?.total_votes_count || 0}</span>
-                                  </div>
-                                  <div className="flex items-center gap-1">
-                                    <Heart className="h-3 w-3 text-red-500" />
-                                    <span className="text-xs">{userActivityData?.[ipProfile.id]?.likes_given || 0}</span>
-                                  </div>
+                                <div 
+                                  className="flex items-center gap-1 cursor-pointer hover:opacity-80"
+                                  onClick={() => {
+                                    if (!ipActivityData && fetchUserActivity) {
+                                      fetchUserActivity(ipProfile.id);
+                                    }
+                                    const newExpanded = new Set(expandedUserActivity);
+                                    if (newExpanded.has(ipProfile.id)) {
+                                      newExpanded.delete(ipProfile.id);
+                                    } else {
+                                      newExpanded.add(ipProfile.id);
+                                    }
+                                    setExpandedUserActivity(newExpanded);
+                                  }}
+                                >
+                                  <Heart className="h-3 w-3 text-red-500" />
+                                  <span>
+                                    {ipActivityData?.likes_given || 0}
+                                    {ipActivityData?.this_week_likes_count ? `/${ipActivityData.this_week_likes_count}` : ''}
+                                    {ipActivityData?.next_week_likes_count ? (
+                                      <span className="text-blue-500">/{ipActivityData.next_week_likes_count}</span>
+                                    ) : ''}
+                                  </span>
                                 </div>
                               </div>
                             </div>
-                          </div>
+                            
+                            {/* Expanded activity section */}
+                            {expandedUserActivity.has(ipProfile.id) && (
+                              <Card className="mt-3 p-4 bg-muted/50 border">
+                                {ipActivityData ? (
+                                  <>
+                                    {/* Ratings */}
+                                    {ipActivityData.ratings && ipActivityData.ratings.length > 0 && (
+                                      <div className="mb-4">
+                                        <h5 className="text-sm font-semibold mb-3 flex items-center gap-1">
+                                          <Star className="h-4 w-4 text-yellow-500" />
+                                          Ratings ({ipActivityData.ratingsCount})
+                                        </h5>
+                                        <div className="space-y-2 max-h-64 overflow-y-auto">
+                                          {Object.entries(ipActivityData.ratingsByWeek || {}).map(([week, ratings]: [string, any]) => {
+                                            return (
+                                              <div key={week} className="space-y-2">
+                                                <div className="text-xs font-medium text-muted-foreground">{week}</div>
+                                                {ratings.map((rating: any) => (
+                                                  <div key={rating.id} className="flex items-center gap-2 text-xs p-2 bg-background rounded border">
+                                                    <div className="relative h-12 w-12 flex-shrink-0">
+                                                      <img 
+                                                        src={rating.profiles?.photo_1_url || rating.profiles?.avatar_url || ''} 
+                                                        alt={rating.profiles?.display_name}
+                                                        className="h-full w-full object-cover rounded"
+                                                      />
+                                                    </div>
+                                                    <div className="flex-1">
+                                                      <div className="font-medium">
+                                                        {rating.profiles?.display_name || 
+                                                         `${rating.profiles?.first_name || ''} ${rating.profiles?.last_name || ''}`.trim()}
+                                                      </div>
+                                                      <div className="flex items-center gap-2 mt-1">
+                                                        <div className="flex">
+                                                          {[1,2,3,4,5].map(i => (
+                                                            <Star key={i} className={`h-3 w-3 ${i <= rating.rating ? 'fill-yellow-500 text-yellow-500' : 'text-gray-300'}`} />
+                                                          ))}
+                                                          <span className="font-bold text-sm ml-1">{rating.rating}</span>
+                                                        </div>
+                                                        <span className="text-muted-foreground text-xs">
+                                                          {new Date(rating.created_at).toLocaleDateString('en-GB')}
+                                                        </span>
+                                                      </div>
+                                                    </div>
+                                                  </div>
+                                                ))}
+                                              </div>
+                                            );
+                                          })}
+                                        </div>
+                                      </div>
+                                    )}
+                                    
+                                    {/* Likes */}
+                                    {ipActivityData.likes && ipActivityData.likes.length > 0 && (
+                                      <div>
+                                        <h5 className="text-sm font-semibold mb-3 flex items-center gap-1">
+                                          <Heart className="h-4 w-4 text-red-500" />
+                                          Likes ({ipActivityData.likesCount})
+                                        </h5>
+                                        <div className="space-y-2 max-h-64 overflow-y-auto">
+                                          {ipActivityData.likes.map((like: any) => (
+                                            <div key={like.id} className="flex items-center gap-2 text-xs p-2 bg-background rounded border">
+                                              <div className="relative h-12 w-12 flex-shrink-0">
+                                                <img 
+                                                  src={like.profiles?.photo_1_url || like.profiles?.avatar_url || ''} 
+                                                  alt={like.profiles?.display_name}
+                                                  className="h-full w-full object-cover rounded"
+                                                />
+                                              </div>
+                                              <div className="flex-1">
+                                                <div className="font-medium">
+                                                  {like.profiles?.display_name || 
+                                                   `${like.profiles?.first_name || ''} ${like.profiles?.last_name || ''}`.trim()}
+                                                </div>
+                                                <div className="text-muted-foreground text-xs mt-1">
+                                                  {new Date(like.created_at).toLocaleDateString('en-GB')}
+                                                </div>
+                                              </div>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+                                    
+                                    {(!ipActivityData.ratings || ipActivityData.ratings.length === 0) &&
+                                     (!ipActivityData.likes || ipActivityData.likes.length === 0) && (
+                                      <div className="text-center text-muted-foreground py-4">
+                                        No activity yet
+                                      </div>
+                                    )}
+                                  </>
+                                ) : (
+                                  <div className="text-center text-muted-foreground py-4">
+                                    <LoadingSpinner />
+                                  </div>
+                                )}
+                              </Card>
+                            )}
+                          </Card>
                         );
                       })}
                     </div>
