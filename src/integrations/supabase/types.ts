@@ -1856,6 +1856,16 @@ export type Database = {
           },
         ]
       }
+      v_next_week_cards_totals: {
+        Row: {
+          candidate_name: string | null
+          participant_user_id: string | null
+          total_dislikes: number | null
+          total_likes: number | null
+          total_votes: number | null
+        }
+        Relationships: []
+      }
       v_next_week_votes_by_day: {
         Row: {
           candidate_name: string | null
