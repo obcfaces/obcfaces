@@ -70,7 +70,7 @@ export function AdminNextWeekTab({
     loadVotes();
   }, []);
 
-  const [participantWeeklyStats, setParticipantWeeklyStats] = useState<Record<string, {
+  const [weeklyVotesByDay, setWeeklyVotesByDay] = useState<Record<string, {
     mon: { likes: number; dislikes: number };
     tue: { likes: number; dislikes: number };
     wed: { likes: number; dislikes: number };
@@ -80,49 +80,45 @@ export function AdminNextWeekTab({
     sun: { likes: number; dislikes: number };
   }>>({});
 
-  // Load weekly votes breakdown by day
+  // Load ALL votes and calculate daily breakdown for current week
   useEffect(() => {
-    const loadWeeklyStats = async () => {
+    const loadDailyVotes = async () => {
       try {
-        // Get current week boundaries (Monday to Sunday) in UTC
-        const now = new Date();
-        const dayOfWeek = now.getUTCDay(); // 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
-        const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-        
-        const weekMonday = new Date(Date.UTC(
-          now.getUTCFullYear(),
-          now.getUTCMonth(),
-          now.getUTCDate() - daysFromMonday,
-          0, 0, 0, 0
-        ));
-        const weekSunday = new Date(weekMonday);
-        weekSunday.setUTCDate(weekMonday.getUTCDate() + 6);
-        weekSunday.setUTCHours(23, 59, 59, 999);
-
-        console.log('📅 Week boundaries:', {
-          monday: weekMonday.toISOString(),
-          sunday: weekSunday.toISOString()
-        });
-
-        // Get ALL votes
+        // Fetch all votes from next_week_votes
         const { data: allVotes, error } = await supabase
           .from('next_week_votes')
           .select('candidate_name, vote_type, created_at');
 
-        if (error) {
-          console.error('Error loading votes:', error);
+        if (error || !allVotes) {
+          console.error('❌ Error fetching votes:', error);
           return;
         }
 
-        if (!allVotes || allVotes.length === 0) {
-          setParticipantWeeklyStats({});
-          return;
-        }
+        console.log(`📊 TOTAL votes fetched: ${allVotes.length}`);
 
-        console.log(`📊 Total votes in database: ${allVotes.length}`);
+        // Calculate current week Monday (UTC)
+        const now = new Date();
+        const currentDayOfWeek = now.getUTCDay(); // 0=Sun, 1=Mon, etc.
+        const daysToSubtract = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+        
+        const mondayUTC = new Date(Date.UTC(
+          now.getUTCFullYear(),
+          now.getUTCMonth(),
+          now.getUTCDate() - daysToSubtract,
+          0, 0, 0, 0
+        ));
 
-        // Initialize stats
-        const stats: Record<string, {
+        const sundayUTC = new Date(mondayUTC);
+        sundayUTC.setUTCDate(mondayUTC.getUTCDate() + 6);
+        sundayUTC.setUTCHours(23, 59, 59, 999);
+
+        console.log('📅 Current week (UTC):', {
+          monday: mondayUTC.toISOString(),
+          sunday: sundayUTC.toISOString()
+        });
+
+        // Group votes by participant and day
+        const dailyStats: Record<string, {
           mon: { likes: number; dislikes: number };
           tue: { likes: number; dislikes: number };
           wed: { likes: number; dislikes: number };
@@ -132,68 +128,65 @@ export function AdminNextWeekTab({
           sun: { likes: number; dislikes: number };
         }> = {};
 
-        // Process each vote
-        allVotes.forEach(vote => {
-          const voteDate = new Date(vote.created_at);
-          const name = vote.candidate_name.trim().replace(/\s+/g, ' ');
-          
-          // Only count votes from this week
-          if (voteDate >= weekMonday && voteDate <= weekSunday) {
-            // Initialize candidate if not exists
-            if (!stats[name]) {
-              stats[name] = {
-                mon: { likes: 0, dislikes: 0 },
-                tue: { likes: 0, dislikes: 0 },
-                wed: { likes: 0, dislikes: 0 },
-                thu: { likes: 0, dislikes: 0 },
-                fri: { likes: 0, dislikes: 0 },
-                sat: { likes: 0, dislikes: 0 },
-                sun: { likes: 0, dislikes: 0 },
-              };
-            }
+        let mycelDebugVotes: any[] = [];
 
-            // Get day of week (0=Sunday, 1=Monday, ..., 6=Saturday)
-            const dayOfWeek = voteDate.getUTCDay();
-            const dayMap: Record<number, 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat'> = {
-              0: 'sun',
-              1: 'mon',
-              2: 'tue',
-              3: 'wed',
-              4: 'thu',
-              5: 'fri',
-              6: 'sat'
+        allVotes.forEach((vote) => {
+          const voteTimestamp = new Date(vote.created_at);
+          const participantName = vote.candidate_name.trim().replace(/\s+/g, ' ');
+
+          // Only process votes from current week
+          if (voteTimestamp < mondayUTC || voteTimestamp > sundayUTC) {
+            return; // Skip votes outside current week
+          }
+
+          // Initialize participant stats if needed
+          if (!dailyStats[participantName]) {
+            dailyStats[participantName] = {
+              mon: { likes: 0, dislikes: 0 },
+              tue: { likes: 0, dislikes: 0 },
+              wed: { likes: 0, dislikes: 0 },
+              thu: { likes: 0, dislikes: 0 },
+              fri: { likes: 0, dislikes: 0 },
+              sat: { likes: 0, dislikes: 0 },
+              sun: { likes: 0, dislikes: 0 },
             };
-            const dayKey = dayMap[dayOfWeek];
+          }
 
-            // Count the vote
-            if (vote.vote_type === 'like') {
-              stats[name][dayKey].likes++;
-            } else if (vote.vote_type === 'dislike') {
-              stats[name][dayKey].dislikes++;
-            }
+          // Determine day of week in UTC
+          const utcDayIndex = voteTimestamp.getUTCDay(); // 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
+          const dayKeys: ('sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat')[] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+          const dayKey = dayKeys[utcDayIndex];
 
-            // Debug for Mycel Jera
-            if (name === 'Mycel Jera') {
-              console.log('✅ Mycel vote counted:', {
-                date: vote.created_at,
-                dayKey,
-                type: vote.vote_type,
-                newCount: vote.vote_type === 'like' ? stats[name][dayKey].likes : stats[name][dayKey].dislikes
-              });
-            }
+          // Increment counter
+          if (vote.vote_type === 'like') {
+            dailyStats[participantName][dayKey].likes++;
+          } else if (vote.vote_type === 'dislike') {
+            dailyStats[participantName][dayKey].dislikes++;
+          }
+
+          // Debug Mycel Jera
+          if (participantName === 'Mycel Jera') {
+            mycelDebugVotes.push({
+              created_at: vote.created_at,
+              utcDay: dayKey,
+              type: vote.vote_type,
+              likes_now: dailyStats[participantName][dayKey].likes,
+              dislikes_now: dailyStats[participantName][dayKey].dislikes
+            });
           }
         });
 
-        console.log('📊 Weekly stats:', stats);
-        console.log('📊 Mycel Jera stats:', stats['Mycel Jera']);
-        
-        setParticipantWeeklyStats(stats);
-      } catch (error) {
-        console.error('Error in loadWeeklyStats:', error);
+        console.log('🔍 Mycel Jera ALL processed votes:', mycelDebugVotes);
+        console.log('📊 Mycel Jera final daily stats:', dailyStats['Mycel Jera']);
+        console.log('📊 ALL participants daily stats:', dailyStats);
+
+        setWeeklyVotesByDay(dailyStats);
+      } catch (err) {
+        console.error('❌ Error in loadDailyVotes:', err);
       }
     };
 
-    loadWeeklyStats();
+    loadDailyVotes();
   }, []);
 
   // Week dates for table headers
@@ -217,20 +210,15 @@ export function AdminNextWeekTab({
     return dates;
   }, []);
 
-  // Get participants with votes - show ALL next week participants
+  // Get participants with votes - show ALL next week participants with their daily stats
   const participantsWithVotes = useMemo(() => {
-    const allParticipantsMap = new Map(
-      filteredParticipants.map(p => {
-        const appData = p.application_data || {};
-        const firstName = appData.first_name || '';
-        const lastName = appData.last_name || '';
-        const name = `${firstName} ${lastName}`.trim().replace(/\s+/g, ' ');
-        return [name, p];
-      })
-    );
-
-    const results = Array.from(allParticipantsMap.entries()).map(([name, participant]) => {
-      const weeklyBreakdown = participantWeeklyStats[name] || {
+    const results = filteredParticipants.map(p => {
+      const appData = p.application_data || {};
+      const firstName = appData.first_name || '';
+      const lastName = appData.last_name || '';
+      const name = `${firstName} ${lastName}`.trim().replace(/\s+/g, ' ');
+      
+      const weeklyBreakdown = weeklyVotesByDay[name] || {
         mon: { likes: 0, dislikes: 0 },
         tue: { likes: 0, dislikes: 0 },
         wed: { likes: 0, dislikes: 0 },
@@ -241,21 +229,26 @@ export function AdminNextWeekTab({
       };
 
       // Calculate WEEKLY total from daily stats (for table)
-      const weeklyTotal = {
-        likes: Object.values(weeklyBreakdown).reduce((sum, day) => sum + day.likes, 0),
-        dislikes: Object.values(weeklyBreakdown).reduce((sum, day) => sum + day.dislikes, 0)
-      };
+      const totalLikes = (weeklyBreakdown.mon?.likes || 0) + (weeklyBreakdown.tue?.likes || 0) + 
+                         (weeklyBreakdown.wed?.likes || 0) + (weeklyBreakdown.thu?.likes || 0) + 
+                         (weeklyBreakdown.fri?.likes || 0) + (weeklyBreakdown.sat?.likes || 0) + 
+                         (weeklyBreakdown.sun?.likes || 0);
+      
+      const totalDislikes = (weeklyBreakdown.mon?.dislikes || 0) + (weeklyBreakdown.tue?.dislikes || 0) + 
+                            (weeklyBreakdown.wed?.dislikes || 0) + (weeklyBreakdown.thu?.dislikes || 0) + 
+                            (weeklyBreakdown.fri?.dislikes || 0) + (weeklyBreakdown.sat?.dislikes || 0) + 
+                            (weeklyBreakdown.sun?.dislikes || 0);
 
       return {
         name,
         stats: weeklyBreakdown,
-        totalLikes: weeklyTotal.likes,
-        totalDislikes: weeklyTotal.dislikes,
+        totalLikes,
+        totalDislikes,
       };
     });
 
     return results.sort((a, b) => (b.totalLikes + b.totalDislikes) - (a.totalLikes + a.totalDislikes));
-  }, [filteredParticipants, participantWeeklyStats]);
+  }, [filteredParticipants, weeklyVotesByDay]);
 
   const totalStats = useMemo(() => {
     const total = { like: 0, dislike: 0 };
