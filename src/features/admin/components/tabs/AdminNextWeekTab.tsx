@@ -149,6 +149,19 @@ export function AdminNextWeekTab({
         // Check if vote is in range
         const inRange = voteDate >= weekMonday && voteDate <= weekSunday;
         
+        // Debug for Mycel
+        if (name === 'Mycel Jera') {
+          console.log('🔍 Mycel vote check:', {
+            created_at: vote.created_at,
+            voteDate_utc: voteDate.toUTCString(),
+            vote_type: vote.vote_type,
+            dayOfWeek: voteDate.getUTCDay(),
+            inRange,
+            weekMonday_utc: weekMonday.toUTCString(),
+            weekSunday_utc: weekSunday.toUTCString()
+          });
+        }
+        
         if (inRange) {
           // Initialize stats object if not exists
           if (!stats[name]) {
@@ -167,6 +180,14 @@ export function AdminNextWeekTab({
           const dayIndex = voteDate.getUTCDay();
           const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
           const dayKey = dayKeys[dayIndex] as 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
+          
+          if (name === 'Mycel Jera') {
+            console.log('✅ Mycel vote ADDED to stats:', {
+              dayKey,
+              vote_type: vote.vote_type,
+              currentCount: vote.vote_type === 'like' ? stats[name][dayKey].likes : stats[name][dayKey].dislikes
+            });
+          }
           
           if (vote.vote_type === 'like') {
             stats[name][dayKey].likes++;
