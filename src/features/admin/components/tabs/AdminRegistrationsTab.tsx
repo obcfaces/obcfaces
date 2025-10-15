@@ -449,7 +449,7 @@ export function AdminRegistrationsTab({
       </div>
 
       {/* User Cards */}
-      <div className="space-y-4 -mx-0.5 md:mx-0">
+      <div className="space-y-4 md:mx-0">
         {paginatedProfiles.map(profile => {
           const fullName = profile.display_name || 
             `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 
@@ -807,17 +807,8 @@ export function AdminRegistrationsTab({
                             if (!activity) return '0';
                             
                             const votes = activity.ratingsCount || 0;
-                            const likes = activity.likes || [];
-                            
-                            // Separate likes by participant's admin_status
-                            // "next week on site" participants = next likes (blue)
-                            // "this week" participants = this week likes (green)
-                            const nextLikes = likes.filter((like: any) => 
-                              like.admin_status === 'next week on site'
-                            ).length;
-                            const thisWeekLikes = likes.filter((like: any) => 
-                              like.admin_status === 'this week'
-                            ).length;
+                            const nextLikes = activity.next_week_likes_count || 0;
+                            const thisWeekLikes = activity.this_week_likes_count || 0;
                             
                             // Format: votes/nextLikes/thisWeekLikes, hiding zeros
                             const parts = [];
