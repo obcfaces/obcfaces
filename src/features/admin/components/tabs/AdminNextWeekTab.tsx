@@ -345,6 +345,13 @@ export function AdminNextWeekTab({
           {filterType === 'all' ? 'No participants for next week' : `No participants with ${filterType}s`}
         </div>
       )}
+      
+      {/* Auto-refresh info block */}
+      <div className="mt-6 p-3 bg-muted/50 rounded-md border border-border">
+        <p className="text-sm text-muted-foreground text-center">
+          ⏱️ Results update automatically every 00:00 UTC and refresh every 60 seconds
+        </p>
+      </div>
     </div>
   );
 }
