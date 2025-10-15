@@ -149,33 +149,8 @@ export function AdminNextWeekTab({
         // Check if vote is in range
         const inRange = voteDate >= weekMonday && voteDate <= weekSunday;
         
-        // Debug for Mycel Jera
-        if (name === 'Mycel Jera') {
-          console.log('🔍 Mycel vote:', {
-            created_at: vote.created_at,
-            voteDate_iso: voteDate.toISOString(),
-            voteDate_utc: voteDate.toUTCString(),
-            vote_type: vote.vote_type,
-            inRange,
-            weekMonday_iso: weekMonday.toISOString(),
-            weekSunday_iso: weekSunday.toISOString()
-          });
-        }
-        
         if (inRange) {
-          // getUTCDay returns: 0=Sunday, 1=Monday, 2=Tuesday, 3=Wednesday, 4=Thursday, 5=Friday, 6=Saturday
-          const dayIndex = voteDate.getUTCDay();
-          const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-          const dayKey = dayKeys[dayIndex] as 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
-
-          if (name === 'Mycel Jera') {
-            console.log('✅ Mycel vote COUNTED:', {
-              dayIndex,
-              dayKey,
-              vote_type: vote.vote_type
-            });
-          }
-
+          // Initialize stats object if not exists
           if (!stats[name]) {
             stats[name] = {
               mon: { likes: 0, dislikes: 0 },
@@ -187,6 +162,11 @@ export function AdminNextWeekTab({
               sun: { likes: 0, dislikes: 0 },
             };
           }
+
+          // getUTCDay returns: 0=Sunday, 1=Monday, 2=Tuesday, 3=Wednesday, 4=Thursday, 5=Friday, 6=Saturday
+          const dayIndex = voteDate.getUTCDay();
+          const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+          const dayKey = dayKeys[dayIndex] as 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
           
           if (vote.vote_type === 'like') {
             stats[name][dayKey].likes++;
