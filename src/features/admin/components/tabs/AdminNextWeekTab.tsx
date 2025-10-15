@@ -86,7 +86,7 @@ export function AdminNextWeekTab({
     sun: { likes: number; dislikes: number };
   }>>({});
 
-  // Load weekly votes from next_week_votes table
+  // Load weekly votes breakdown by day
   useEffect(() => {
     const loadWeeklyStats = async () => {
       // Get ALL votes from next_week_votes with dates
@@ -155,6 +155,7 @@ export function AdminNextWeekTab({
       });
 
       console.log('📅 Weekly stats calculated:', stats);
+      console.log('📅 Mycel Jera weekly:', stats['Mycel Jera']);
       setParticipantWeeklyStats(stats);
     };
 
