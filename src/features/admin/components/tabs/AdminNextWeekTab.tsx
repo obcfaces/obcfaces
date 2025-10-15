@@ -125,6 +125,14 @@ export function AdminNextWeekTab({
       sunday.setUTCDate(monday.getUTCDate() + 6);
       sunday.setUTCHours(23, 59, 59, 999);
 
+      console.log('📅 Current week:', {
+        now: now.toISOString(),
+        monday: monday.toISOString(),
+        sunday: sunday.toISOString(),
+        dayOfWeek,
+        daysFromMonday
+      });
+
       // Count votes by day and type
       votesData?.forEach(vote => {
         const voteDate = new Date(vote.created_at);
@@ -133,6 +141,17 @@ export function AdminNextWeekTab({
           const dayIndex = voteDate.getUTCDay();
           const dayKey = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][dayIndex] as 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
           const name = vote.candidate_name.trim().replace(/\s+/g, ' ');
+
+          // Debug for Mycel Jera
+          if (name === 'Mycel Jera') {
+            console.log('📅 Mycel Jera vote:', {
+              date: voteDate.toISOString(),
+              dayIndex,
+              dayKey,
+              vote_type: vote.vote_type,
+              inRange: voteDate >= monday && voteDate <= sunday
+            });
+          }
 
           if (!stats[name]) {
             stats[name] = {
