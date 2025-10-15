@@ -618,6 +618,7 @@ export type Database = {
           candidate_name: string
           created_at: string
           id: string
+          participant_user_id: string | null
           updated_at: string | null
           user_id: string
           vote_count: number | null
@@ -628,6 +629,7 @@ export type Database = {
           candidate_name: string
           created_at?: string
           id?: string
+          participant_user_id?: string | null
           updated_at?: string | null
           user_id: string
           vote_count?: number | null
@@ -638,6 +640,7 @@ export type Database = {
           candidate_name?: string
           created_at?: string
           id?: string
+          participant_user_id?: string | null
           updated_at?: string | null
           user_id?: string
           vote_count?: number | null
@@ -894,6 +897,7 @@ export type Database = {
           country: string | null
           created_at: string
           display_name: string | null
+          display_name_generated: string | null
           email_verified: boolean | null
           first_name: string | null
           gender: string | null
@@ -926,6 +930,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           display_name?: string | null
+          display_name_generated?: string | null
           email_verified?: boolean | null
           first_name?: string | null
           gender?: string | null
@@ -958,6 +963,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           display_name?: string | null
+          display_name_generated?: string | null
           email_verified?: boolean | null
           first_name?: string | null
           gender?: string | null
@@ -1702,6 +1708,56 @@ export type Database = {
         }
         Relationships: []
       }
+      v_contestant_ratings_unified: {
+        Row: {
+          contestant_name_unified: string | null
+          created_at: string | null
+          id: string | null
+          participant_id: string | null
+          rating: number | null
+          updated_at: string | null
+          user_id: string | null
+          week_interval: string | null
+          week_start_utc: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contestant_ratings_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "cached_participant_engagement"
+            referencedColumns: ["participant_id"]
+          },
+          {
+            foreignKeyName: "contestant_ratings_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "v_next_week"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contestant_ratings_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "v_past_archive"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contestant_ratings_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "v_this_week"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contestant_ratings_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "weekly_contest_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_next_week: {
         Row: {
           admin_status:
@@ -1799,6 +1855,17 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      v_next_week_votes_by_day: {
+        Row: {
+          candidate_name: string | null
+          dislikes: number | null
+          likes: number | null
+          participant_user_id: string | null
+          total_votes: number | null
+          vote_date: string | null
+        }
+        Relationships: []
       }
       v_past_archive: {
         Row: {
