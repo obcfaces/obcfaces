@@ -174,6 +174,7 @@ export function AdminNextWeekTab({
       });
 
       console.log('📅 Weekly stats calculated:', stats);
+      console.log('📅 All candidate names in stats:', Object.keys(stats));
       console.log('📅 Mycel Jera weekly:', stats['Mycel Jera']);
       setParticipantWeeklyStats(stats);
     };
