@@ -506,7 +506,7 @@ export function AdminRegistrationsTab({
           
           return (
             <div key={profile.id} className="space-y-2">
-              <Card className="p-4 rounded-none md:rounded-lg relative hover:shadow-md transition-shadow">
+              <Card className="rounded-none md:rounded-lg p-4 relative hover:shadow-md transition-shadow">
                 {/* Date/time badge in top-left */}
                 <Badge 
                   variant="outline"
@@ -766,9 +766,8 @@ export function AdminRegistrationsTab({
                     </div>
                   )}
                   
-                  {/* User Activity Icons (bottom right - no padding) */}
-                  <div className="absolute bottom-0 right-0 flex flex-col gap-0">
-                    {/* Stars - top */}
+                  {/* User Activity Icons (bottom right - single star with vote/like stats) */}
+                  <div className="absolute bottom-0 right-0">
                     <button
                       className="flex items-center gap-1 bg-background/90 px-1.5 py-0.5 hover:bg-background transition-colors cursor-pointer"
                       onClick={(e) => {
@@ -792,36 +791,42 @@ export function AdminRegistrationsTab({
                         <Loader2 className="h-3 w-3 animate-spin" />
                       ) : (
                         <span className="text-sm font-medium">
-                          {userActivityData[profile.id]?.ratingsCount ?? 0}
-                        </span>
-                      )}
-                    </button>
-                    
-                    {/* Hearts - bottom */}
-                    <button
-                      className="flex items-center gap-1 bg-background/90 px-1.5 py-0.5 hover:bg-background transition-colors cursor-pointer"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        const isExpanded = expandedUserActivity.has(profile.id);
-                        if (isExpanded) {
-                          const newExpanded = new Set(expandedUserActivity);
-                          newExpanded.delete(profile.id);
-                          setExpandedUserActivity(newExpanded);
-                        } else {
-                          setExpandedUserActivity(new Set(expandedUserActivity).add(profile.id));
-                          if (!userActivityData[profile.id] && fetchUserActivity) {
-                            fetchUserActivity(profile.id);
-                          }
-                        }
-                      }}
-                    >
-                      <Heart className="h-4 w-4 text-red-500 fill-red-500" />
-                      {loadingActivity.has(profile.id) ? (
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                      ) : (
-                        <span className="text-sm font-medium">
-                          {userActivityData[profile.id]?.likesCount ?? 0}
+                          {(() => {
+                            const activity = userActivityData[profile.id];
+                            if (!activity) return '0';
+                            
+                            const votes = activity.ratingsCount || 0;
+                            const likes = activity.likes || [];
+                            
+                            // Separate likes by participant's admin_status
+                            // "next week on site" participants = next likes (blue)
+                            // "this week" participants = this week likes (green)
+                            const nextLikes = likes.filter((like: any) => 
+                              like.admin_status === 'next week on site'
+                            ).length;
+                            const thisWeekLikes = likes.filter((like: any) => 
+                              like.admin_status === 'this week'
+                            ).length;
+                            
+                            // Format: votes/nextLikes/thisWeekLikes, hiding zeros
+                            const parts = [];
+                            if (votes > 0) parts.push(<span key="votes" className="text-red-500">{votes}</span>);
+                            if (nextLikes > 0) parts.push(<span key="next" className="text-blue-500">{nextLikes}</span>);
+                            if (thisWeekLikes > 0) parts.push(<span key="this" className="text-green-500">{thisWeekLikes}</span>);
+                            
+                            if (parts.length === 0) return '0';
+                            
+                            return (
+                              <>
+                                {parts.map((part, idx) => (
+                                  <React.Fragment key={idx}>
+                                    {idx > 0 && '/'}
+                                    {part}
+                                  </React.Fragment>
+                                ))}
+                              </>
+                            );
+                          })()}
                         </span>
                       )}
                     </button>
