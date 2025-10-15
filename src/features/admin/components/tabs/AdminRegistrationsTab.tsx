@@ -449,7 +449,7 @@ export function AdminRegistrationsTab({
       </div>
 
       {/* User Cards */}
-      <div className="space-y-4 -mx-4 md:mx-0">
+      <div className="space-y-4 -mx-1 md:mx-0">
         {paginatedProfiles.map(profile => {
           const fullName = profile.display_name || 
             `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 
@@ -1038,58 +1038,65 @@ export function AdminRegistrationsTab({
                               );
                             })()}
                             
-                            {/* Stats row */}
-                            <div className="flex items-center gap-4 text-xs mt-2">
-                              <div 
-                                className="flex items-center gap-1 cursor-pointer hover:opacity-80"
-                                onClick={() => {
-                                  if (!fpActivityData && fetchUserActivity) {
-                                    fetchUserActivity(fpProfile.id);
-                                  }
-                                  const newExpanded = new Set(expandedUserActivity);
-                                  if (newExpanded.has(fpProfile.id)) {
-                                    newExpanded.delete(fpProfile.id);
-                                  } else {
-                                    newExpanded.add(fpProfile.id);
-                                  }
-                                  setExpandedUserActivity(newExpanded);
-                                }}
-                              >
-                                <Star className="h-3 w-3 text-yellow-500" />
-                                <span>
-                                  {fpVotingStats?.total_votes_count || 0}
-                                  {fpVotingStats?.this_week_count ? `/${fpVotingStats.this_week_count}` : ''}
-                                  {fpVotingStats?.next_week_count ? (
-                                    <span className="text-blue-500">/{fpVotingStats.next_week_count}</span>
-                                  ) : ''}
-                                </span>
+                              {/* Stats row - matching main card */}
+                              <div className="absolute bottom-0 right-0">
+                                <button
+                                  className="flex items-center gap-1 bg-background/90 px-1.5 py-0.5 hover:bg-background transition-colors cursor-pointer"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    if (!fpActivityData && fetchUserActivity) {
+                                      fetchUserActivity(fpProfile.id);
+                                    }
+                                    const newExpanded = new Set(expandedUserActivity);
+                                    if (newExpanded.has(fpProfile.id)) {
+                                      newExpanded.delete(fpProfile.id);
+                                    } else {
+                                      newExpanded.add(fpProfile.id);
+                                    }
+                                    setExpandedUserActivity(newExpanded);
+                                  }}
+                                >
+                                  <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                                  {loadingActivity.has(fpProfile.id) ? (
+                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                  ) : (
+                                    <span className="text-sm font-medium">
+                                      {(() => {
+                                        if (!fpActivityData) return '0';
+                                        
+                                        const votes = fpActivityData.ratingsCount || 0;
+                                        const likes = fpActivityData.likes || [];
+                                        
+                                        const nextLikes = likes.filter((like: any) => 
+                                          like.admin_status === 'next week on site'
+                                        ).length;
+                                        const thisWeekLikes = likes.filter((like: any) => 
+                                          like.admin_status === 'this week'
+                                        ).length;
+                                        
+                                        const parts = [];
+                                        if (votes > 0) parts.push(<span key="votes" className="text-red-500">{votes}</span>);
+                                        if (nextLikes > 0) parts.push(<span key="next" className="text-blue-500">{nextLikes}</span>);
+                                        if (thisWeekLikes > 0) parts.push(<span key="this" className="text-green-500">{thisWeekLikes}</span>);
+                                        
+                                        if (parts.length === 0) return '0';
+                                        
+                                        return (
+                                          <>
+                                            {parts.map((part, idx) => (
+                                              <React.Fragment key={idx}>
+                                                {idx > 0 && '/'}
+                                                {part}
+                                              </React.Fragment>
+                                            ))}
+                                          </>
+                                        );
+                                      })()}
+                                    </span>
+                                  )}
+                                </button>
                               </div>
-                              
-                              <div 
-                                className="flex items-center gap-1 cursor-pointer hover:opacity-80"
-                                onClick={() => {
-                                  if (!fpActivityData && fetchUserActivity) {
-                                    fetchUserActivity(fpProfile.id);
-                                  }
-                                  const newExpanded = new Set(expandedUserActivity);
-                                  if (newExpanded.has(fpProfile.id)) {
-                                    newExpanded.delete(fpProfile.id);
-                                  } else {
-                                    newExpanded.add(fpProfile.id);
-                                  }
-                                  setExpandedUserActivity(newExpanded);
-                                }}
-                              >
-                                <Heart className="h-3 w-3 text-red-500" />
-                                <span>
-                                  {fpActivityData?.likes_given || 0}
-                                  {fpActivityData?.this_week_likes_count ? `/${fpActivityData.this_week_likes_count}` : ''}
-                                  {fpActivityData?.next_week_likes_count ? (
-                                    <span className="text-blue-500">/{fpActivityData.next_week_likes_count}</span>
-                                  ) : ''}
-                                </span>
-                              </div>
-                            </div>
                           </div>
                           
                           {/* Expanded activity section */}
@@ -1276,11 +1283,13 @@ export function AdminRegistrationsTab({
                                 );
                               })()}
                               
-                              {/* Stats row */}
-                              <div className="flex items-center gap-4 text-xs mt-2">
-                                <div 
-                                  className="flex items-center gap-1 cursor-pointer hover:opacity-80"
-                                  onClick={() => {
+                              {/* Stats row - matching main card */}
+                              <div className="absolute bottom-0 right-0">
+                                <button
+                                  className="flex items-center gap-1 bg-background/90 px-1.5 py-0.5 hover:bg-background transition-colors cursor-pointer"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
                                     if (!ipActivityData && fetchUserActivity) {
                                       fetchUserActivity(ipProfile.id);
                                     }
@@ -1293,40 +1302,45 @@ export function AdminRegistrationsTab({
                                     setExpandedUserActivity(newExpanded);
                                   }}
                                 >
-                                  <Star className="h-3 w-3 text-yellow-500" />
-                                  <span>
-                                    {ipVotingStats?.total_votes_count || 0}
-                                    {ipVotingStats?.this_week_count ? `/${ipVotingStats.this_week_count}` : ''}
-                                    {ipVotingStats?.next_week_count ? (
-                                      <span className="text-blue-500">/{ipVotingStats.next_week_count}</span>
-                                    ) : ''}
-                                  </span>
-                                </div>
-                                
-                                <div 
-                                  className="flex items-center gap-1 cursor-pointer hover:opacity-80"
-                                  onClick={() => {
-                                    if (!ipActivityData && fetchUserActivity) {
-                                      fetchUserActivity(ipProfile.id);
-                                    }
-                                    const newExpanded = new Set(expandedUserActivity);
-                                    if (newExpanded.has(ipProfile.id)) {
-                                      newExpanded.delete(ipProfile.id);
-                                    } else {
-                                      newExpanded.add(ipProfile.id);
-                                    }
-                                    setExpandedUserActivity(newExpanded);
-                                  }}
-                                >
-                                  <Heart className="h-3 w-3 text-red-500" />
-                                  <span>
-                                    {ipActivityData?.likes_given || 0}
-                                    {ipActivityData?.this_week_likes_count ? `/${ipActivityData.this_week_likes_count}` : ''}
-                                    {ipActivityData?.next_week_likes_count ? (
-                                      <span className="text-blue-500">/{ipActivityData.next_week_likes_count}</span>
-                                    ) : ''}
-                                  </span>
-                                </div>
+                                  <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                                  {loadingActivity.has(ipProfile.id) ? (
+                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                  ) : (
+                                    <span className="text-sm font-medium">
+                                      {(() => {
+                                        if (!ipActivityData) return '0';
+                                        
+                                        const votes = ipActivityData.ratingsCount || 0;
+                                        const likes = ipActivityData.likes || [];
+                                        
+                                        const nextLikes = likes.filter((like: any) => 
+                                          like.admin_status === 'next week on site'
+                                        ).length;
+                                        const thisWeekLikes = likes.filter((like: any) => 
+                                          like.admin_status === 'this week'
+                                        ).length;
+                                        
+                                        const parts = [];
+                                        if (votes > 0) parts.push(<span key="votes" className="text-red-500">{votes}</span>);
+                                        if (nextLikes > 0) parts.push(<span key="next" className="text-blue-500">{nextLikes}</span>);
+                                        if (thisWeekLikes > 0) parts.push(<span key="this" className="text-green-500">{thisWeekLikes}</span>);
+                                        
+                                        if (parts.length === 0) return '0';
+                                        
+                                        return (
+                                          <>
+                                            {parts.map((part, idx) => (
+                                              <React.Fragment key={idx}>
+                                                {idx > 0 && '/'}
+                                                {part}
+                                              </React.Fragment>
+                                            ))}
+                                          </>
+                                        );
+                                      })()}
+                                    </span>
+                                  )}
+                                </button>
                               </div>
                             </div>
                             

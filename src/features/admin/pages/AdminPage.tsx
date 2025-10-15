@@ -1271,14 +1271,39 @@ const AdminContent = () => {
         week: r.vote_week_interval 
       })));
 
+      // Calculate grouping of ratings by week_interval
+      const ratingsByWeek: Record<string, any[]> = {};
+      finalRatings.forEach(rating => {
+        const week = rating.vote_week_interval || 'Unknown';
+        if (!ratingsByWeek[week]) {
+          ratingsByWeek[week] = [];
+        }
+        ratingsByWeek[week].push(rating);
+      });
+
+      // Count likes by admin_status
+      const thisWeekLikes = finalLikes.filter((like: any) => like.admin_status === 'this week').length;
+      const nextWeekLikes = finalLikes.filter((like: any) => like.admin_status === 'next week on site').length;
+      
+      console.log(`👍 Likes breakdown for user ${userId}:`, {
+        total: finalLikes.length,
+        thisWeek: thisWeekLikes,
+        nextWeek: nextWeekLikes,
+        likesData: finalLikes.map((l: any) => ({ admin_status: l.admin_status, participant_id: l.participant_id }))
+      });
+
       // Store in BOTH states for compatibility
       const activityData = {
         likesCount: finalLikes.length,
         ratingsCount: finalRatings.length,
         likes: finalLikes,
         ratings: finalRatings,
+        ratingsByWeek,
         uniqueWeeks: uniqueWeeksArray.length,
-        weekIntervals: uniqueWeeksArray
+        weekIntervals: uniqueWeeksArray,
+        this_week_likes_count: thisWeekLikes,
+        next_week_likes_count: nextWeekLikes,
+        likes_given: finalLikes.length
       };
       
       setUserActivityStats(prev => ({
