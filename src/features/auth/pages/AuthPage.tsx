@@ -48,7 +48,7 @@ const Auth = () => {
             sessionStorage.removeItem('redirectPath');
             navigate(redirectPath, { replace: true });
           } else {
-            navigate("/account", { replace: true });
+            navigate("/", { replace: true });
           }
           return;
         }
@@ -91,7 +91,7 @@ const Auth = () => {
             sessionStorage.removeItem('redirectPath');
             navigate(redirectPath, { replace: true });
           } else {
-            navigate(`/u/${user.id}`, { replace: true });
+            navigate("/", { replace: true });
           }
           return;
         }
