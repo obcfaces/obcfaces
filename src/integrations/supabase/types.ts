@@ -2250,6 +2250,16 @@ export type Database = {
           total_votes: number
         }[]
       }
+      get_next_week_daily_stats_by_participant: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          candidate_name: string
+          day_name: string
+          day_of_week: number
+          dislike_count: number
+          like_count: number
+        }[]
+      }
       get_next_week_participants_admin: {
         Args: Record<PropertyKey, never>
         Returns: {

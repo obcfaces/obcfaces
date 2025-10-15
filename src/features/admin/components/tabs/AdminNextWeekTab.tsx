@@ -82,46 +82,29 @@ export function AdminNextWeekTab({
     sun: { likes: number; dislikes: number };
   }>>({});
 
-  // Load ALL votes and calculate daily breakdown for current week
+  // Load ALL votes and calculate daily breakdown for current week using RPC
   useEffect(() => {
-    console.log('⚡️ useEffect STARTED - loadDailyVotes');
     const loadDailyVotes = async () => {
       try {
-        console.log('⚡️ Inside loadDailyVotes function');
-        // Fetch all votes from next_week_votes
-        const { data: allVotes, error } = await supabase
-          .from('next_week_votes')
-          .select('candidate_name, vote_type, created_at');
+        console.log('⚡️ Loading daily votes using RPC...');
+        
+        // Use the new RPC function
+        const { data, error } = await supabase.rpc('get_next_week_daily_stats_by_participant');
 
-        if (error || !allVotes) {
-          console.error('❌ Error fetching votes:', error);
+        if (error) {
+          console.error('❌ Error fetching daily stats:', error);
           return;
         }
 
-        console.log(`📊 TOTAL votes fetched: ${allVotes.length}`);
+        if (!data || data.length === 0) {
+          console.log('📊 No daily vote data');
+          setWeeklyVotesByDay({});
+          return;
+        }
 
-        // Calculate current week Monday (UTC)
-        const now = new Date();
-        const currentDayOfWeek = now.getUTCDay(); // 0=Sun, 1=Mon, etc.
-        const daysToSubtract = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
-        
-        const mondayUTC = new Date(Date.UTC(
-          now.getUTCFullYear(),
-          now.getUTCMonth(),
-          now.getUTCDate() - daysToSubtract,
-          0, 0, 0, 0
-        ));
+        console.log('📊 Received', data.length, 'daily stat records from RPC');
 
-        const sundayUTC = new Date(mondayUTC);
-        sundayUTC.setUTCDate(mondayUTC.getUTCDate() + 6);
-        sundayUTC.setUTCHours(23, 59, 59, 999);
-
-        console.log('📅 Current week (UTC):', {
-          monday: mondayUTC.toISOString(),
-          sunday: sundayUTC.toISOString()
-        });
-
-        // Group votes by participant and day
+        // Transform RPC data into our stats structure
         const dailyStats: Record<string, {
           mon: { likes: number; dislikes: number };
           tue: { likes: number; dislikes: number };
@@ -132,18 +115,10 @@ export function AdminNextWeekTab({
           sun: { likes: number; dislikes: number };
         }> = {};
 
-        let mycelDebugVotes: any[] = [];
-
-        allVotes.forEach((vote) => {
-          const voteTimestamp = new Date(vote.created_at);
-          const participantName = vote.candidate_name.trim().replace(/\s+/g, ' ');
-
-          // Only process votes from current week
-          if (voteTimestamp < mondayUTC || voteTimestamp > sundayUTC) {
-            return; // Skip votes outside current week
-          }
-
-          // Initialize participant stats if needed
+        data.forEach((row: any) => {
+          const participantName = row.candidate_name.trim().replace(/\s+/g, ' ');
+          
+          // Initialize if needed
           if (!dailyStats[participantName]) {
             dailyStats[participantName] = {
               mon: { likes: 0, dislikes: 0 },
@@ -156,33 +131,28 @@ export function AdminNextWeekTab({
             };
           }
 
-          // Determine day of week in UTC
-          const utcDayIndex = voteTimestamp.getUTCDay(); // 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
-          const dayKeys: ('sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat')[] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-          const dayKey = dayKeys[utcDayIndex];
+          // Map day_of_week to day key
+          const dayMap: Record<number, 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat'> = {
+            0: 'sun',
+            1: 'mon',
+            2: 'tue',
+            3: 'wed',
+            4: 'thu',
+            5: 'fri',
+            6: 'sat'
+          };
+          const dayKey = dayMap[row.day_of_week];
 
-          // Increment counter
-          if (vote.vote_type === 'like') {
-            dailyStats[participantName][dayKey].likes++;
-          } else if (vote.vote_type === 'dislike') {
-            dailyStats[participantName][dayKey].dislikes++;
-          }
-
-          // Debug Mycel Jera
-          if (participantName === 'Mycel Jera') {
-            mycelDebugVotes.push({
-              created_at: vote.created_at,
-              utcDay: dayKey,
-              type: vote.vote_type,
-              likes_now: dailyStats[participantName][dayKey].likes,
-              dislikes_now: dailyStats[participantName][dayKey].dislikes
-            });
+          if (dayKey) {
+            dailyStats[participantName][dayKey] = {
+              likes: Number(row.like_count) || 0,
+              dislikes: Number(row.dislike_count) || 0
+            };
           }
         });
 
-        console.log('🔍 Mycel Jera ALL processed votes:', mycelDebugVotes);
-        console.log('📊 Mycel Jera final daily stats:', dailyStats['Mycel Jera']);
-        console.log('📊 ALL participants daily stats:', dailyStats);
+        console.log('📊 Mycel Jera daily stats:', dailyStats['Mycel Jera']);
+        console.log('📊 Total participants with votes:', Object.keys(dailyStats).length);
 
         setWeeklyVotesByDay(dailyStats);
       } catch (err) {
