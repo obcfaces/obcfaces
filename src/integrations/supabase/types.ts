@@ -2066,6 +2066,15 @@ export type Database = {
           },
         ]
       }
+      v_unmatched_votes: {
+        Row: {
+          candidate_name: string | null
+          first_vote: string | null
+          last_vote: string | null
+          vote_count: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       archive_old_data: {
@@ -2083,6 +2092,10 @@ export type Database = {
       auto_transition_weekly_contests_with_timezone: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      backfill_participant_user_id: {
+        Args: { correct_user_id: string; old_candidate_name: string }
+        Returns: number
       }
       check_conversation_membership: {
         Args: { conversation_id_param: string; user_id_param: string }
