@@ -1125,23 +1125,22 @@ export function AdminRegistrationsTab({
                                                       className="h-full w-full object-cover rounded"
                                                     />
                                                   </div>
-                                                  <div className="flex-1">
-                                                    <div className="font-medium">
-                                                      {rating.profiles?.display_name || 
-                                                       `${rating.profiles?.first_name || ''} ${rating.profiles?.last_name || ''}`.trim()}
-                                                    </div>
-                                                    <div className="flex items-center gap-2 mt-1">
-                                                      <div className="flex">
-                                                        {[1,2,3,4,5].map(i => (
-                                                          <Star key={i} className={`h-3 w-3 ${i <= rating.rating ? 'fill-yellow-500 text-yellow-500' : 'text-gray-300'}`} />
-                                                        ))}
-                                                        <span className="font-bold text-sm ml-1">{rating.rating}</span>
-                                                      </div>
-                                                      <span className="text-muted-foreground text-xs">
-                                                        {new Date(rating.created_at).toLocaleDateString('en-GB')}
-                                                      </span>
-                                                    </div>
-                                                  </div>
+                                                   <div className="flex-1 min-w-0">
+                                                     <div className="font-medium truncate">
+                                                       {rating.profiles?.display_name || 
+                                                        `${rating.profiles?.first_name || ''} ${rating.profiles?.last_name || ''}`.trim() || 
+                                                        'Unknown'}
+                                                     </div>
+                                                     <div className="text-muted-foreground truncate">
+                                                       {rating.profiles?.city && rating.profiles?.country ? 
+                                                         `${rating.profiles.city}, ${rating.profiles.country}` : 
+                                                         rating.profiles?.country || ''}
+                                                     </div>
+                                                   </div>
+                                                   <div className="flex items-center gap-1 flex-shrink-0">
+                                                     <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                                                     <span className="text-xs font-medium">{rating.rating}</span>
+                                                   </div>
                                                 </div>
                                               ))}
                                             </div>
@@ -1168,15 +1167,24 @@ export function AdminRegistrationsTab({
                                                 className="h-full w-full object-cover rounded"
                                               />
                                             </div>
-                                            <div className="flex-1">
-                                              <div className="font-medium">
-                                                {like.profiles?.display_name || 
-                                                 `${like.profiles?.first_name || ''} ${like.profiles?.last_name || ''}`.trim()}
-                                              </div>
-                                              <div className="text-muted-foreground text-xs mt-1">
-                                                {new Date(like.created_at).toLocaleDateString('en-GB')}
-                                              </div>
-                                            </div>
+                                             <div className="flex-1 min-w-0">
+                                               <div className="font-medium truncate">
+                                                 {like.profiles?.display_name || 
+                                                  `${like.profiles?.first_name || ''} ${like.profiles?.last_name || ''}`.trim() || 
+                                                  'Unknown'}
+                                               </div>
+                                               <div className="text-muted-foreground truncate">
+                                                 {like.profiles?.city && like.profiles?.country ? 
+                                                   `${like.profiles.city}, ${like.profiles.country}` : 
+                                                   like.profiles?.country || ''}
+                                               </div>
+                                               <div className="text-muted-foreground text-[10px]">
+                                                 {like.week_interval || 'No week'} • {like.admin_status || 'Unknown'}
+                                               </div>
+                                             </div>
+                                             <div className="flex items-center gap-1 flex-shrink-0">
+                                               <Heart className="h-3 w-3 text-red-500 fill-red-500" />
+                                             </div>
                                           </div>
                                         ))}
                                       </div>
@@ -1370,23 +1378,22 @@ export function AdminRegistrationsTab({
                                                         className="h-full w-full object-cover rounded"
                                                       />
                                                     </div>
-                                                    <div className="flex-1">
-                                                      <div className="font-medium">
-                                                        {rating.profiles?.display_name || 
-                                                         `${rating.profiles?.first_name || ''} ${rating.profiles?.last_name || ''}`.trim()}
-                                                      </div>
-                                                      <div className="flex items-center gap-2 mt-1">
-                                                        <div className="flex">
-                                                          {[1,2,3,4,5].map(i => (
-                                                            <Star key={i} className={`h-3 w-3 ${i <= rating.rating ? 'fill-yellow-500 text-yellow-500' : 'text-gray-300'}`} />
-                                                          ))}
-                                                          <span className="font-bold text-sm ml-1">{rating.rating}</span>
-                                                        </div>
-                                                        <span className="text-muted-foreground text-xs">
-                                                          {new Date(rating.created_at).toLocaleDateString('en-GB')}
-                                                        </span>
-                                                      </div>
-                                                    </div>
+                                                     <div className="flex-1 min-w-0">
+                                                       <div className="font-medium truncate">
+                                                         {rating.profiles?.display_name || 
+                                                          `${rating.profiles?.first_name || ''} ${rating.profiles?.last_name || ''}`.trim() || 
+                                                          'Unknown'}
+                                                       </div>
+                                                       <div className="text-muted-foreground truncate">
+                                                         {rating.profiles?.city && rating.profiles?.country ? 
+                                                           `${rating.profiles.city}, ${rating.profiles.country}` : 
+                                                           rating.profiles?.country || ''}
+                                                       </div>
+                                                     </div>
+                                                     <div className="flex items-center gap-1 flex-shrink-0">
+                                                       <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                                                       <span className="text-xs font-medium">{rating.rating}</span>
+                                                     </div>
                                                   </div>
                                                 ))}
                                               </div>
@@ -1413,15 +1420,24 @@ export function AdminRegistrationsTab({
                                                   className="h-full w-full object-cover rounded"
                                                 />
                                               </div>
-                                              <div className="flex-1">
-                                                <div className="font-medium">
-                                                  {like.profiles?.display_name || 
-                                                   `${like.profiles?.first_name || ''} ${like.profiles?.last_name || ''}`.trim()}
-                                                </div>
-                                                <div className="text-muted-foreground text-xs mt-1">
-                                                  {new Date(like.created_at).toLocaleDateString('en-GB')}
-                                                </div>
-                                              </div>
+                                               <div className="flex-1 min-w-0">
+                                                 <div className="font-medium truncate">
+                                                   {like.profiles?.display_name || 
+                                                    `${like.profiles?.first_name || ''} ${like.profiles?.last_name || ''}`.trim() || 
+                                                    'Unknown'}
+                                                 </div>
+                                                 <div className="text-muted-foreground truncate">
+                                                   {like.profiles?.city && like.profiles?.country ? 
+                                                     `${like.profiles.city}, ${like.profiles.country}` : 
+                                                     like.profiles?.country || ''}
+                                                 </div>
+                                                 <div className="text-muted-foreground text-[10px]">
+                                                   {like.week_interval || 'No week'} • {like.admin_status || 'Unknown'}
+                                                 </div>
+                                               </div>
+                                               <div className="flex items-center gap-1 flex-shrink-0">
+                                                 <Heart className="h-3 w-3 text-red-500 fill-red-500" />
+                                               </div>
                                             </div>
                                           ))}
                                         </div>
