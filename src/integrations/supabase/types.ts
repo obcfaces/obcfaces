@@ -244,6 +244,7 @@ export type Database = {
           updated_at: string
           user_id: string
           week_interval: string | null
+          week_start_utc: string | null
         }
         Insert: {
           contestant_name: string
@@ -255,6 +256,7 @@ export type Database = {
           updated_at?: string
           user_id: string
           week_interval?: string | null
+          week_start_utc?: string | null
         }
         Update: {
           contestant_name?: string
@@ -266,6 +268,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           week_interval?: string | null
+          week_start_utc?: string | null
         }
         Relationships: [
           {
@@ -619,6 +622,7 @@ export type Database = {
           user_id: string
           vote_count: number | null
           vote_type: string
+          week_start_utc: string | null
         }
         Insert: {
           candidate_name: string
@@ -628,6 +632,7 @@ export type Database = {
           user_id: string
           vote_count?: number | null
           vote_type: string
+          week_start_utc?: string | null
         }
         Update: {
           candidate_name?: string
@@ -637,6 +642,7 @@ export type Database = {
           user_id?: string
           vote_count?: number | null
           vote_type?: string
+          week_start_utc?: string | null
         }
         Relationships: []
       }
@@ -1338,10 +1344,12 @@ export type Database = {
           nw_rank_segment: number | null
           nw_score: number | null
           preview_week_start: string | null
+          promote_on_week: string | null
           rejection_reason: string | null
           rejection_reason_types: string[] | null
           reviewed_at: string | null
           reviewed_by: string | null
+          selected_for_promotion: boolean | null
           status_history: Json | null
           submitted_at: string | null
           total_votes: number | null
@@ -1365,10 +1373,12 @@ export type Database = {
           nw_rank_segment?: number | null
           nw_score?: number | null
           preview_week_start?: string | null
+          promote_on_week?: string | null
           rejection_reason?: string | null
           rejection_reason_types?: string[] | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          selected_for_promotion?: boolean | null
           status_history?: Json | null
           submitted_at?: string | null
           total_votes?: number | null
@@ -1392,10 +1402,12 @@ export type Database = {
           nw_rank_segment?: number | null
           nw_score?: number | null
           preview_week_start?: string | null
+          promote_on_week?: string | null
           rejection_reason?: string | null
           rejection_reason_types?: string[] | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          selected_for_promotion?: boolean | null
           status_history?: Json | null
           submitted_at?: string | null
           total_votes?: number | null
@@ -2404,6 +2416,16 @@ export type Database = {
           week_start_date: string
         }[]
       }
+      get_participant_wilson_score: {
+        Args: { min_votes?: number; participant_id_param: string }
+        Returns: {
+          meets_threshold: boolean
+          participant_id: string
+          positive_votes: number
+          total_votes: number
+          wilson_score: number
+        }[]
+      }
       get_primary_participant_timezone: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -2838,8 +2860,16 @@ export type Database = {
         Args: { p_preview_week_start: string }
         Returns: undefined
       }
+      transition_this_week: {
+        Args: { dry_run?: boolean }
+        Returns: Json
+      }
       transition_weekly_contest: {
         Args: { dry_run?: boolean; target_week_start: string }
+        Returns: Json
+      }
+      transition_weekly_contest_safe: {
+        Args: { dry_run?: boolean; target_week_start_utc: string }
         Returns: Json
       }
       transition_weekly_participant_statuses: {
@@ -2879,6 +2909,14 @@ export type Database = {
       week_start_wita: {
         Args: { ts: string }
         Returns: string
+      }
+      wilson_score_lower_bound: {
+        Args: {
+          confidence?: number
+          positive_votes: number
+          total_votes: number
+        }
+        Returns: number
       }
     }
     Enums: {
