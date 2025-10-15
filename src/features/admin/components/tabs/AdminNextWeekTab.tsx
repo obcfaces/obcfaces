@@ -125,26 +125,26 @@ export function AdminNextWeekTab({
         sun: { likes: number; dislikes: number };
       }> = {};
 
-      // Get NEXT week boundaries (not current week!)
+      // Get CURRENT week boundaries (Monday to Sunday)
       const now = new Date();
       const dayOfWeek = now.getUTCDay();
       const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
       
-      // Calculate NEXT Monday (add 7 days to current Monday)
-      const nextMonday = new Date(Date.UTC(
+      // Calculate this week's Monday
+      const weekMonday = new Date(Date.UTC(
         now.getUTCFullYear(),
         now.getUTCMonth(),
-        now.getUTCDate() - daysFromMonday + 7,  // +7 for next week
+        now.getUTCDate() - daysFromMonday,
         0, 0, 0, 0
       ));
-      const nextSunday = new Date(nextMonday);
-      nextSunday.setUTCDate(nextMonday.getUTCDate() + 6);
-      nextSunday.setUTCHours(23, 59, 59, 999);
+      const weekSunday = new Date(weekMonday);
+      weekSunday.setUTCDate(weekMonday.getUTCDate() + 6);
+      weekSunday.setUTCHours(23, 59, 59, 999);
 
-      console.log('📅 NEXT week boundaries:', {
+      console.log('📅 Week boundaries for Next tab:', {
         now: now.toISOString(),
-        nextMonday: nextMonday.toISOString(),
-        nextSunday: nextSunday.toISOString()
+        weekMonday: weekMonday.toISOString(),
+        weekSunday: weekSunday.toISOString()
       });
 
         // Count votes by day and type - process ALL votes
@@ -157,13 +157,13 @@ export function AdminNextWeekTab({
           console.log('🔍 Processing Mycel vote:', {
             created_at: vote.created_at,
             voteDate: voteDate.toISOString(),
-            nextMonday: nextMonday.toISOString(),
-            nextSunday: nextSunday.toISOString(),
-            inRange: voteDate >= nextMonday && voteDate <= nextSunday
+            weekMonday: weekMonday.toISOString(),
+            weekSunday: weekSunday.toISOString(),
+            inRange: voteDate >= weekMonday && voteDate <= weekSunday
           });
         }
         
-        if (voteDate >= nextMonday && voteDate <= nextSunday) {
+        if (voteDate >= weekMonday && voteDate <= weekSunday) {
           // getUTCDay returns: 0=Sunday, 1=Monday, 2=Tuesday, 3=Wednesday, 4=Thursday, 5=Friday, 6=Saturday
           const dayIndex = voteDate.getUTCDay();
           const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
