@@ -290,6 +290,7 @@ export function AdminNextWeekTab({
                   </th>
                 ))}
                 <th className="text-center px-1 py-0.5 md:p-1 font-medium text-[10px] md:text-xs">Total</th>
+                <th className="text-center px-1 py-0.5 md:p-1 font-medium text-[10px] md:text-xs bg-primary/10">Votes</th>
               </tr>
             </thead>
             <tbody>
@@ -322,11 +323,16 @@ export function AdminNextWeekTab({
                       <span className="text-red-500">{participant.totalDislikes}</span>
                     </span>
                   </td>
+                  <td className="text-center px-1 py-0.5 md:p-1 bg-primary/5">
+                    <span className="text-sm md:text-lg font-bold">
+                      {participant.totalLikes + participant.totalDislikes}
+                    </span>
+                  </td>
                 </tr>
               ))}
               {participantsWithVotes.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="text-center py-8 text-muted-foreground">
+                  <td colSpan={10} className="text-center py-8 text-muted-foreground">
                     No votes yet
                   </td>
                 </tr>
