@@ -1692,6 +1692,16 @@ export type Database = {
         }
         Relationships: []
       }
+      storage_usage_stats: {
+        Row: {
+          bucket_id: string | null
+          file_count: number | null
+          last_upload: string | null
+          total_bytes: number | null
+          total_mb: number | null
+        }
+        Relationships: []
+      }
       v_next_week: {
         Row: {
           admin_status:
@@ -2393,6 +2403,10 @@ export type Database = {
       get_participant_likes_count: {
         Args: { participant_id_param: string }
         Returns: number
+      }
+      get_participant_photo_url: {
+        Args: { participant_id_param: string; photo_number?: number }
+        Returns: string
       }
       get_participant_rating_stats: {
         Args: { participant_id_param: string }
