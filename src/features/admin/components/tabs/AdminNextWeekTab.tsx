@@ -93,23 +93,27 @@ export function AdminNextWeekTab({
       try {
         console.log('⏳ Starting loadWeeklyStats function');
         
-        // Get ALL votes from next_week_votes with dates
-        const { data: votesData, error: votesError } = await supabase
+        // Get ALL votes from next_week_votes with dates - SIMPLE DIRECT QUERY
+        const { data: allVotes, error: votesError } = await supabase
           .from('next_week_votes')
-          .select('candidate_name, vote_type, created_at');
+          .select('*');
 
-        console.log('📊 Votes query result:', { 
-          dataLength: votesData?.length, 
+        console.log('📊 All votes loaded:', { 
+          count: allVotes?.length,
           hasError: !!votesError,
           error: votesError
         });
 
         if (votesError) {
-          console.error('❌ Error loading weekly votes:', votesError);
+          console.error('❌ Error loading votes:', votesError);
           return;
         }
 
-        console.log('📅 Weekly votes loaded:', votesData?.length);
+        if (!allVotes || allVotes.length === 0) {
+          console.log('⚠️ No votes found');
+          setParticipantWeeklyStats({});
+          return;
+        }
 
       const stats: Record<string, {
         mon: { likes: number; dislikes: number };
@@ -143,8 +147,8 @@ export function AdminNextWeekTab({
         daysFromMonday
       });
 
-      // Count votes by day and type
-      votesData?.forEach(vote => {
+        // Count votes by day and type - process ALL votes
+        allVotes.forEach(vote => {
         const voteDate = new Date(vote.created_at);
         const name = vote.candidate_name.trim().replace(/\s+/g, ' ');
         
