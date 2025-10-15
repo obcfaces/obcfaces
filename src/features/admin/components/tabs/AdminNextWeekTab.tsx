@@ -88,6 +88,7 @@ export function AdminNextWeekTab({
 
   // Load weekly votes breakdown by day
   useEffect(() => {
+    console.log('🔄 Loading weekly stats useEffect triggered');
     const loadWeeklyStats = async () => {
       // Get ALL votes from next_week_votes with dates
       const { data: votesData, error: votesError } = await supabase
