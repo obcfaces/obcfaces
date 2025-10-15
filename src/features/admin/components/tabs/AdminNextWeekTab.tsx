@@ -46,11 +46,11 @@ export function AdminNextWeekTab({
   // Load votes data from next_week_votes for cards display
   useEffect(() => {
     const loadVotes = async () => {
-      // Get all participants with 'next week on site' status
+      // Get all participants with 'next week' status
       const { data: participants, error: participantsError } = await supabase
         .from('weekly_contest_participants')
         .select('id, user_id, application_data')
-        .eq('admin_status', 'next week on site')
+        .eq('admin_status', 'next week')
         .is('deleted_at', null);
 
       if (participantsError || !participants) {
@@ -75,10 +75,11 @@ export function AdminNextWeekTab({
         })
       );
 
-      // Get likes for these participants
+      // Get likes for these participants (only contest likes)
       const { data: likesData, error: likesError } = await supabase
         .from('likes')
         .select('participant_id')
+        .eq('content_type', 'contest')
         .in('participant_id', participantIds);
 
       // Get dislikes from next_week_votes
@@ -138,11 +139,11 @@ export function AdminNextWeekTab({
   // Load weekly votes from likes table
   useEffect(() => {
     const loadWeeklyStats = async () => {
-      // Get all participants with 'next week on site' status
+      // Get all participants with 'next week' status
       const { data: participants, error: participantsError } = await supabase
         .from('weekly_contest_participants')
         .select('id, user_id, application_data')
-        .eq('admin_status', 'next week on site')
+        .eq('admin_status', 'next week')
         .is('deleted_at', null);
 
       if (participantsError || !participants) {
@@ -167,10 +168,11 @@ export function AdminNextWeekTab({
         })
       );
 
-      // Get likes with created_at for weekly breakdown
+      // Get likes with created_at for weekly breakdown (only contest likes)
       const { data: likesData, error: likesError } = await supabase
         .from('likes')
         .select('participant_id, created_at')
+        .eq('content_type', 'contest')
         .in('participant_id', participantIds);
 
       // Get dislikes from next_week_votes
