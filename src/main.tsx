@@ -3,6 +3,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import * as Sentry from "@sentry/react"
 import App from './App.tsx'
 import './index.css'
+import { installGlobalErrorHandler } from '@/utils/errors'
+
+// Install global error handler (logs errors to database)
+installGlobalErrorHandler();
 
 // Initialize Sentry for error tracking
 Sentry.init({
