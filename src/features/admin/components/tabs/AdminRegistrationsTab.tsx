@@ -449,7 +449,7 @@ export function AdminRegistrationsTab({
       </div>
 
       {/* User Cards */}
-      <div className="space-y-4">
+      <div className="space-y-4 px-2 md:px-0">
         {paginatedProfiles.map(profile => {
           const fullName = profile.display_name || 
             `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 
@@ -517,7 +517,7 @@ export function AdminRegistrationsTab({
           
           return (
             <div key={profile.id} className="space-y-2">
-              <Card className="rounded-none md:rounded-lg p-0 md:p-4 relative hover:shadow-md transition-shadow">
+              <Card className="rounded-none md:rounded-lg p-4 relative hover:shadow-md transition-shadow">
                 {/* Date/time badge in top-left */}
                 <Badge 
                   variant="outline"
@@ -1144,7 +1144,7 @@ export function AdminRegistrationsTab({
       {/* Pagination */}
       {totalPages > 1 && (
         <Pagination className="mt-6">
-          <PaginationContent>
+          <PaginationContent className="flex-wrap gap-1">
             <PaginationItem>
               <PaginationPrevious 
                 href="#"
@@ -1154,7 +1154,10 @@ export function AdminRegistrationsTab({
                 }}
                 aria-disabled={currentPage === 1}
                 className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
-              />
+              >
+                <span className="hidden sm:inline">Previous</span>
+                <span className="sm:hidden">Prev</span>
+              </PaginationPrevious>
             </PaginationItem>
             
             {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
