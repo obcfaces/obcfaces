@@ -13,6 +13,7 @@ import { ParticipantStatusHistoryModal } from '../ParticipantStatusHistoryModal'
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { loadDailyByParticipant, loadCardTotals, NextTotalsRow } from '../../utils/nextWeekData';
 
 interface AdminNextWeekTabProps {
   participants: WeeklyContestParticipant[];
@@ -60,7 +61,7 @@ export function AdminNextWeekTab({
   const [rows, setRows] = useState<VoteRow[]>([]);
   const [votesLoading, setVotesLoading] = useState(true);
   const [votesError, setVotesError] = useState<string | null>(null);
-  const [votesData, setVotesData] = useState<Record<string, { likes: number; dislikes: number }>>({});
+  const [cardTotals, setCardTotals] = useState<Map<string, NextTotalsRow>>(new Map());
 
   const filteredParticipants = useMemo(() => {
     return participants.filter(p => {
@@ -74,27 +75,14 @@ export function AdminNextWeekTab({
       setVotesLoading(true);
       setVotesError(null);
       
-      const { data, error } = await supabase
-        .from('v_next_week_votes_by_day')
-        .select('*');
-
-      if (error) {
-        setVotesError(error.message);
-        console.error('❌ Error loading v_next_week_votes_by_day:', error);
-      } else {
-        setRows((data ?? []) as VoteRow[]);
-        
-        const stats: Record<string, { likes: number; dislikes: number }> = {};
-        (data ?? []).forEach((r: VoteRow) => {
-          const key = r.candidate_name;
-          if (!stats[key]) {
-            stats[key] = { likes: 0, dislikes: 0 };
-          }
-          stats[key].likes += r.likes || 0;
-          stats[key].dislikes += r.dislikes || 0;
-        });
-        setVotesData(stats);
-      }
+      // Load daily data for table
+      const dailyData = await loadDailyByParticipant();
+      setRows(dailyData);
+      
+      // Load card totals for cards
+      const totalsMap = await loadCardTotals();
+      setCardTotals(totalsMap);
+      
       setVotesLoading(false);
     };
 
@@ -161,18 +149,22 @@ export function AdminNextWeekTab({
 
     if (filterType !== 'all') {
       result = result.filter(p => {
-        const name = `${p.application_data?.first_name || ''} ${p.application_data?.last_name || ''}`.trim();
-        const stats = votesData[name];
-        if (!stats) return false;
+        const totals = cardTotals.get(p.user_id);
+        if (!totals) return false;
         
-        if (filterType === 'like') return stats.likes > 0;
-        if (filterType === 'dislike') return stats.dislikes > 0;
+        if (filterType === 'like') return totals.total_likes > 0;
+        if (filterType === 'dislike') return totals.total_dislikes > 0;
         return false;
       });
     }
 
-    return result;
-  }, [filteredParticipants, filterType, votesData]);
+    // Sort by total votes descending
+    return result.sort((a, b) => {
+      const aTotals = cardTotals.get(a.user_id);
+      const bTotals = cardTotals.get(b.user_id);
+      return (bTotals?.total_votes || 0) - (aTotals?.total_votes || 0);
+    });
+  }, [filteredParticipants, filterType, cardTotals]);
 
   if (loading) {
     return <LoadingSpinner message="Loading next week participants..." />;
@@ -284,7 +276,7 @@ export function AdminNextWeekTab({
           onStatusChange={onStatusChange}
           onEdit={onEdit}
           getStatusBackgroundColor={getStatusBackgroundColor}
-          votesData={votesData}
+          cardTotals={cardTotals}
         />
       ))}
 
@@ -304,7 +296,7 @@ const ParticipantCard = ({
   onStatusChange,
   onEdit,
   getStatusBackgroundColor,
-  votesData,
+  cardTotals,
 }: any) => {
   const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);
   const [showStatusHistoryModal, setShowStatusHistoryModal] = useState(false);
@@ -320,16 +312,21 @@ const ParticipantCard = ({
   const photo1 = appData.photo_1_url || appData.photo1_url || '';
   const photo2 = appData.photo_2_url || appData.photo2_url || '';
   
-  // CRITICAL: Use profiles.display_name_generated for matching
+  // CRITICAL: Use display_name_generated from profiles
   const participantName = participant.profiles?.display_name_generated || 
                          participant.profiles?.display_name || 
                          `${firstName} ${lastName}`.trim().replace(/\s+/g, ' ');
   const submittedDate = participant.created_at ? new Date(participant.created_at) : null;
 
-  // Get vote stats for this participant using the SAME data source as the table
-  const stats = votesData[participantName] || { likes: 0, dislikes: 0 };
+  // Get vote stats from v_next_week_cards_totals via cardTotals Map
+  const totals = cardTotals.get(participant.user_id);
+  const stats = {
+    likes: totals?.total_likes || 0,
+    dislikes: totals?.total_dislikes || 0,
+    total: totals?.total_votes || 0
+  };
   
-  console.log(`🔍 Card for "${participantName}": likes=${stats.likes}, dislikes=${stats.dislikes}`);
+  console.log(`🔍 Card for "${participantName}" (${participant.user_id}): likes=${stats.likes}, dislikes=${stats.dislikes}, total=${stats.total}`);
 
   const handleShowVoters = async (type: 'like' | 'dislike') => {
     setVotersType(type);
