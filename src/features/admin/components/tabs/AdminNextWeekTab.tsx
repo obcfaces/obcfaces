@@ -178,6 +178,11 @@ export function AdminNextWeekTab({
       console.log('📅 Weekly stats calculated:', stats);
       console.log('📅 All candidate names in stats:', Object.keys(stats));
       console.log('📅 Mycel Jera weekly:', stats['Mycel Jera']);
+      
+      // Debug: check if any name contains "Mycel"
+      const mycelNames = Object.keys(stats).filter(name => name.toLowerCase().includes('mycel'));
+      console.log('📅 Names containing "mycel":', mycelNames);
+      
       setParticipantWeeklyStats(stats);
     };
 
@@ -214,6 +219,18 @@ export function AdminNextWeekTab({
         const firstName = appData.first_name || '';
         const lastName = appData.last_name || '';
         const name = `${firstName} ${lastName}`.trim().replace(/\s+/g, ' ');
+        
+        // Debug for Mycel
+        if (name.toLowerCase().includes('mycel')) {
+          console.log('📋 Mapping participant:', {
+            name,
+            firstName,
+            lastName,
+            hasWeeklyStats: !!participantWeeklyStats[name],
+            weeklyStats: participantWeeklyStats[name]
+          });
+        }
+        
         return [name, p];
       })
     );
