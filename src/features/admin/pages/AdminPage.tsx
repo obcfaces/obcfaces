@@ -1087,10 +1087,10 @@ const AdminContent = () => {
             .select('id, display_name, first_name, last_name, avatar_url, photo_1_url, photo_2_url')
             .in('id', participantIds);
           
-          // Get participant week intervals from weekly_contest_participants table
+          // Get participant week intervals and admin_status from weekly_contest_participants table
           const { data: participantsData, error: participantsError } = await supabase
             .from('weekly_contest_participants')
-            .select('id, week_interval, user_id')
+            .select('id, week_interval, admin_status, user_id')
             .in('id', participantIds);
           
           if (participantsError) {
@@ -1102,20 +1102,21 @@ const AdminContent = () => {
           );
           
           const participantsMap = new Map(
-            (participantsData || []).map(p => [p.id, p.week_interval])
+            (participantsData || []).map(p => [p.id, { week_interval: p.week_interval, admin_status: p.admin_status }])
           );
           
           console.log('📅 Participant week intervals for likes:', Array.from(participantsMap.entries()).slice(0, 5));
           
-          // Use participant's week_interval from the table
+          // Use participant's week_interval and admin_status from the table
           likesWithProfiles = likesData.map(like => {
-            const weekInterval = like.participant_id ? participantsMap.get(like.participant_id) : null;
+            const participantData = like.participant_id ? participantsMap.get(like.participant_id) : null;
             const profile = like.participant_id ? profilesMap.get(like.participant_id) : null;
             
             return {
               ...like,
               profiles: profile,
-              week_interval: weekInterval
+              week_interval: participantData?.week_interval,
+              admin_status: participantData?.admin_status
             };
           }).filter(like => like.profiles && like.week_interval);
           
