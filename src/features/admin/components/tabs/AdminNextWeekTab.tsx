@@ -43,33 +43,62 @@ export function AdminNextWeekTab({
     });
   }, [participants, selectedCountry]);
 
-  // Load votes data using RPC function
+  // Load votes data - count votes for CURRENT week only
   useEffect(() => {
     const loadVotes = async () => {
-      // Get vote statistics using RPC
-      const { data: voteStats, error: voteStatsError } = await supabase
-        .rpc('get_next_week_votes_summary');
+      // Calculate current week boundaries
+      const now = new Date();
+      const dayOfWeek = now.getUTCDay();
+      const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+      
+      const weekMonday = new Date(Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate() - daysFromMonday,
+        0, 0, 0, 0
+      ));
+      const weekSunday = new Date(weekMonday);
+      weekSunday.setUTCDate(weekMonday.getUTCDate() + 6);
+      weekSunday.setUTCHours(23, 59, 59, 999);
 
-      if (voteStatsError) {
-        console.error('❌ Error loading vote stats:', voteStatsError);
+      // Get ALL votes from next_week_votes
+      const { data: allVotes, error: votesError } = await supabase
+        .from('next_week_votes')
+        .select('*');
+
+      if (votesError) {
+        console.error('❌ Error loading votes:', votesError);
         return;
       }
 
-      console.log('📊 Vote stats from RPC:', voteStats?.length, 'candidates');
+      if (!allVotes) {
+        setVotesData({});
+        return;
+      }
 
-      // Convert to stats object
+      // Filter votes for current week and count
       const stats: Record<string, { likes: number; dislikes: number }> = {};
       
-      voteStats?.forEach(stat => {
-        const name = stat.candidate_name.trim().replace(/\s+/g, ' ');
-        stats[name] = {
-          likes: Number(stat.likes_count) || 0,
-          dislikes: Number(stat.dislikes_count) || 0
-        };
+      allVotes.forEach(vote => {
+        const voteDate = new Date(vote.created_at);
+        
+        // Only count votes from this week
+        if (voteDate >= weekMonday && voteDate <= weekSunday) {
+          const name = vote.candidate_name.trim().replace(/\s+/g, ' ');
+          
+          if (!stats[name]) {
+            stats[name] = { likes: 0, dislikes: 0 };
+          }
+          
+          if (vote.vote_type === 'like') {
+            stats[name].likes++;
+          } else if (vote.vote_type === 'dislike') {
+            stats[name].dislikes++;
+          }
+        }
       });
 
-      console.log('📊 FINAL STATS:', stats);
-      console.log('📊 Mycel Jera stats:', stats['Mycel Jera']);
+      console.log('📊 Weekly vote stats (filtered):', stats);
       setVotesData(stats);
     };
 
