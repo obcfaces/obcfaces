@@ -88,9 +88,10 @@ export function AdminRegistrationsTab({
   const weeklyStats = useMemo(() => {
     const stats = {
       all: { mon: 0, tue: 0, wed: 0, thu: 0, fri: 0, sat: 0, sun: 0 },
-      email_verified: { mon: 0, tue: 0, wed: 0, thu: 0, fri: 0, sat: 0, sun: 0 },
-      unverified: { mon: 0, tue: 0, wed: 0, thu: 0, fri: 0, sat: 0, sun: 0 },
       gmail: { mon: 0, tue: 0, wed: 0, thu: 0, fri: 0, sat: 0, sun: 0 },
+      email_verified: { mon: 0, tue: 0, wed: 0, thu: 0, fri: 0, sat: 0, sun: 0 },
+      no_vote: { mon: 0, tue: 0, wed: 0, thu: 0, fri: 0, sat: 0, sun: 0 },
+      unverified: { mon: 0, tue: 0, wed: 0, thu: 0, fri: 0, sat: 0, sun: 0 },
       facebook: { mon: 0, tue: 0, wed: 0, thu: 0, fri: 0, sat: 0, sun: 0 },
       maybe_suspicious: { mon: 0, tue: 0, wed: 0, thu: 0, fri: 0, sat: 0, sun: 0 },
       suspicious: { mon: 0, tue: 0, wed: 0, thu: 0, fri: 0, sat: 0, sun: 0 },
@@ -127,14 +128,21 @@ export function AdminRegistrationsTab({
 
       stats.all[day]++;
 
+      if (profile.auth_provider === 'google') {
+        stats.gmail[day]++;
+      }
       if (profile.auth_provider === 'email' && profile.email_confirmed_at) {
         stats.email_verified[day]++;
       }
+      
+      // No Vote: registered (not unverified) but haven't voted
+      const hasVoted = userVotingStats[profile.id]?.totalVotes > 0;
+      if (profile.email_confirmed_at && !hasVoted) {
+        stats.no_vote[day]++;
+      }
+      
       if (!profile.email_confirmed_at) {
         stats.unverified[day]++;
-      }
-      if (profile.auth_provider === 'google') {
-        stats.gmail[day]++;
       }
       if (profile.auth_provider === 'facebook') {
         stats.facebook[day]++;
@@ -366,9 +374,10 @@ export function AdminRegistrationsTab({
             <tbody>
               {[
                 { label: 'Total', key: 'all', className: '' },
-                { label: 'Email ✓', key: 'email_verified', className: '' },
-                { label: 'Unverif', key: 'unverified', className: '' },
                 { label: 'Gmail', key: 'gmail', className: '' },
+                { label: 'Email ✓', key: 'email_verified', className: '' },
+                { label: 'No Vote', key: 'no_vote', className: '' },
+                { label: 'Unverif', key: 'unverified', className: '' },
                 { label: 'Facebook', key: 'facebook', className: '' },
                 { label: 'Maybe Suspicious', key: 'maybe_suspicious', className: 'text-red-500' },
                 { label: 'Suspicious', key: 'suspicious', className: 'text-red-500' },
