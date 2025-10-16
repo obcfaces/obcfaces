@@ -136,7 +136,7 @@ export function AdminRegistrationsTab({
       }
       
       // No Vote: registered (not unverified) but haven't voted
-      const hasVoted = userVotingStats[profile.id]?.totalVotes > 0;
+      const hasVoted = userVotingStats[profile.id]?.total_votes_count > 0;
       if (profile.email_confirmed_at && !hasVoted) {
         stats.no_vote[day]++;
       }
