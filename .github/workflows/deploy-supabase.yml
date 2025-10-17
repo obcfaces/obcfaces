@@ -30,6 +30,7 @@ jobs:
         run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
 
       - name: Push database migrations
+        if: ${{ hashFiles('supabase/migrations/*.sql') != '' }}
         run: supabase db push
 
       - name: Deploy edge functions (if exist)
