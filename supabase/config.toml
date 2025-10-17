@@ -4,7 +4,9 @@ project_id = "mlbzdxsumfudrtuuybqn"
 enabled = true
 
 [db]
-shadow_enabled = true
+port = 54322
+shadow_port = 54320
+major_version = 15
 
 [functions.auto-translate]
 verify_jwt = false
