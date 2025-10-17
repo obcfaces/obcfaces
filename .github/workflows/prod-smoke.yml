@@ -23,21 +23,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - uses: pnpm/action-setup@v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
-      
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: 'npm'
       
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
       
       - name: Get Playwright version
         id: playwright-version
-        run: echo "version=$(pnpm list @playwright/test --depth=0 | grep @playwright/test | sed 's/.*@//')" >> $GITHUB_OUTPUT
+        run: echo "version=$(npm list @playwright/test --depth=0 | grep @playwright/test | sed 's/.*@//')" >> $GITHUB_OUTPUT
       
       - name: Cache Playwright browsers
         uses: actions/cache@v4
@@ -48,14 +44,14 @@ jobs:
       
       - name: Install Playwright browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: pnpm exec playwright install --with-deps chromium
+        run: npx playwright install --with-deps chromium
       
       - name: Install Playwright system dependencies
         if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: pnpm exec playwright install-deps chromium
+        run: npx playwright install-deps chromium
       
       - name: Run production smoke tests
-        run: pnpm exec playwright test --project=chromium
+        run: npx playwright test --project=chromium
         continue-on-error: true
         id: smoke-tests
       
@@ -126,43 +122,9 @@ jobs:
       
       - name: Post to Slack on failure
         if: failure() && env.SLACK_WEBHOOK_URL != ''
-        uses: slackapi/slack-github-action@v1
-        with:
-          payload: |
-            {
-              "text": "🚨 Production smoke tests failed!",
-              "blocks": [
-                {
-                  "type": "header",
-                  "text": {
-                    "type": "plain_text",
-                    "text": "🚨 Production Smoke Tests Failed"
-                  }
-                },
-                {
-                  "type": "section",
-                  "fields": [
-                    {
-                      "type": "mrkdwn",
-                      "text": "*Base URL:*\n${{ env.BASE_URL }}"
-                    },
-                    {
-                      "type": "mrkdwn",
-                      "text": "*Run:*\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|#${{ github.run_number }}>"
-                    }
-                  ]
-                },
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "View <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Playwright Report> for details."
-                  }
-                }
-              ]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+            --data '{"text":"Prod smoke failed"}' "$SLACK_WEBHOOK_URL"
       
       - name: Summary
         if: always()

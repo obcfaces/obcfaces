@@ -39,20 +39,16 @@ jobs:
         shell: bash
         run: |
           set -e
-          shopt -s nullglob
-          valid=(supabase/migrations/[0-9]*_*.sql)
-          if (( ${#valid[@]} > 0 )); then
-            echo "Valid local migrations found -> pushing to remote"
-            supabase db push
-          else
-            echo "No valid local migrations -> pulling from remote"
-            supabase db pull
-          fi
+          echo "🔁 Pushing local migrations to remote…"
+          supabase db push
+          echo "📥 Pulling remote shadow to local (to keep history in sync)…"
+          supabase db pull || true
 
       - name: Deploy edge functions (if exist)
         if: ${{ hashFiles('supabase/edge-functions/**') != '' }}
         shell: bash
         run: |
+          set -e
           if [ -d "supabase/edge-functions/vote-cast" ]; then
             supabase functions deploy vote-cast
           fi

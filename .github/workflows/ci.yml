@@ -21,23 +21,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - uses: pnpm/action-setup@v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
-      
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: 'npm'
       
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
       
       - name: Type check
-        run: pnpm run type-check || npx tsc --noEmit
+        run: npm run type-check || npx tsc --noEmit
       
       - name: Lint
-        run: pnpm run lint || echo "Lint script not configured"
+        run: npm run lint || echo "Lint script not configured"
 
   test:
     name: Unit Tests
@@ -45,20 +41,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - uses: pnpm/action-setup@v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
-      
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: 'npm'
       
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
       
       - name: Run tests with coverage
-        run: pnpm run test -- --coverage
+        run: npm test -- --coverage
         env:
           DEFAULT_LOCALE: en-ph
       
@@ -102,21 +94,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - uses: pnpm/action-setup@v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
-      
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: 'npm'
       
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
       
       - name: Get Playwright version
         id: playwright-version
-        run: echo "version=$(pnpm list @playwright/test --depth=0 | grep @playwright/test | sed 's/.*@//')" >> $GITHUB_OUTPUT
+        run: echo "version=$(npm list @playwright/test --depth=0 | grep @playwright/test | sed 's/.*@//')" >> $GITHUB_OUTPUT
       
       - name: Cache Playwright browsers
         uses: actions/cache@v4
@@ -127,20 +115,20 @@ jobs:
       
       - name: Install Playwright browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: pnpm exec playwright install --with-deps chromium webkit
+        run: npx playwright install --with-deps chromium webkit
       
       - name: Install Playwright system dependencies
         if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: pnpm exec playwright install-deps chromium webkit
+        run: npx playwright install-deps chromium webkit
       
       - name: Build app
-        run: pnpm run build
+        run: npm run build
       
       - name: Run E2E tests
         run: |
-          pnpm run preview &
-          pnpm exec wait-on $BASE_URL
-          pnpm exec playwright test --project=${{ matrix.project }}
+          npm run preview &
+          npx wait-on $BASE_URL
+          npx playwright test --project=${{ matrix.project }}
       
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
@@ -194,23 +182,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - uses: pnpm/action-setup@v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
-      
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: 'npm'
       
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
       
       - name: Install Playwright
-        run: pnpm exec playwright install --with-deps chromium
+        run: npx playwright install --with-deps chromium
       
       - name: Run E2E tests against staging
-        run: pnpm exec playwright test --project=chromium
+        run: npx playwright test --project=chromium
       
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
@@ -226,20 +210,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - uses: pnpm/action-setup@v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
-      
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: 'npm'
       
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
       
       - name: Build
-        run: pnpm run build
+        run: npm run build
       
       - name: Check bundle size
         run: |
