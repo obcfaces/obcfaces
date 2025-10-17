@@ -39,11 +39,13 @@ jobs:
         shell: bash
         run: |
           set -e
-          if [ -d "supabase/migrations" ] && [ "$(ls -A supabase/migrations | wc -l)" -gt 0 ]; then
-            echo "Local migrations found -> pushing to remote"
+          shopt -s nullglob
+          valid=(supabase/migrations/[0-9]*_*.sql)
+          if (( ${#valid[@]} > 0 )); then
+            echo "Valid local migrations found -> pushing to remote"
             supabase db push
           else
-            echo "No local migrations -> pulling from remote to initialize"
+            echo "No valid local migrations -> pulling from remote"
             supabase db pull
           fi
 
