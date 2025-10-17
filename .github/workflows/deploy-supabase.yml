@@ -1,12 +1,15 @@
 name: Deploy Supabase (DB + Edge)
 
 on:
+  workflow_dispatch: {}
   push:
     branches: [ main ]
     paths:
       - "supabase/**"
       - ".github/workflows/deploy-supabase.yml"
-  workflow_dispatch: {}
+
+permissions:
+  contents: read
 
 jobs:
   deploy:
@@ -14,6 +17,7 @@ jobs:
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,16 +28,28 @@ jobs:
           version: latest
 
       - name: Check environment variables
-        run: echo "REF=$SUPABASE_PROJECT_REF" && supabase --version
+        run: |
+          test -n "$SUPABASE_ACCESS_TOKEN"
+          test -n "$SUPABASE_PROJECT_REF"
 
       - name: Link project
         run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
 
-      - name: Push database migrations
-        if: ${{ hashFiles('supabase/migrations/*.sql') != '' }}
-        run: supabase db push
+      - name: Sync database migrations
+        shell: bash
+        run: |
+          set -e
+          if [ -d "supabase/migrations" ] && [ "$(ls -A supabase/migrations | wc -l)" -gt 0 ]; then
+            echo "Local migrations found -> pushing to remote"
+            supabase db push
+          else
+            echo "No local migrations -> pulling from remote to initialize"
+            supabase db pull
+          fi
 
       - name: Deploy edge functions (if exist)
+        if: ${{ hashFiles('supabase/edge-functions/**') != '' }}
+        shell: bash
         run: |
           if [ -d "supabase/edge-functions/vote-cast" ]; then
             supabase functions deploy vote-cast
