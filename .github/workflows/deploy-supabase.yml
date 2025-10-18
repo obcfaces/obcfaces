@@ -40,9 +40,7 @@ jobs:
         run: |
           set -e
           echo "🔁 Pushing local migrations to remote…"
-          supabase db push
-          echo "📥 Pulling remote shadow to local (to keep history in sync)…"
-          supabase db pull || true
+          supabase db push --include-all --non-interactive
 
       - name: Deploy edge functions (if exist)
         if: ${{ hashFiles('supabase/edge-functions/**') != '' }}
