@@ -32,21 +32,28 @@ jobs:
           test -n "$SUPABASE_ACCESS_TOKEN"
           test -n "$SUPABASE_PROJECT_REF"
 
-      - name: Link project
-        run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
-
-      - name: Sync database migrations
+      - name: Push database migrations (remote)
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
           set -euo pipefail
-          echo "🚀 Pushing local migrations to remote..."
+          echo "🚀 Pushing local migrations to remote…"
+          # fail fast, если секрет пустой
+          if [ -z "${SUPABASE_DB_URL:-}" ]; then
+            echo "❌ SUPABASE_DB_URL is empty or not available to this workflow run." >&2
+            exit 1
+          fi
+          
+          # до 5 попыток — на случай кратковременных рестартов
           for i in {1..5}; do
-            if yes | supabase db push --include-all --db-url "${{ secrets.SUPABASE_DB_URL }}" --yes --debug; then
+            if yes | supabase db push --include-all --db-url "$SUPABASE_DB_URL" --yes --debug; then
               echo "✅ Migrations pushed successfully."
               exit 0
             fi
-            echo "⚠️ Push failed (attempt $i). Retrying in 20s..."
+            echo "⚠️ Push failed (attempt $i). Retrying in 20s…"
             sleep 20
           done
+          
           echo "❌ Failed to push migrations after retries." >&2
           exit 1
 
