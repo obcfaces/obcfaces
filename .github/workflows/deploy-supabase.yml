@@ -37,9 +37,20 @@ jobs:
 
       - name: Sync database migrations
         run: |
-          set -e
+          set -euo pipefail
           echo "🚀 Pushing local migrations to remote…"
-          supabase db push --include-all --linked --yes
+          # до 5 попыток с паузой, чтобы пережить рестарт DB/Pooler
+          for i in {1..5}; do
+            # yes | — на случай, если CLI всё же спросит подтверждение
+            if yes | supabase db push --include-all --linked --yes --debug; then
+              echo "✅ Migrations pushed."
+              exit 0
+            fi
+            echo "⚠️ Push failed (attempt $i). Sleeping 20s…"
+            sleep 20
+          done
+          echo "❌ Failed to push migrations after retries" >&2
+          exit 1
 
       - name: Deploy edge functions (if exist)
         if: ${{ hashFiles('supabase/edge-functions/**') != '' }}
