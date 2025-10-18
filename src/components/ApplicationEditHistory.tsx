@@ -32,7 +32,7 @@ export const ApplicationEditHistory = ({
         const { data: authData } = await supabase.rpc('get_user_auth_data_admin');
         
         const names: Record<string, string> = {};
-        authData?.forEach((user: any) => {
+        authData?.forEach((user: { user_id: string; email: string | null }) => {
           if (changerIds.includes(user.user_id)) {
             names[user.user_id] = user.email || 'Unknown User';
           }

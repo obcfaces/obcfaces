@@ -146,7 +146,7 @@ export function withErrorBoundary<P extends object>(
 
 // Hook for error handling in functional components
 export function useErrorHandler() {
-  return (error: Error, errorInfo?: any) => {
+  return (error: Error, errorInfo?: Record<string, unknown>) => {
     trackError(error, {
       type: 'hook-error',
       ...errorInfo

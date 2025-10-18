@@ -42,7 +42,10 @@ interface CompactCardLayoutProps {
   hideCardActions?: boolean;
   
   // Card data
-  cardData: any;
+  cardData: {
+    likes: number;
+    comments: number;
+  };
   isLiked: boolean[];
   hasCommented: boolean;
   isDisliked: boolean;
@@ -50,7 +53,9 @@ interface CompactCardLayoutProps {
   showDislike: boolean;
   
   // User
-  propUser: any;
+  propUser: {
+    id?: string;
+  } | null;
   
   // Winner content
   winnerContent?: WinnerContent | null;
@@ -60,7 +65,7 @@ interface CompactCardLayoutProps {
   handleLike: (photoIndex: number) => void;
   handleComment: () => void;
   handleDislike: () => void;
-  openShareModal: (data: any) => void;
+  openShareModal: (data: { title: string; url: string; description: string }) => void;
   handleRate: (rating: number) => void;
   setShowLoginModal: (show: boolean) => void;
   setUserRating: (rating: number) => void;
