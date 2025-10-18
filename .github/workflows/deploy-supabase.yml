@@ -36,11 +36,10 @@ jobs:
         run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
 
       - name: Sync database migrations
-        shell: bash
         run: |
           set -e
-          echo "🔁 Pushing local migrations to remote…"
-          supabase db push --include-all --non-interactive
+          echo "🚀 Pushing local migrations to remote…"
+          supabase db push --include-all --linked --yes
 
       - name: Deploy edge functions (if exist)
         if: ${{ hashFiles('supabase/edge-functions/**') != '' }}
