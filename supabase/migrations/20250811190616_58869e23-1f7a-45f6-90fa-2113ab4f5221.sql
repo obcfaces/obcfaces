@@ -1,11 +1,7 @@
--- Set explicit search_path for update_updated_at_column
-create or replace function public.update_updated_at_column()
-returns trigger
-language plpgsql
-set search_path = public
-as $$
-begin
-  new.updated_at = now();
-  return new;
-end;
-$$;
+drop policy if exists "Profiles are viewable by everyone" on public.profiles;
+
+create policy "Profiles are viewable by everyone"
+on public.profiles
+for select
+to public
+using (true);
